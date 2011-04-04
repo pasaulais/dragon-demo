@@ -17,6 +17,8 @@ public:
     static double shearedParalpdWidth(double baseWidth, double height, double theta);
 
 private:
+    static Mesh * fromFaces(GLfloat *facesVertices, GLfloat *facesNormals,
+                            GLuint *facesIndices, uint indiceCount, uint faceCount);
     static void curveVertices(Mesh *m, double theta, double width, GLuint nCurvePoints);
     static void curveNormals(Mesh *m, double theta, double width, GLuint nCurvePoints);
     static void curveTexcoords(Mesh *m, double theta, double width, GLuint nCurvePoints);

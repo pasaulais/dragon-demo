@@ -29,6 +29,7 @@ public:
     QVector3D *allocVertices(int n);
     QVector3D *normals() const;
     void setNormals(GLfloat *normals, int n);
+    QVector3D *allocNormals(int n);
     QVector2D *texCoords() const;
     void setTexCoords(GLfloat *texCoords, int n);
     uint *indices() const;

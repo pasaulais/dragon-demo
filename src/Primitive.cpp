@@ -244,6 +244,37 @@ void Primitive::curveMeshes(Mesh *m, double theta, double width, GLuint nCurvePo
     delete [] indices;
 }
 
+Mesh * Primitive::fromFaces(GLfloat *facesVertices, GLfloat *facesNormals,
+    GLuint *facesIndices, uint indiceCount, uint faceCount)
+{
+    uint verticesPerFace = indiceCount / faceCount;
+    Mesh *m = new Mesh();
+
+    QVector<QVector3D> vertices;
+    QVector<uint> indices;
+    vertices.resize(indiceCount);
+    indices.resize(indiceCount);
+    for(uint i = 0; i < indiceCount; i++)
+    {
+        GLuint indice = facesIndices[i];
+        vertices[i] = QVector3D(facesVertices[(indice * 3) + 0],
+                                facesVertices[(indice * 3) + 1],
+                                facesVertices[(indice * 3) + 2]);
+        indices[i] = i;
+    }
+
+    m->setVertices((GLfloat *)vertices.data(), indiceCount);
+    m->setIndices((GLuint *)indices.data(), indiceCount);
+    for(int i = 0; i < faceCount; i++)
+        m->addFace(GL_QUADS, verticesPerFace, i * verticesPerFace);
+    if(facesNormals)
+        m->setNormals(facesNormals, indiceCount);
+    else
+        m->computeNormals(indiceCount);
+    //m->generate_quadri_textcoords(indiceCount);
+    return m;
+}
+
 Mesh * Primitive::createCube()
 {
     static GLfloat vertices[][3] =
@@ -270,18 +301,9 @@ Mesh * Primitive::createCube()
         {0, 4, 7, 3}, {1, 2, 6, 5},
         {4, 5, 6, 7}, {0, 1, 5, 4}
     };
-    int indiceCount = 24, faceCount = 6, verticesPerFace = indiceCount / faceCount;
-    Mesh *m = new Mesh();
-    m->setVertices((GLfloat *)vertices, 8);
-    m->setIndices((GLuint *)faces_indices, indiceCount);
-    for(int i = 0; i < faceCount; i++)
-        m->addFace(GL_QUADS, verticesPerFace, i * verticesPerFace);
-    if(faces_normals)
-        m->setNormals((GLfloat *)faces_normals, faceCount);
-    else
-        m->computeNormals(indiceCount);
-    //m->generate_quadri_textcoords(indiceCount);
-    return m;
+    return fromFaces((GLfloat *)vertices,
+                     (GLfloat *)faces_normals,
+                     (GLuint *)faces_indices, 24, 6);
 }
 
 Mesh * Primitive::createShearedParalpd(double width, double height, double theta)
@@ -312,15 +334,9 @@ Mesh * Primitive::createShearedParalpd(double width, double height, double theta
         {0, 4, 5, 1}, {3, 2, 6, 7},
         {1, 5, 6, 2}, {0, 3, 7, 4}
     };
-    int indiceCount = 24, faceCount = 6, verticesPerFace = indiceCount / faceCount;
-    Mesh *m = new Mesh();
-    m->setVertices((GLfloat *)vertices, 8);
-    m->setNormals((GLfloat *)faces_normals, faceCount);
-    m->setIndices((GLuint *)faces_indices, indiceCount);
-    for(int i = 0; i < faceCount; i++)
-        m->addFace(GL_QUADS, verticesPerFace, i * verticesPerFace);
-    //m->generate_quadri_textcoords(indiceCount);
-    return m;
+    return fromFaces((GLfloat *)vertices,
+                     (GLfloat *)faces_normals,
+                     (GLuint *)faces_indices, 24, 6);
 }
 
 double Primitive::shearedParalpdWidth(double baseWidth, double height, double theta)

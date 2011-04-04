@@ -59,6 +59,12 @@ void Mesh::setNormals(GLfloat *normals, int n)
         m_normals[i] = QVector3D(normals[0], normals[1], normals[2]);
 }
 
+QVector3D *Mesh::allocNormals(int n)
+{
+    delete [] m_normals;
+    m_normals = new QVector3D[n];
+}
+
 QVector2D *Mesh::texCoords() const
 {
     return m_texCoords;
@@ -141,7 +147,7 @@ void Mesh::computeNormals(int indiceCount)
 
         // assign it to every vertex in the face
         for(uint i = 0; i < f.count; i++)
-            m_normals[m_indices[f.offset + i]] = u;
+            m_normals[f.offset + i] = u;
     }
 }
 
@@ -228,6 +234,8 @@ void Mesh::draw_normals()
 {
     static Material mat(QVector4D(1.0, 1.0, 1.0, 1.0),
         QVector4D(0.0, 0.0, 0.0, 1.0), QVector4D(0.0, 0.0, 0.0, 1.0), 0.0);
+    if(!m_normals)
+        return;
     mat.beginApply();
     glLineWidth(3.0);
     glBegin(GL_LINES);
