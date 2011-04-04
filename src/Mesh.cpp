@@ -10,41 +10,38 @@ bool fequal(double a, double b)
 
 Mesh::Mesh(QObject *parent) : QObject(parent)
 {
-    m_vertices = 0;
-    m_normals = 0;
-    m_texCoords = 0;
-    m_indices = 0;
     m_use_vertex_list = true;
 }
 
 Mesh::~Mesh()
 {
-    delete [] m_vertices;
-    delete [] m_normals;
-    delete [] m_texCoords;
-    delete [] m_indices;
 }
 
-QVector3D *Mesh::vertices() const
+QVector<QVector3D> & Mesh::vertices()
+{
+    return m_vertices;
+}
+
+const QVector<QVector3D> & Mesh::vertices() const
 {
     return m_vertices;
 }
 
 void Mesh::setVertices(GLfloat *vertices, int n)
 {
-    delete [] m_vertices;
-    m_vertices = new QVector3D[n];
+    if(!vertices)
+        return;
+    m_vertices.resize(n);
     for(int i = 0; i < n; i++, vertices += 3)
         m_vertices[i] = QVector3D(vertices[0], vertices[1], vertices[2]);
 }
 
-QVector3D * Mesh::allocVertices(int n)
+QVector<QVector3D> & Mesh::normals()
 {
-    delete [] m_vertices;
-    m_vertices = new QVector3D[n];
+    return m_normals;
 }
 
-QVector3D *Mesh::normals() const
+const QVector<QVector3D> & Mesh::normals() const
 {
     return m_normals;
 }
@@ -53,40 +50,45 @@ void Mesh::setNormals(GLfloat *normals, int n)
 {
     if(!normals)
         return;
-    delete [] m_normals;
-    m_normals = new QVector3D[n];
+    m_normals.resize(n);
     for(int i = 0; i < n; i++, normals += 3)
         m_normals[i] = QVector3D(normals[0], normals[1], normals[2]);
 }
 
-QVector3D *Mesh::allocNormals(int n)
+QVector<QVector2D> & Mesh::texCoords()
 {
-    delete [] m_normals;
-    m_normals = new QVector3D[n];
+    return m_texCoords;
 }
 
-QVector2D *Mesh::texCoords() const
+const QVector<QVector2D> & Mesh::texCoords() const
 {
     return m_texCoords;
 }
 
 void Mesh::setTexCoords(GLfloat *texCoords, int n)
 {
-    delete [] m_texCoords;
-    m_texCoords = new QVector2D[n];
+    if(!texCoords)
+        return;
+    m_texCoords.resize(n);
     for(int i = 0; i < n; i++, texCoords += 2)
         m_texCoords[i] = QVector2D(texCoords[0], texCoords[1]);
 }
 
-uint *Mesh::indices() const
+QVector<uint> & Mesh::indices()
+{
+    return m_indices;
+}
+
+const QVector<uint> & Mesh::indices() const
 {
     return m_indices;
 }
 
 void Mesh::setIndices(GLuint *indices, int n)
 {
-    delete [] m_indices;
-    m_indices = new uint[n];
+    if(!indices)
+        return;
+    m_indices.resize(n);
     for(int i = 0; i < n; i++, indices++)
         m_indices[i] = indices[0];
 }
@@ -109,7 +111,7 @@ void Mesh::addFace(uint mode, int vertexCount, int offset, bool draw)
 /* Generate texture coordinates for 4 vertices-faced meshes */
 void Mesh::generate_quadri_textcoords(int indiceCount)
 {
-    m_texCoords = new QVector2D[indiceCount];
+    m_texCoords.resize(indiceCount);
     foreach(Face f, m_faces)
     {
         for(GLuint j = 0; j < 4; j++)
@@ -124,12 +126,11 @@ void Mesh::generate_quadri_textcoords(int indiceCount)
 
 void Mesh::computeNormals(int indiceCount)
 {
-    if(!m_vertices || !m_indices)
+    if((m_vertices.count() < indiceCount) || (m_indices.count() < indiceCount))
         return;
-    delete [] m_normals;
-    m_normals = new QVector3D[indiceCount];
 
     QVector3D u, v1, v2, v3;
+    m_normals.resize(indiceCount);
     foreach(Face f, m_faces)
     {
         // use the face's first three vertices to compute its normal vector
@@ -146,7 +147,7 @@ void Mesh::computeNormals(int indiceCount)
         normal_vector(v1, v2, v3, u);
 
         // assign it to every vertex in the face
-        for(uint i = 0; i < f.count; i++)
+        for(int i = 0; i < f.count; i++)
             m_normals[f.offset + i] = u;
     }
 }
@@ -185,10 +186,10 @@ void Mesh::draw_immediate()
             glBegin(f.mode);
             for(GLsizei j = 0; j < f.count; j++)
             {
-                GLuint ind = m_indices ? m_indices[f.offset + j] : f.offset + j;
-                if(m_normals)
+                GLuint ind = (m_indices.count() > 0) ? m_indices[f.offset + j] : f.offset + j;
+                if(m_normals.count() > 0)
                     glNormal3fv((GLfloat *)&m_normals[ind]);
-                if(m_texCoords)
+                if(m_texCoords.count() > 0)
                     glTexCoord2fv((GLfloat *)&m_texCoords[ind]);
                 glVertex3fv((GLfloat *)&m_vertices[ind]);
             }
@@ -200,31 +201,31 @@ void Mesh::draw_immediate()
 // draw the mesh using vertex lists, which is faster than calling glBegin/glEnd
 void Mesh::draw_vertex_list()
 {
-    if(m_normals)
+    if(m_normals.count() > 0)
     {
         glEnableClientState(GL_NORMAL_ARRAY);
-        glNormalPointer(GL_FLOAT, 0, m_normals);
+        glNormalPointer(GL_FLOAT, 0, m_normals.data());
     }
-    if(m_texCoords)
+    if(m_texCoords.count() > 0)
     {
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        glTexCoordPointer(2, GL_FLOAT, 0, m_texCoords);
+        glTexCoordPointer(2, GL_FLOAT, 0, m_texCoords.data());
     }
     glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, m_vertices);
+    glVertexPointer(3, GL_FLOAT, 0, m_vertices.data());
     foreach(Face f, m_faces)
     {
         if(f.draw)
         {
-            if(m_indices)
-                glDrawElements(f.mode, f.count, GL_UNSIGNED_INT, m_indices + f.offset);
+            if(m_indices.count() > 0)
+                glDrawElements(f.mode, f.count, GL_UNSIGNED_INT, (m_indices.data() + f.offset));
             else
                 glDrawArrays(f.mode, f.offset, f.count);
         }
     }
-    if(m_texCoords)
+    if(m_texCoords.count() > 0)
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    if(m_normals)
+    if(m_normals.count() > 0)
         glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
 }
@@ -234,7 +235,7 @@ void Mesh::draw_normals()
 {
     static Material mat(QVector4D(1.0, 1.0, 1.0, 1.0),
         QVector4D(0.0, 0.0, 0.0, 1.0), QVector4D(0.0, 0.0, 0.0, 1.0), 0.0);
-    if(!m_normals)
+    if(m_normals.count() == 0)
         return;
     mat.beginApply();
     glLineWidth(3.0);
@@ -245,7 +246,7 @@ void Mesh::draw_normals()
             continue;
         for(int p = 0; p < face.count; p++)
         {
-            uint ind = m_indices ? m_indices[face.offset + p] : face.offset + p;
+            uint ind = (m_indices.count() > 0) ? m_indices[face.offset + p] : face.offset + p;
             QVector3D v = m_vertices[ind];
             QVector3D v2 = m_normals[ind] + v;
             glVertex3fv((GLfloat *)&v);
@@ -260,8 +261,6 @@ void Mesh::draw_normals()
 Mesh * Mesh::load_stl(const char *path, QObject *parent, bool compute_normals)
 {
     Mesh *m = 0;
-    QVector3D *vertices = 0;
-    QVector3D *normals = 0;
     FILE *f = fopen(path, "rb");
     char header[80];
     uint32_t triangles = 0;
@@ -272,18 +271,30 @@ Mesh * Mesh::load_stl(const char *path, QObject *parent, bool compute_normals)
     if(f == 0)
     {
         fprintf(stderr, "Could not open file '%s'.\n", path);
-        goto cleanup;
+        return 0;
     }
-    if(fread(header, sizeof(header), 1, f) < 1) goto cleanup;
-    if(fread(&triangles, 4, 1, f) < 1) goto cleanup;
+    if((fread(header, sizeof(header), 1, f) < 1) ||
+            (fread(&triangles, 4, 1, f) < 1))
+    {
+        fclose(f);
+        return 0;
+    }
 
     // read vertex data
-    vertices = new QVector3D[3 * triangles];
-    normals = new QVector3D[3 * triangles];
+    m = new Mesh(parent);
+    QVector<QVector3D> &vertices = m->vertices();
+    QVector<QVector3D> &normals = m->normals();
+    vertices.resize(3 * triangles);
+    normals.resize(3 * triangles);
     for(uint32_t i = 0; i < triangles; i++)
     {
-        if(fread(points, sizeof(points), 1, f) < 1) goto cleanup;
-        if(fread(&attributes, 2, 1, f) < 1) goto cleanup;
+        if((fread(points, sizeof(points), 1, f) < 1) ||
+            (fread(&attributes, 2, 1, f) < 1))
+        {
+            delete m;
+            fclose(f);
+            return 0;
+        }
         if(compute_normals)
             points[0] = QVector3D::normal(points[1], points[2], points[3]);
         for(uint32_t v = 0; v < 3; v++)
@@ -293,20 +304,8 @@ Mesh * Mesh::load_stl(const char *path, QObject *parent, bool compute_normals)
             normals[pos] = points[0];
         }
     }
-
-    // create mesh
-    m = new Mesh(parent);
-    m->m_vertices = vertices;
-    m->m_normals = normals;
-    vertices = 0;
-    normals = 0;
     m->addFace(GL_TRIANGLES, triangles * 3, 0);
-
-cleanup:
-    delete [] vertices;
-    delete [] normals;
-    if(f)
-        fclose(f);
+    fclose(f);
     return m;
 }
 

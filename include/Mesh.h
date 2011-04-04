@@ -24,15 +24,20 @@ public:
     Mesh(QObject *parent = 0);
     virtual ~Mesh();
 
-    QVector3D *vertices() const;
+    QVector<QVector3D> & vertices();
+    const QVector<QVector3D> & vertices() const;
     void setVertices(GLfloat *vertices, int n);
-    QVector3D *allocVertices(int n);
-    QVector3D *normals() const;
+
+    QVector<QVector3D> & normals();
+    const QVector<QVector3D> & normals() const;
     void setNormals(GLfloat *normals, int n);
-    QVector3D *allocNormals(int n);
-    QVector2D *texCoords() const;
+
+    QVector<QVector2D> & texCoords();
+    const QVector<QVector2D> & texCoords() const;
     void setTexCoords(GLfloat *texCoords, int n);
-    uint *indices() const;
+
+    QVector<uint> & indices();
+    const QVector<uint> & indices() const;
     void setIndices(GLuint *indices, int n);
 
     const QVector<Face> & faces() const;
@@ -59,10 +64,10 @@ private:
     // Compute the normal vector of the triangle ABC
     static void normal_vector(const QVector3D &a, const QVector3D &b, const QVector3D &c, QVector3D &n);
 
-    QVector3D *m_vertices;
-    QVector3D *m_normals;
-    QVector2D *m_texCoords;
-    uint *m_indices;
+    QVector<QVector3D> m_vertices;
+    QVector<QVector3D> m_normals;
+    QVector<QVector2D> m_texCoords;
+    QVector<uint> m_indices;
     QVector<Face> m_faces;
     bool m_use_vertex_list;
 };
