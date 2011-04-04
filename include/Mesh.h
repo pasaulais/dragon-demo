@@ -47,7 +47,7 @@ public:
     // Generate texture coordinates for 4 vertices-faced meshes
     void generate_quadri_textcoords(int indiceCount);
 
-    void computeNormals(int indiceCount);
+    void computeNormals();
 
     void draw();
     // draw the mesh using glBegin/glEnd/glVertex/etc
@@ -61,9 +61,6 @@ public:
     static Mesh * load_stl(const char *path, QObject *parent, bool compute_normals = true);
 
 private:
-    // Compute the normal vector of the triangle ABC
-    static void normal_vector(const QVector3D &a, const QVector3D &b, const QVector3D &c, QVector3D &n);
-
     QVector<QVector3D> m_vertices;
     QVector<QVector3D> m_normals;
     QVector<QVector2D> m_texCoords;

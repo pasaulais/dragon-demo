@@ -3,7 +3,10 @@
 #include "Primitive.h"
 #include "Mesh.h"
 
-Mesh * Primitive::createCurve(double theta, double width, GLuint nCurvePoints)
+#define M_PI		3.14159265358979323846	/* pi */
+#define radians(t)  (((t) / 180.0) * M_PI)
+
+Mesh * Primitive::createCurve(double theta, double width, uint nCurvePoints)
 {
     double theta_rad = radians(theta);
     Mesh *m = new Mesh();
@@ -15,14 +18,14 @@ Mesh * Primitive::createCurve(double theta, double width, GLuint nCurvePoints)
     curveNormals(m, theta_rad, width, nCurvePoints);
     
     // compute the texture coords of the curve
-    curveTexcoords(m, theta_rad, width, nCurvePoints);
+    curveTexcoords(m, theta_rad, nCurvePoints);
     
     // specify the model using triangle strips for the different faces
-    curveMeshes(m, theta_rad, width, nCurvePoints);
+    curveMeshes(m, nCurvePoints);
     return m;
 }
 
-void Primitive::curveVertices(Mesh *m, double theta, double width, GLuint nCurvePoints)
+void Primitive::curveVertices(Mesh *m, double theta, double width, uint nCurvePoints)
 {
     // face 0 is front, face 1 is back, 2 is start leg, 3 is end leg
     int verticeCount = ((nCurvePoints * 8) + 8);
@@ -41,7 +44,7 @@ void Primitive::curveVertices(Mesh *m, double theta, double width, GLuint nCurve
     double angle = 0.0;
     double step = theta / ((double)nCurvePoints - 1.0);
     double r = (1.0 - width);
-    for(GLuint i = 0; i < nCurvePoints; i++, angle += step)
+    for(uint i = 0; i < nCurvePoints; i++, angle += step)
     {
         double x = cos(angle);
         double y = sin(angle);
@@ -81,7 +84,7 @@ void Primitive::curveVertices(Mesh *m, double theta, double width, GLuint nCurve
     delete [] vertices;
 }
 
-void Primitive::curveNormals(Mesh *m, double theta, double width, GLuint nCurvePoints)
+void Primitive::curveNormals(Mesh *m, double theta, double width, uint nCurvePoints)
 {   
     // face 0 is front, face 1 is back, 2 is start leg, 3 is end leg
     int normalCount = ((nCurvePoints * 8) + 8);
@@ -100,7 +103,7 @@ void Primitive::curveNormals(Mesh *m, double theta, double width, GLuint nCurveP
     double angle = 0.0;
     double step = theta / ((double)nCurvePoints - 1.0);
     double r = (1.0 - width);
-    for(GLuint i = 0; i < nCurvePoints; i++, angle += step)
+    for(uint i = 0; i < nCurvePoints; i++, angle += step)
     {
         double x = cos(angle);
         double y = sin(angle);
@@ -144,7 +147,7 @@ void Primitive::curveNormals(Mesh *m, double theta, double width, GLuint nCurveP
     delete [] normals;
 }
 
-void Primitive::curveTexcoords(Mesh *m, double theta, double width, GLuint nCurvePoints)
+void Primitive::curveTexcoords(Mesh *m, double theta, uint nCurvePoints)
 {
     // face 0 is front, face 1 is back, 2 is start leg, 3 is end leg
     int texCoordsCount = ((nCurvePoints * 8) + 8);
@@ -162,8 +165,7 @@ void Primitive::curveTexcoords(Mesh *m, double theta, double width, GLuint nCurv
     
     double angle = 0.0;
     double step = theta / ((double)nCurvePoints - 1.0);
-    double r = (1.0 - width);
-    for(GLuint i = 0; i < nCurvePoints; i++, angle += step)
+    for(uint i = 0; i < nCurvePoints; i++, angle += step)
     {
         double tc = (double)i / (double)nCurvePoints; // normalized texture coord
         
@@ -198,11 +200,11 @@ void Primitive::curveTexcoords(Mesh *m, double theta, double width, GLuint nCurv
     delete [] texCoords;
 }
 
-void Primitive::curveMeshes(Mesh *m, double theta, double width, GLuint nCurvePoints)
+void Primitive::curveMeshes(Mesh *m, uint nCurvePoints)
 {
     int offset[6];
     int vertices[6];
-    for(GLuint i = 0; i < 4; i++)
+    for(uint i = 0; i < 4; i++)
     {
         vertices[i] = nCurvePoints * 2;
         offset[i] = i * nCurvePoints * 2;
@@ -213,14 +215,14 @@ void Primitive::curveMeshes(Mesh *m, double theta, double width, GLuint nCurvePo
     offset[5] = offset[4] + vertices[4];
 
     int indiceCount = ((nCurvePoints * 2 * 4) + 8);
-    GLuint *indices = new GLuint[indiceCount];
-    GLuint *i0 = indices + offset[0];
-    GLuint *i1 = indices + offset[1];
-    GLuint *i2 = indices + offset[2];
-    GLuint *i3 = indices + offset[3];
-    GLuint *i4 = indices + offset[4];
-    GLuint *i5 = indices + offset[5];
-    for(GLuint i = 0; i < nCurvePoints; i++)
+    uint *indices = new uint[indiceCount];
+    uint *i0 = indices + offset[0];
+    uint *i1 = indices + offset[1];
+    uint *i2 = indices + offset[2];
+    uint *i3 = indices + offset[3];
+    uint *i4 = indices + offset[4];
+    uint *i5 = indices + offset[5];
+    for(uint i = 0; i < nCurvePoints; i++)
     {
         *i0++ = i + (nCurvePoints * 5);
         *i0++ = i + (nCurvePoints * 4);
@@ -231,21 +233,20 @@ void Primitive::curveMeshes(Mesh *m, double theta, double width, GLuint nCurvePo
         *i3++ = i + (nCurvePoints * 1);
         *i3++ = i + (nCurvePoints * 3);
     }
-    for(GLuint i = 0; i < 4; i++)
+    for(uint i = 0; i < 4; i++)
     {
         i4[i] = offset[4] + i;
         i5[i] = offset[5] + i;
     }
     m->setIndices(indices, indiceCount);
-    for(GLuint i = 0; i < 4; i++)
+    for(uint i = 0; i < 4; i++)
         m->addFace(GL_TRIANGLE_STRIP, vertices[i], offset[i]);
-    for(GLuint i = 4; i < 6; i++)
+    for(uint i = 4; i < 6; i++)
         m->addFace(GL_QUADS, vertices[i], offset[i]);
     delete [] indices;
 }
 
-Mesh * Primitive::fromFaces(GLfloat *facesVertices, GLfloat *facesNormals,
-    GLuint *facesIndices, uint indiceCount, uint faceCount)
+Mesh * Primitive::fromFaces(GLfloat *facesVertices, uint *facesIndices, uint indiceCount, uint faceCount)
 {
     uint verticesPerFace = indiceCount / faceCount;
     Mesh *m = new Mesh();
@@ -256,7 +257,7 @@ Mesh * Primitive::fromFaces(GLfloat *facesVertices, GLfloat *facesNormals,
     indices.resize(indiceCount);
     for(uint i = 0; i < indiceCount; i++)
     {
-        GLuint indice = facesIndices[i];
+        uint indice = facesIndices[i];
         vertices[i] = QVector3D(facesVertices[(indice * 3) + 0],
                                 facesVertices[(indice * 3) + 1],
                                 facesVertices[(indice * 3) + 2]);
@@ -264,13 +265,10 @@ Mesh * Primitive::fromFaces(GLfloat *facesVertices, GLfloat *facesNormals,
     }
 
     m->setVertices((GLfloat *)vertices.data(), indiceCount);
-    m->setIndices((GLuint *)indices.data(), indiceCount);
-    for(int i = 0; i < faceCount; i++)
+    m->setIndices((uint *)indices.data(), indiceCount);
+    for(uint i = 0; i < faceCount; i++)
         m->addFace(GL_QUADS, verticesPerFace, i * verticesPerFace);
-    if(facesNormals)
-        m->setNormals(facesNormals, indiceCount);
-    else
-        m->computeNormals(indiceCount);
+    m->computeNormals();
     //m->generate_quadri_textcoords(indiceCount);
     return m;
 }
@@ -284,26 +282,13 @@ Mesh * Primitive::createCube()
         {-1.0, -1.0, -1.0}, {-1.0,  1.0, -1.0},
         { 1.0,  1.0, -1.0}, { 1.0, -1.0, -1.0}
     };
-#ifdef EXACT_NORMALS
-    static GLfloat faces_normals[][3] =
-    {
-        { 0.0,  0.0,  1.0}, { 1.0,  0.0,  0.0},
-        { 0.0, -1.0,  0.0}, { 0.0,  1.0,  0.0},
-        { 0.0,  0.0, -1.0}, {-1.0,  0.0,  0.0},
-    };
-#else
-    // let create_mesh() compute face normals
-    GLfloat *faces_normals = 0;
-#endif
-    static GLuint faces_indices[][4] =
+    static uint faces_indices[][4] =
     {
         {0, 3, 2, 1}, {2, 3, 7, 6},
         {0, 4, 7, 3}, {1, 2, 6, 5},
         {4, 5, 6, 7}, {0, 1, 5, 4}
     };
-    return fromFaces((GLfloat *)vertices,
-                     (GLfloat *)faces_normals,
-                     (GLuint *)faces_indices, 24, 6);
+    return fromFaces((GLfloat *)vertices, (uint *)faces_indices, 24, 6);
 }
 
 Mesh * Primitive::createShearedParalpd(double width, double height, double theta)
@@ -316,27 +301,13 @@ Mesh * Primitive::createShearedParalpd(double width, double height, double theta
         {0.0, 0.0, 1.0},          {d, height, 1.0},
         {width + d, height, 1.0}, {width, 0.0, 1.0},
     };
-#ifdef EXACT_NORMALS
-    GLfloat a = sqrt(height * height + d * d);
-    GLfloat faces_normals[6][3] =
-    {
-        { 0.0,  0.0, -1.0},     { 0.0,  0.0,  1.0},
-        {-height/a, d/a,  0.0}, {height/a, -d/a,  0.0},
-        { 0.0,  1.0,  0.0},     { 0.0, -1.0,  0.0},
-    };
-#else
-    // let create_mesh() compute face normals
-    GLfloat *faces_normals = 0;
-#endif
-    static GLuint faces_indices[][4] =
+    static uint faces_indices[][4] =
     {
         {0, 1, 2, 3}, {4, 7, 6, 5},
         {0, 4, 5, 1}, {3, 2, 6, 7},
         {1, 5, 6, 2}, {0, 3, 7, 4}
     };
-    return fromFaces((GLfloat *)vertices,
-                     (GLfloat *)faces_normals,
-                     (GLuint *)faces_indices, 24, 6);
+    return fromFaces((GLfloat *)vertices, (uint *)faces_indices, 24, 6);
 }
 
 double Primitive::shearedParalpdWidth(double baseWidth, double height, double theta)

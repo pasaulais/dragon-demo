@@ -124,12 +124,13 @@ void Mesh::generate_quadri_textcoords(int indiceCount)
     }
 }
 
-void Mesh::computeNormals(int indiceCount)
+void Mesh::computeNormals()
 {
-    if((m_vertices.count() < indiceCount) || (m_indices.count() < indiceCount))
+    int indiceCount = m_indices.count();
+    if((indiceCount == 0) || (m_vertices.count() < indiceCount))
         return;
 
-    QVector3D u, v1, v2, v3;
+    QVector3D u;
     m_normals.resize(indiceCount);
     foreach(Face f, m_faces)
     {
@@ -139,33 +140,12 @@ void Mesh::computeNormals(int indiceCount)
         GLuint ind1 = m_indices[f.offset + 0];
         GLuint ind2 = m_indices[f.offset + 1];
         GLuint ind3 = m_indices[f.offset + 2];
-
-        v1 = m_vertices[ind1];
-        v2 = m_vertices[ind2];
-        v3 = m_vertices[ind3];
-
-        normal_vector(v1, v2, v3, u);
+        u = QVector3D::normal(m_vertices[ind1], m_vertices[ind2], m_vertices[ind3]);
 
         // assign it to every vertex in the face
         for(int i = 0; i < f.count; i++)
             m_normals[f.offset + i] = u;
     }
-}
-
-// Compute the normal vector of the triangle ABC
-void Mesh::normal_vector(const QVector3D &a, const QVector3D &b, const QVector3D &c, QVector3D &n)
-{
-    // calculate the cross-product of AB and AC
-    QVector3D u = b - a, v = c - a;
-    n.setX(u.y() * v.z() - u.z() * v.y());
-    n.setY(u.z() * v.x() - u.x() * v.z());
-    n.setZ(u.x() * v.y() - u.y() * v.x());
-
-    // normalize it
-    GLfloat w = sqrt(n.x() * n.x() + n.y() * n.y() + n.z() * n.z());
-    n.setX(n.x() / w);
-    n.setY(n.y() / w);
-    n.setZ(n.z() / w);
 }
 
 void Mesh::draw()
