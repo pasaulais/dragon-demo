@@ -1,6 +1,3 @@
-#include <GL/glut.h>
-#include <cstdio>
-#include <cmath>
 #include "Dragon.h"
 #include "Letters.h"
 
@@ -19,10 +16,36 @@ Dragon::Dragon(DragonScene *scene)
     alpha = 0.0;
     beta = 0.0;
     gamma = 0.0;
-    joint_parts = 4;
-    chest_parts = 8;
-    tail_end_parts = 2;
+    setDetailLevel(0);
     m_scene = scene;
+}
+
+void Dragon::setDetailLevel(int level)
+{
+    switch(level)
+    {
+        case 1:
+            joint_parts = 1;
+            chest_parts = 2;
+            tail_end_parts = 1;
+            break;
+        case 2:
+            joint_parts = 2;
+            chest_parts = 4;
+            tail_end_parts = 2;
+            break;
+        default:
+        case 3:
+            joint_parts = 4;
+            chest_parts = 8;
+            tail_end_parts = 4;
+            break;
+        case 4:
+            joint_parts = 8;
+            chest_parts = 16;
+            tail_end_parts = 8;
+            break;
+    }
 }
 
 void Dragon::draw()
@@ -123,8 +146,8 @@ void Dragon::drawTongue()
 
 void Dragon::drawJoint()
 {
-    GLfloat step = 360.0 / joint_parts;
-    for(GLfloat theta = 0.0; theta < 360.0; theta += step)
+    float step = 360.0 / joint_parts;
+    for(float theta = 0.0; theta < 360.0; theta += step)
     {
         glPushMatrix();
             glTranslatef(0.40, 0.0, 0.0);
@@ -173,8 +196,8 @@ void Dragon::drawBody()
 
 void Dragon::drawChest()
 {
-    GLfloat step = 360.0 / chest_parts;
-    for(GLfloat theta = 0.0; theta < 359.0; theta += step)
+    float step = 360.0 / chest_parts;
+    for(float theta = 0.0; theta < 359.0; theta += step)
     {
         glPushMatrix();
             glTranslatef(-1.0, 0.0, 0.0);
@@ -339,18 +362,18 @@ void Dragon::drawPaw()
 void Dragon::drawTail()
 {
     GLuint n = 10;
-    GLfloat k = theta_tail / 20.0;
-    static GLfloat sizes[10] =
+    float k = theta_tail / 20.0;
+    static float sizes[10] =
     {
         // make the tail smaller and smaller as we get near the end
         1.0, 0.80, 0.75, 0.75, 0.77, 0.86, 0.9, 0.89, 0.88, 0.86
     };
-    GLfloat angles[10] =
+    float angles[10] =
     {
         // rotate more and more each joint to make the tail curl
         -theta_tail, 0.0, 0.0, 45.0  * k, 45.0  * k, 60.0 * k, 45.0 * k, 60.0 * k, 120.0 * k, 60.0 * k
     };
-    GLfloat mod[10] =
+    float mod[10] =
     {
         // slow down some joints by a factor inversely proportional to their size
         // 1.0, 0.80, 0.6, 0.45, 0.35, 0.30, 0.27, 0.24, 0.21, 0.18
@@ -365,7 +388,7 @@ void Dragon::drawTail()
             glScalef(0.52, 1.0, 1.0);
             for(GLuint i = 0; i < n; i++)
             {
-                GLfloat f = sizes[i];
+                float f = sizes[i];
                 glTranslatef(0.80, 0.0, 0.0);
                 glRotatef(angles[i] * mod[i], 0.0, 0.0, 1.0);
                 glScalef(f, f, f);
@@ -381,8 +404,8 @@ void Dragon::drawTail()
 
 void Dragon::drawTailEnd()
 {
-    GLfloat step = 360.0 / (tail_end_parts * 2.0);
-    for(GLfloat theta = 0.0; theta < 359.0; theta += step)
+    float step = 360.0 / (tail_end_parts * 2.0);
+    for(float theta = 0.0; theta < 359.0; theta += step)
     {
         glPushMatrix();
             glRotatef(theta, 1.0, 0.0, 0.0);

@@ -84,6 +84,7 @@ void DragonScene::reset()
 {
     m_selected = SCENE;
     m_drawNormals = false;
+    m_detailLevel = 3;
     emit invalidated();
 }
 
@@ -120,8 +121,35 @@ void DragonScene::draw()
     glPushMatrix();
     if(item == SCENE)
     {
-        foreach(Dragon *d, m_dragons)
-            d->draw();
+        Dragon *da = m_dragons[0];
+        glPushMatrix();
+            glTranslatef(0.0, 2.0 + 0.6 * da->alpha, 0.0);
+            glScalef(3.0, 3.0, 3.0);
+            da->setDetailLevel(m_detailLevel);
+            drawDragonHoldingA(da);
+        glPopMatrix();
+
+        Dragon *dp = m_dragons[1];
+        glPushMatrix();
+            glTranslatef(-dp->beta, dp->beta, dp->beta);
+            glRotatef(dp->alpha, 0.0, 1.0, 0.0);
+            glTranslatef(4.0, 0.0, 4.0);
+            glRotatef(60.0, 0.0, 1.0, 0.0);
+            glScalef(1.5, 1.5, 1.5);
+            dp->setDetailLevel(m_detailLevel);
+            drawDragonHoldingP(dp);
+        glPopMatrix();
+
+        Dragon *ds = m_dragons[2];
+        glPushMatrix();
+            glTranslatef(0.0, ds->beta, 0.0);
+            glRotatef(-ds->alpha, 0.0, 1.0, 0.0);
+            glTranslatef(3.0, 0.0, 3.0);
+            glRotatef(-120.0, 0.0, 1.0, 0.0);
+            glScalef(1.5, 1.5, 1.5);
+            ds->setDetailLevel(m_detailLevel);
+            drawDragonHoldingS(ds);
+        glPopMatrix();
     }
     else
     {
@@ -141,6 +169,59 @@ void DragonScene::draw()
 
         debug_material.endApply();
     }
+    glPopMatrix();
+}
+
+void DragonScene::drawDragonHoldingA(Dragon *d)
+{
+    glPushMatrix();
+        glPushMatrix();
+            glRotatef(45.0, 0.0, 0.0, 1.0);
+            d->draw();
+        glPopMatrix();
+        glPushMatrix();
+            glTranslatef(1.0/3.0, 0.2/3.0, 0.0);
+            glRotatef(15.0, 0.0, 1.0, 0.0);
+            glRotatef(-d->theta_front_legs, 0.0, 0.0, 1.0);
+            glScalef(2.0/3.0, 2.0/3.0, 1.0/3.0);
+            tongue_material.beginApply();
+            Letters::drawA(this);
+            tongue_material.endApply();
+        glPopMatrix();
+    glPopMatrix();
+}
+
+void DragonScene::drawDragonHoldingP(Dragon *d)
+{
+    glPushMatrix();
+        d->draw();
+        glPushMatrix();
+            glTranslatef(0.08, -0.13, 0.0);
+            glRotatef(-d->theta_front_legs + 90.0, 0.0, 0.0, 1.0);
+            glTranslatef(0.2, -0.1, 0.0);
+            glRotatef(-170, 0.0, 0.0, 1.0);
+            glScalef(1.0, 1.0, 0.5);
+            tongue_material.beginApply();
+            Letters::drawP(this);
+            tongue_material.endApply();
+        glPopMatrix();
+    glPopMatrix();
+}
+
+void DragonScene::drawDragonHoldingS(Dragon *d)
+{
+    glPushMatrix();
+        d->draw();
+        glPushMatrix();
+            glTranslatef(0.26, -0.25, 0.0);
+            glRotatef(180.0 - d->theta_front_legs, 0.0, 0.0, 1.0);
+            // need to change the center of the rotation
+            glTranslatef(-0.4, 0.1, 0.0);
+            glScalef(1.0, 1.0, 0.5);
+            tongue_material.beginApply();
+            Letters::drawS(this);
+            tongue_material.endApply();
+        glPopMatrix();
     glPopMatrix();
 }
 
@@ -184,7 +265,87 @@ void DragonScene::drawMesh(Mesh *m)
 
 void DragonScene::animate()
 {
-    /*clock_t ticks = clock();
-    GLfloat t = (GLfloat)ticks / (GLfloat)CLOCKS_PER_SEC;
-    emit invalidated();*/
+    clock_t ticks = clock();
+    float t = (float)ticks / (float)CLOCKS_PER_SEC;
+
+    double angle = fmod(t * 45.0, 360.0);
+
+    // hovering dragon
+    animateDragon(m_dragons[0], t);
+    m_dragons[0]->alpha = cos(t * 3.5 + M_PI);
+    m_dragons[0]->theta_head_z = -45.0;
+    m_dragons[0]->theta_paw = 60.0;
+
+    // drunk dragon trying to fly clockwise
+    animateDragon(m_dragons[1], t);
+    m_dragons[1]->alpha = angle;
+    m_dragons[1]->beta = cos(t * 3.5) * cos(t) * cos(t);
+    m_dragons[1]->theta_head_z = -30.0;
+    m_dragons[1]->theta_neck = 30.0;
+    m_dragons[1]->theta_paw = 60.0;
+
+    // dragon jumping anticlockwise
+    animateDragon(m_dragons[2], t);
+    m_dragons[2]->alpha = angle;
+    m_dragons[2]->beta = 1.20 * sqrt(fabs(cos(5.0 * t) - cos(6.0 * t) + cos(7.0 * t)));
+    m_dragons[2]->theta_wing = 0.0;
+    m_dragons[2]->theta_wing_joint = 20.0;
+    m_dragons[2]->theta_neck = 30.0;
+    m_dragons[2]->theta_paw = 60.0;
+    m_dragons[2]->theta_neck = 30.0;
+    m_dragons[2]->theta_paw = 60.0;
+    // this one is definitely having the time of its life
+    m_dragons[2]->theta_head_z = 60.0 * spaced_cos(t, 1.0, 2.0) - 30.0;
+    m_dragons[2]->theta_jaw = 10.0 * spaced_cos(t, 1.0, 2.0) + 10.0;
+
+    /*switch(s->camera)
+    {
+        default:
+        case CAMERA_STATIC:
+            s->theta[1] = 0.0;			// static camera
+            break;
+        case CAMERA_JUMPING:
+            s->theta[1] = angle;		// following jumping dragon
+            break;
+        case CAMERA_FLYING:
+            s->theta[1] = -angle;		// following drunk dragon
+    }*/
+
+    emit invalidated();
+}
+
+// Periodic function linearly going from 0 to 1
+float DragonScene::sawtooth(float t)
+{
+    return t - (float)floor(t);
+}
+
+// Periodic function which returns 0 for w seconds then returns 1 for a seconds
+float DragonScene::spaced_rect(float t, float w, float a)
+{
+    return (sawtooth(t / (w + a)) > w / (w + a)) ? 1.0 : 0.0;
+}
+
+// Periodic function which returns 0 for w seconds then is the sawtooth function for a seconds
+float DragonScene::spaced_sawtooth(float x, float w, float a)
+{
+    return spaced_rect(x, w, a) * sawtooth((x - w) / (w + a)) * ((w + a) / a);
+}
+
+// Periodic function which returns 0 for w seconds then is the cosine function for a seconds
+float DragonScene::spaced_cos(float x, float w, float a)
+{
+    return cos(2.0 * M_PI * spaced_sawtooth(x, w, a) + M_PI / 2.0);
+}
+
+void DragonScene::animateDragon(Dragon *d, float t)
+{
+    d->theta_jaw = 10.0 * spaced_cos(t, 5.0, 2.0) + 10.0;
+    d->theta_head_y = 45.0 * spaced_cos(t, 5.0, 2.0);
+    d->theta_neck = 5.0 * cos(t * 3.0);
+    d->theta_wing = 45.0 * cos(t * 3.5);
+    d->theta_wing_joint = 60.0 - 30.0 * fabs(cos(t * 3.5) * cos(t));
+    d->theta_front_legs = 10.0 * cos(t * 3.0) + 40.0 + 45.0;
+    d->theta_back_legs = 10.0 * cos(t * 3.0) + 80.0 + 45.0;
+    d->theta_tail = 15.0 * cos(pow(t * 0.3, 2.0)) * cos(6.0 * t * 0.3);
 }

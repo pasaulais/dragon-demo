@@ -58,10 +58,19 @@ public slots:
 
 private:
     Mesh * loadMesh(QString path);
+    void drawDragonHoldingA(Dragon *d);
+    void drawDragonHoldingP(Dragon *d);
+    void drawDragonHoldingS(Dragon *d);
+    static float sawtooth(float t);
+    static float spaced_rect(float t, float w, float a);
+    static float spaced_sawtooth(float x, float w, float a);
+    static float spaced_cos(float x, float w, float a);
+    void animateDragon(Dragon *d, float t);
 
     int m_loadedMeshes, m_missingMeshes;
     bool m_drawNormals;
     int m_selected;
+    int m_detailLevel;
     QList<Dragon *> m_dragons;
 };
 

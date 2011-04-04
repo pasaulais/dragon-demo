@@ -10,6 +10,8 @@ class Dragon
 public:
     Dragon(DragonScene *scene);
 
+    void setDetailLevel(int level);
+
     void draw();
 
     void drawUpper();
@@ -31,22 +33,19 @@ public:
     void drawTail();
     void drawTailEnd();
 
-    GLfloat theta_jaw;
-    GLfloat theta_head_z;
-    GLfloat theta_head_y;
-    GLfloat theta_neck;
-    GLfloat theta_wing;
-    GLfloat theta_wing_joint;
-    GLfloat theta_front_legs;
-    GLfloat theta_back_legs;
-    GLfloat theta_paw;
-    GLfloat theta_tail;
-    GLfloat alpha;              //
-    GLfloat beta;               // animation-dependent variables
-    GLfloat gamma;              //
-    GLuint joint_parts;
-    GLuint chest_parts;
-    GLuint tail_end_parts;
+    float theta_jaw;
+    float theta_head_z;
+    float theta_head_y;
+    float theta_neck;
+    float theta_wing;
+    float theta_wing_joint;
+    float theta_front_legs;
+    float theta_back_legs;
+    float theta_paw;
+    float theta_tail;
+    float alpha;              //
+    float beta;               // animation-dependent variables
+    float gamma;              //
     Material default_material;
     Material tongue_material;
     Material wing_material;
@@ -54,6 +53,9 @@ public:
 
 private:
     DragonScene *m_scene;
+    uint joint_parts;
+    uint chest_parts;
+    uint tail_end_parts;
 };
 
 #endif
