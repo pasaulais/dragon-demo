@@ -74,10 +74,12 @@ class Material
 public:
     Material();
     Material(QVector4D ambient, QVector4D diffuse, QVector4D specular, float shine);
+    Material(QVector4D ambient, QVector4D diffuse, QVector4D specular, float shine, bool useMipmaps);
     void beginApply();
     void endApply();
 
     void setAmbient(const QVector4D &ambient);
+    void setTexture(uint texture);
 
 private:
     QVector4D m_ambient;

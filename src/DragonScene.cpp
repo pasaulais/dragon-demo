@@ -6,8 +6,10 @@
 #include <QMatrix4x4>
 #include <QKeyEvent>
 #include "DragonScene.h"
+#include "Dragon.h"
 #include "Mesh.h"
 #include "Letters.h"
+#include "Images.h"
 
 using namespace std;
 
@@ -32,14 +34,50 @@ static Material glass_material(QVector4D(0.2, 0.2, 0.2, 0.2),
 static Material debug_material(QVector4D(0.2, 0.2, 0.2, 1.0),
     QVector4D(1.0, 4.0/6.0, 0.0, 1.0), QVector4D(0.2, 0.2, 0.2, 1.0), 20.0);
 
+static Material floor_material(QVector4D(0.5, 0.5, 0.5, 1.0),
+    QVector4D(1.0, 1.0, 1.0, 1.0), QVector4D(1.0, 1.0, 1.0, 1.0), 00.0, true);
+
+static Material tongue_material(QVector4D(0.1, 0.0, 0.0, 1.0),
+    QVector4D(0.6, 0.0, 0.0, 1.0), QVector4D(1.0, 1.0, 1.0, 1.0), 50.0);
+
+static Material scales_material(QVector4D(0.2, 0.2, 0.2, 1.0),
+    QVector4D(0.8, 0.8, 0.8, 1.0), QVector4D(1.0, 1.0, 1.0, 1.0), 20.0);
+
+static Material wing_material(QVector4D(0.2, 0.2, 0.2, 1.0),
+    QVector4D(1.0, 1.0, 1.0, 1.0), QVector4D(1.0, 1.0, 1.0, 1.0), 20.0);
+
+static Material wing_membrane_material(QVector4D(0.1, 0.0, 0.0, 1.0),
+    QVector4D(0.6, 0.0, 0.0, 1.0), QVector4D(0.2, 0.2, 0.2, 1.0), 20.0);
+
 DragonScene::DragonScene(QObject *parent) : Scene(parent)
 {
     m_loadedMeshes = 0;
     m_missingMeshes = 0;
+
+    //s->floor = create_cube();
+    //floor_material.texture = textureFromTIFFImage("lava_green.tiff", 1);
+
+    for(int i = 0; i < 3; i++)
+    {
+        Dragon *d = new Dragon(this);
+        d->default_material = scales_material;
+        d->tongue_material = tongue_material;
+        d->wing_material = wing_material;
+        d->wing_membrane_material = wing_membrane_material;
+        m_dragons.append(d);
+    }
+    m_dragons.value(0)->default_material.setTexture(textureFromTIFFImage("scale_green.tiff", 0));
+    m_dragons.value(0)->wing_material.setTexture(textureFromTIFFImage("wing_green.tiff", 0));
+    m_dragons.value(1)->default_material.setTexture(textureFromTIFFImage("scale_black.tiff", 0));
+    m_dragons.value(1)->wing_material.setTexture(textureFromTIFFImage("wing_black.tiff", 0));
+    m_dragons.value(2)->default_material.setTexture(textureFromTIFFImage("scale_bronze.tiff", 0));
+    m_dragons.value(2)->wing_material.setTexture(textureFromTIFFImage("wing_bronze.tiff", 0));
 }
 
 DragonScene::~DragonScene()
 {
+    while(m_dragons.count() > 0)
+        delete m_dragons.takeFirst();
 }
 
 void DragonScene::reset()
@@ -82,9 +120,8 @@ void DragonScene::draw()
     glPushMatrix();
     if(item == SCENE)
     {
-        debug_material.beginApply();
-        Letters::drawCube(this);
-        debug_material.endApply();
+        foreach(Dragon *d, m_dragons)
+            d->draw();
     }
     else
     {

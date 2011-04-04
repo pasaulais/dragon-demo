@@ -2,10 +2,11 @@
 #define INITIALS_DRAGON_SCENE_H
 
 #include <QObject>
+#include <QList>
 #include "Scene.h"
 
 class Mesh;
-class RobotArm;
+class Dragon;
 
 class DragonScene : public Scene
 {
@@ -61,6 +62,7 @@ private:
     int m_loadedMeshes, m_missingMeshes;
     bool m_drawNormals;
     int m_selected;
+    QList<Dragon *> m_dragons;
 };
 
 #endif

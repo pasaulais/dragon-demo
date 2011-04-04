@@ -297,6 +297,7 @@ Material::Material()
     m_specular = QVector4D(0.0, 0.0, 0.0, 0.0);
     m_shine = 0.0;
     m_texture = 0;
+    m_useMipmaps = false;
 }
 
 Material::Material(QVector4D ambient, QVector4D diffuse, QVector4D specular, float shine)
@@ -305,11 +306,28 @@ Material::Material(QVector4D ambient, QVector4D diffuse, QVector4D specular, flo
     m_diffuse = diffuse;
     m_specular = specular;
     m_shine = shine;
+    m_texture = 0;
+    m_useMipmaps = false;
+}
+
+Material::Material(QVector4D ambient, QVector4D diffuse, QVector4D specular, float shine, bool useMipmaps)
+{
+    m_ambient = ambient;
+    m_diffuse = diffuse;
+    m_specular = specular;
+    m_shine = shine;
+    m_texture = 0;
+    m_useMipmaps = useMipmaps;
 }
 
 void Material::setAmbient(const QVector4D &ambient)
 {
     m_ambient = ambient;
+}
+
+void Material::setTexture(uint texture)
+{
+    m_texture = texture;
 }
 
 void Material::beginApply()
