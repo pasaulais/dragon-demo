@@ -2,6 +2,7 @@
 #define INITIALS_SCENE_H
 
 #include <QObject>
+#include <QVector3D>
 
 class QWidget;
 class QKeyEvent;
@@ -15,8 +16,10 @@ public:
     virtual ~Scene();
 
     virtual bool load();
+    virtual void loadTextures();
     virtual void draw() = 0;
     virtual void reset();
+    virtual QVector3D orientation() const;
 
     virtual QWidget * createControlWidget(QWidget *parent = 0);
     virtual void keyReleaseEvent(QKeyEvent *e);

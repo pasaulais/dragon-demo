@@ -6,7 +6,7 @@
 #include <QVector4D>
 #include "SceneViewport.h"
 #include "Scene.h"
-#include "Mesh.h"
+#include "Material.h"
 
 SceneViewport::SceneViewport(Scene *scene, QWidget *parent) : QGLWidget(parent)
 {
@@ -46,6 +46,7 @@ void SceneViewport::initializeGL()
     glLightfv(GL_LIGHT0, GL_AMBIENT, (GLfloat *)&ambient0);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, (GLfloat *)&diffuse0);
     glLightfv(GL_LIGHT0, GL_SPECULAR, (GLfloat *)&specular0);
+    m_scene->loadTextures();
     reset_camera();
 }
 
@@ -75,13 +76,15 @@ void SceneViewport::paintGL()
     glClearColor(m_bgColor.redF(), m_bgColor.greenF(), m_bgColor.blueF(), 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glPolygonMode(GL_FRONT_AND_BACK, m_wireframe_mode ? GL_LINE : GL_FILL);
-    
+
+    // determine which rotation to apply from both the user and the scene
+    QVector3D rot = m_theta + m_scene->orientation();
     glPushMatrix();
         glLoadIdentity();
         glTranslatef(m_delta.x(), m_delta.y(), m_delta.z());
-        glRotatef(m_theta.x(), 1.0, 0.0, 0.0);
-        glRotatef(m_theta.y(), 0.0, 1.0, 0.0);
-        glRotatef(m_theta.z(), 0.0, 0.0, 1.0);
+        glRotatef(rot.x(), 1.0, 0.0, 0.0);
+        glRotatef(rot.y(), 0.0, 1.0, 0.0);
+        glRotatef(rot.z(), 0.0, 0.0, 1.0);
         glScalef(m_sigma, m_sigma, m_sigma);
         m_scene->draw();
         if(m_draw_axes)
@@ -196,8 +199,8 @@ void SceneViewport::draw_axis_grid()
 
 void SceneViewport::reset_camera()
 {
-    m_delta = QVector3D(1.0, 0.0, -3.0);
-    m_theta = QVector3D(-65.0, 0.0, 90.0);
+    m_delta = QVector3D(-0.0, -0.5, -5.0);
+    m_theta = QVector3D(21.0, -37.0, 0.0);
     m_trans_state.last = QVector3D();
     m_rot_state.last = QVector3D();
     m_trans_state.active = false;

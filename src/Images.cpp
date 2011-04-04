@@ -1,4 +1,5 @@
-#include <GL/glut.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include <tiffio.h>
 #include "Images.h"
 
@@ -27,9 +28,9 @@ GLuint textureFromTIFFImage(char *path, int mipmaps)
         TIFFClose(tiff);
         return 0;
     }
-    
+
     // create a texture
-    GLuint texID;
+    GLuint texID = 0;
     glGenTextures(1, &texID);
     glBindTexture(GL_TEXTURE_2D, texID);
     if(mipmaps)
@@ -38,6 +39,7 @@ GLuint textureFromTIFFImage(char *path, int mipmaps)
     else
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
             GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glBindTexture(GL_TEXTURE_2D, 0);
     _TIFFfree(data);
     TIFFClose(tiff);
     return texID;

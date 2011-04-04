@@ -2,6 +2,7 @@
 #define INITIALS_DRAGON_SCENE_H
 
 #include <QObject>
+#include <QVector3D>
 #include <QList>
 #include "Scene.h"
 
@@ -17,7 +18,10 @@ public:
     virtual ~DragonScene();
 
     virtual bool load();
+    virtual void loadTextures();
     bool meshLoaded() const;
+
+    virtual QVector3D orientation() const;
 
     virtual void draw();
     void drawMesh(Mesh *m);
@@ -28,6 +32,13 @@ public:
     virtual void keyReleaseEvent(QKeyEvent *e);
 
     virtual void reset();
+
+    enum Camera
+    {
+        Camera_Static,
+        Camera_Jumping,
+        Camera_Flying
+    };
 
     enum Item
     {
@@ -58,6 +69,7 @@ public slots:
 
 private:
     Mesh * loadMesh(QString path);
+    void drawScene();
     void drawDragonHoldingA(Dragon *d);
     void drawDragonHoldingP(Dragon *d);
     void drawDragonHoldingS(Dragon *d);
@@ -71,6 +83,8 @@ private:
     bool m_drawNormals;
     int m_selected;
     int m_detailLevel;
+    Camera m_camera;
+    QVector3D m_theta;
     QList<Dragon *> m_dragons;
 };
 

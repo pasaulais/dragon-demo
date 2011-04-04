@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cstdio>
 #include "Mesh.h"
+#include "Material.h"
 
 bool fequal(double a, double b)
 {
@@ -46,7 +47,7 @@ const QVector<QVector3D> & Mesh::normals() const
     return m_normals;
 }
 
-void Mesh::setNormals(GLfloat *normals, int n)
+void Mesh::setNormals(float *normals, int n)
 {
     if(!normals)
         return;
@@ -65,7 +66,7 @@ const QVector<QVector2D> & Mesh::texCoords() const
     return m_texCoords;
 }
 
-void Mesh::setTexCoords(GLfloat *texCoords, int n)
+void Mesh::setTexCoords(float *texCoords, int n)
 {
     if(!texCoords)
         return;
@@ -84,7 +85,7 @@ const QVector<uint> & Mesh::indices() const
     return m_indices;
 }
 
-void Mesh::setIndices(GLuint *indices, int n)
+void Mesh::setIndices(uint *indices, int n)
 {
     if(!indices)
         return;
@@ -109,11 +110,16 @@ void Mesh::addFace(uint mode, int vertexCount, int offset, bool draw)
 }
 
 /* Generate texture coordinates for 4 vertices-faced meshes */
-void Mesh::generate_quadri_textcoords(int indiceCount)
+void Mesh::generateTextureCoords()
 {
+    int indiceCount = m_indices.count();
+    if((indiceCount == 0) || (m_vertices.count() < indiceCount))
+        return;
     m_texCoords.resize(indiceCount);
     foreach(Face f, m_faces)
     {
+        if(f.count != 4)
+            return;
         for(GLuint j = 0; j < 4; j++)
         {
             GLuint ind = m_indices[f.offset + j];
@@ -164,9 +170,9 @@ void Mesh::draw_immediate()
         if(f.draw)
         {
             glBegin(f.mode);
-            for(GLsizei j = 0; j < f.count; j++)
+            for(int j = 0; j < f.count; j++)
             {
-                GLuint ind = (m_indices.count() > 0) ? m_indices[f.offset + j] : f.offset + j;
+                uint ind = (m_indices.count() > 0) ? m_indices[f.offset + j] : f.offset + j;
                 if(m_normals.count() > 0)
                     glNormal3fv((GLfloat *)&m_normals[ind]);
                 if(m_texCoords.count() > 0)
@@ -287,68 +293,4 @@ Mesh * Mesh::load_stl(const char *path, QObject *parent, bool compute_normals)
     m->addFace(GL_TRIANGLES, triangles * 3, 0);
     fclose(f);
     return m;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-Material::Material()
-{
-    m_ambient = QVector4D(0.0, 0.0, 0.0, 0.0);
-    m_diffuse = QVector4D(0.0, 0.0, 0.0, 0.0);
-    m_specular = QVector4D(0.0, 0.0, 0.0, 0.0);
-    m_shine = 0.0;
-    m_texture = 0;
-    m_useMipmaps = false;
-}
-
-Material::Material(QVector4D ambient, QVector4D diffuse, QVector4D specular, float shine)
-{
-    m_ambient = ambient;
-    m_diffuse = diffuse;
-    m_specular = specular;
-    m_shine = shine;
-    m_texture = 0;
-    m_useMipmaps = false;
-}
-
-Material::Material(QVector4D ambient, QVector4D diffuse, QVector4D specular, float shine, bool useMipmaps)
-{
-    m_ambient = ambient;
-    m_diffuse = diffuse;
-    m_specular = specular;
-    m_shine = shine;
-    m_texture = 0;
-    m_useMipmaps = useMipmaps;
-}
-
-void Material::setAmbient(const QVector4D &ambient)
-{
-    m_ambient = ambient;
-}
-
-void Material::setTexture(uint texture)
-{
-    m_texture = texture;
-}
-
-void Material::beginApply()
-{
-    glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT | GL_LIGHTING_BIT);
-    glMaterialfv(GL_FRONT, GL_AMBIENT, (GLfloat *)&m_ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, (GLfloat *)&m_diffuse);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, (GLfloat *)&m_specular);
-    glMaterialf(GL_FRONT, GL_SHININESS, m_shine);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, m_texture);
-    if(m_useMipmaps)
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    else
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-}
-
-void Material::endApply()
-{
-    glPopAttrib();
 }

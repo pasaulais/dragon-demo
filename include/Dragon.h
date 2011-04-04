@@ -1,7 +1,7 @@
 #ifndef INITIALS_DRAGON_H
 #define INITIALS_DRAGON_H
 
-#include "Mesh.h"
+#include "Material.h"
 
 class DragonScene;
 

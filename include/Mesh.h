@@ -5,8 +5,6 @@
 #include <QVector>
 #include <QVector2D>
 #include <QVector3D>
-#include <QVector4D>
-#include <GL/gl.h>
 
 bool fequal(double a, double b);
 
@@ -26,26 +24,26 @@ public:
 
     QVector<QVector3D> & vertices();
     const QVector<QVector3D> & vertices() const;
-    void setVertices(GLfloat *vertices, int n);
+    void setVertices(float *vertices, int n);
 
     QVector<QVector3D> & normals();
     const QVector<QVector3D> & normals() const;
-    void setNormals(GLfloat *normals, int n);
+    void setNormals(float *normals, int n);
 
     QVector<QVector2D> & texCoords();
     const QVector<QVector2D> & texCoords() const;
-    void setTexCoords(GLfloat *texCoords, int n);
+    void setTexCoords(float *texCoords, int n);
 
     QVector<uint> & indices();
     const QVector<uint> & indices() const;
-    void setIndices(GLuint *indices, int n);
+    void setIndices(uint *indices, int n);
 
     const QVector<Face> & faces() const;
 
     void addFace(uint mode, int vertexCount, int offset, bool draw = true);
 
     // Generate texture coordinates for 4 vertices-faced meshes
-    void generate_quadri_textcoords(int indiceCount);
+    void generateTextureCoords();
 
     void computeNormals();
 
@@ -67,27 +65,6 @@ private:
     QVector<uint> m_indices;
     QVector<Face> m_faces;
     bool m_use_vertex_list;
-};
-
-class Material
-{
-public:
-    Material();
-    Material(QVector4D ambient, QVector4D diffuse, QVector4D specular, float shine);
-    Material(QVector4D ambient, QVector4D diffuse, QVector4D specular, float shine, bool useMipmaps);
-    void beginApply();
-    void endApply();
-
-    void setAmbient(const QVector4D &ambient);
-    void setTexture(uint texture);
-
-private:
-    QVector4D m_ambient;
-    QVector4D m_diffuse;
-    QVector4D m_specular;
-    float m_shine;
-    uint m_texture;
-    bool m_useMipmaps;
 };
 
 #endif

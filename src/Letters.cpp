@@ -1,6 +1,4 @@
-/* Pierre-Andre Saulais <ps188@macs.hw.ac.uk> */
-
-#include <GL/glut.h>
+#include <GL/gl.h>
 #include "Letters.h"
 #include "Mesh.h"
 #include "Primitive.h"

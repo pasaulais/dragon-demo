@@ -8,6 +8,7 @@
 #include "DragonScene.h"
 #include "Dragon.h"
 #include "Mesh.h"
+#include "Material.h"
 #include "Letters.h"
 #include "Images.h"
 
@@ -53,6 +54,7 @@ DragonScene::DragonScene(QObject *parent) : Scene(parent)
 {
     m_loadedMeshes = 0;
     m_missingMeshes = 0;
+    m_camera = Camera_Static;
 
     //s->floor = create_cube();
     //floor_material.texture = textureFromTIFFImage("lava_green.tiff", 1);
@@ -66,12 +68,6 @@ DragonScene::DragonScene(QObject *parent) : Scene(parent)
         d->wing_membrane_material = wing_membrane_material;
         m_dragons.append(d);
     }
-    m_dragons.value(0)->default_material.setTexture(textureFromTIFFImage("scale_green.tiff", 0));
-    m_dragons.value(0)->wing_material.setTexture(textureFromTIFFImage("wing_green.tiff", 0));
-    m_dragons.value(1)->default_material.setTexture(textureFromTIFFImage("scale_black.tiff", 0));
-    m_dragons.value(1)->wing_material.setTexture(textureFromTIFFImage("wing_black.tiff", 0));
-    m_dragons.value(2)->default_material.setTexture(textureFromTIFFImage("scale_bronze.tiff", 0));
-    m_dragons.value(2)->wing_material.setTexture(textureFromTIFFImage("wing_bronze.tiff", 0));
 }
 
 DragonScene::~DragonScene()
@@ -80,12 +76,34 @@ DragonScene::~DragonScene()
         delete m_dragons.takeFirst();
 }
 
+void DragonScene::loadTextures()
+{
+    if(m_dragons.count() < 3)
+        return;
+    m_dragons.value(0)->default_material.setTexture(textureFromTIFFImage("scale_green.tiff", 0));
+    m_dragons.value(0)->wing_material.setTexture(textureFromTIFFImage("wing_green.tiff", 0));
+    m_dragons.value(1)->default_material.setTexture(textureFromTIFFImage("scale_black.tiff", 0));
+    m_dragons.value(1)->wing_material.setTexture(textureFromTIFFImage("wing_black.tiff", 0));
+    m_dragons.value(2)->default_material.setTexture(textureFromTIFFImage("scale_bronze.tiff", 0));
+    m_dragons.value(2)->wing_material.setTexture(textureFromTIFFImage("wing_bronze.tiff", 0));
+}
+
 void DragonScene::reset()
 {
     m_selected = SCENE;
     m_drawNormals = false;
-    m_detailLevel = 3;
+    m_theta = QVector3D(0, 0, 0);
+    m_detailLevel = 4;
+    m_camera = Camera_Static;
     emit invalidated();
+}
+
+QVector3D DragonScene::orientation() const
+{
+    if(m_selected == SCENE)
+        return m_theta;
+    else
+        return QVector3D();
 }
 
 bool DragonScene::load()
@@ -121,35 +139,7 @@ void DragonScene::draw()
     glPushMatrix();
     if(item == SCENE)
     {
-        Dragon *da = m_dragons[0];
-        glPushMatrix();
-            glTranslatef(0.0, 2.0 + 0.6 * da->alpha, 0.0);
-            glScalef(3.0, 3.0, 3.0);
-            da->setDetailLevel(m_detailLevel);
-            drawDragonHoldingA(da);
-        glPopMatrix();
-
-        Dragon *dp = m_dragons[1];
-        glPushMatrix();
-            glTranslatef(-dp->beta, dp->beta, dp->beta);
-            glRotatef(dp->alpha, 0.0, 1.0, 0.0);
-            glTranslatef(4.0, 0.0, 4.0);
-            glRotatef(60.0, 0.0, 1.0, 0.0);
-            glScalef(1.5, 1.5, 1.5);
-            dp->setDetailLevel(m_detailLevel);
-            drawDragonHoldingP(dp);
-        glPopMatrix();
-
-        Dragon *ds = m_dragons[2];
-        glPushMatrix();
-            glTranslatef(0.0, ds->beta, 0.0);
-            glRotatef(-ds->alpha, 0.0, 1.0, 0.0);
-            glTranslatef(3.0, 0.0, 3.0);
-            glRotatef(-120.0, 0.0, 1.0, 0.0);
-            glScalef(1.5, 1.5, 1.5);
-            ds->setDetailLevel(m_detailLevel);
-            drawDragonHoldingS(ds);
-        glPopMatrix();
+        drawScene();
     }
     else
     {
@@ -169,6 +159,39 @@ void DragonScene::draw()
 
         debug_material.endApply();
     }
+    glPopMatrix();
+}
+
+void DragonScene::drawScene()
+{
+    Dragon *da = m_dragons[0];
+    glPushMatrix();
+        glTranslatef(0.0, 2.0 + 0.6 * da->alpha, 0.0);
+        glScalef(3.0, 3.0, 3.0);
+        da->setDetailLevel(m_detailLevel);
+        drawDragonHoldingA(da);
+    glPopMatrix();
+
+    Dragon *dp = m_dragons[1];
+    glPushMatrix();
+        glTranslatef(-dp->beta, dp->beta, dp->beta);
+        glRotatef(dp->alpha, 0.0, 1.0, 0.0);
+        glTranslatef(4.0, 0.0, 4.0);
+        glRotatef(60.0, 0.0, 1.0, 0.0);
+        glScalef(1.5, 1.5, 1.5);
+        dp->setDetailLevel(m_detailLevel);
+        drawDragonHoldingP(dp);
+    glPopMatrix();
+
+    Dragon *ds = m_dragons[2];
+    glPushMatrix();
+        glTranslatef(0.0, ds->beta, 0.0);
+        glRotatef(-ds->alpha, 0.0, 1.0, 0.0);
+        glTranslatef(3.0, 0.0, 3.0);
+        glRotatef(-120.0, 0.0, 1.0, 0.0);
+        glScalef(1.5, 1.5, 1.5);
+        ds->setDetailLevel(m_detailLevel);
+        drawDragonHoldingS(ds);
     glPopMatrix();
 }
 
@@ -252,6 +275,12 @@ void DragonScene::keyReleaseEvent(QKeyEvent *e)
         select_previous();
     else if(key == Qt::Key_N)
         m_drawNormals = !m_drawNormals;
+    else if(key == Qt::Key_F1)
+        m_camera = Camera_Static;
+    else if(key == Qt::Key_F2)
+        m_camera = Camera_Flying;
+    else if(key == Qt::Key_F3)
+        m_camera = Camera_Jumping;
 }
 
 void DragonScene::drawMesh(Mesh *m)
@@ -298,18 +327,19 @@ void DragonScene::animate()
     m_dragons[2]->theta_head_z = 60.0 * spaced_cos(t, 1.0, 2.0) - 30.0;
     m_dragons[2]->theta_jaw = 10.0 * spaced_cos(t, 1.0, 2.0) + 10.0;
 
-    /*switch(s->camera)
+    switch(m_camera)
     {
-        default:
-        case CAMERA_STATIC:
-            s->theta[1] = 0.0;			// static camera
-            break;
-        case CAMERA_JUMPING:
-            s->theta[1] = angle;		// following jumping dragon
-            break;
-        case CAMERA_FLYING:
-            s->theta[1] = -angle;		// following drunk dragon
-    }*/
+    default:
+    case Camera_Static:
+        m_theta.setY(0.0);			// static camera
+        break;
+    case Camera_Jumping:
+        m_theta.setY(angle);		// following jumping dragon
+        break;
+    case Camera_Flying:
+        m_theta.setY(-angle);       // following drunk dragon
+        break;
+    }
 
     emit invalidated();
 }

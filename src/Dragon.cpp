@@ -1,3 +1,4 @@
+#include <GL/gl.h>
 #include "Dragon.h"
 #include "Letters.h"
 

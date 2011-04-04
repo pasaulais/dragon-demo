@@ -269,7 +269,7 @@ Mesh * Primitive::fromFaces(GLfloat *facesVertices, uint *facesIndices, uint ind
     for(uint i = 0; i < faceCount; i++)
         m->addFace(GL_QUADS, verticesPerFace, i * verticesPerFace);
     m->computeNormals();
-    //m->generate_quadri_textcoords(indiceCount);
+    m->generateTextureCoords();
     return m;
 }
 

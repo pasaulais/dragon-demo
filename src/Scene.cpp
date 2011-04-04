@@ -19,6 +19,15 @@ bool Scene::load()
     return true;
 }
 
+void Scene::loadTextures()
+{
+}
+
+QVector3D Scene::orientation() const
+{
+    return QVector3D();
+}
+
 void Scene::animate()
 {
 }
