@@ -70,6 +70,7 @@ public slots:
 private:
     Mesh * loadMesh(QString path);
     void drawScene();
+    void drawFloor();
     void drawDragonHoldingA(Dragon *d);
     void drawDragonHoldingP(Dragon *d);
     void drawDragonHoldingS(Dragon *d);
@@ -85,6 +86,7 @@ private:
     int m_detailLevel;
     Camera m_camera;
     QVector3D m_theta;
+    Mesh *m_floor;
     QList<Dragon *> m_dragons;
 };
 

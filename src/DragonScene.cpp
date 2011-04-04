@@ -10,6 +10,7 @@
 #include "Mesh.h"
 #include "Material.h"
 #include "Letters.h"
+#include "Primitive.h"
 #include "Images.h"
 
 using namespace std;
@@ -56,9 +57,7 @@ DragonScene::DragonScene(QObject *parent) : Scene(parent)
     m_missingMeshes = 0;
     m_camera = Camera_Static;
 
-    //s->floor = create_cube();
-    //floor_material.texture = textureFromTIFFImage("lava_green.tiff", 1);
-
+    m_floor = Primitive::createCube(this);
     for(int i = 0; i < 3; i++)
     {
         Dragon *d = new Dragon(this);
@@ -68,6 +67,7 @@ DragonScene::DragonScene(QObject *parent) : Scene(parent)
         d->wing_membrane_material = wing_membrane_material;
         m_dragons.append(d);
     }
+    animate();
 }
 
 DragonScene::~DragonScene()
@@ -86,6 +86,7 @@ void DragonScene::loadTextures()
     m_dragons.value(1)->wing_material.setTexture(textureFromTIFFImage("wing_black.tiff", 0));
     m_dragons.value(2)->default_material.setTexture(textureFromTIFFImage("scale_bronze.tiff", 0));
     m_dragons.value(2)->wing_material.setTexture(textureFromTIFFImage("wing_bronze.tiff", 0));
+    floor_material.setTexture(textureFromTIFFImage("lava_green.tiff", 1));
 }
 
 void DragonScene::reset()
@@ -164,6 +165,20 @@ void DragonScene::draw()
 
 void DragonScene::drawScene()
 {
+    // tile the texture 16 times in both directions
+    glMatrixMode(GL_TEXTURE);
+    glPushMatrix();
+        glScalef(16.0, 16.0, 1.0);
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+            glTranslatef(0.0, -2.0, 0.0);
+            glScalef(100.0, 1.0, 100.0);
+            drawFloor();
+        glPopMatrix();
+        glMatrixMode(GL_TEXTURE);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+
     Dragon *da = m_dragons[0];
     glPushMatrix();
         glTranslatef(0.0, 2.0 + 0.6 * da->alpha, 0.0);
@@ -193,6 +208,16 @@ void DragonScene::drawScene()
         ds->setDetailLevel(m_detailLevel);
         drawDragonHoldingS(ds);
     glPopMatrix();
+}
+
+void DragonScene::drawFloor()
+{
+    floor_material.beginApply();
+    glPushMatrix();
+        glScalef(1.0, 0.001, 1.0);
+        drawMesh(m_floor);
+    glPopMatrix();
+    floor_material.endApply();
 }
 
 void DragonScene::drawDragonHoldingA(Dragon *d)

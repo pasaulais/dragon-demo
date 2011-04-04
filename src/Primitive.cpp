@@ -6,10 +6,10 @@
 #define M_PI		3.14159265358979323846	/* pi */
 #define radians(t)  (((t) / 180.0) * M_PI)
 
-Mesh * Primitive::createCurve(double theta, double width, uint nCurvePoints)
+Mesh * Primitive::createCurve(double theta, double width, uint nCurvePoints, QObject *parent)
 {
     double theta_rad = radians(theta);
-    Mesh *m = new Mesh();
+    Mesh *m = new Mesh(parent);
     
     // compute the vertices of the curve
     curveVertices(m, theta_rad, width, nCurvePoints);
@@ -246,10 +246,11 @@ void Primitive::curveMeshes(Mesh *m, uint nCurvePoints)
     delete [] indices;
 }
 
-Mesh * Primitive::fromFaces(GLfloat *facesVertices, uint *facesIndices, uint indiceCount, uint faceCount)
+Mesh * Primitive::fromFaces(GLfloat *facesVertices, uint *facesIndices,
+                            uint indiceCount, uint faceCount, QObject *parent)
 {
     uint verticesPerFace = indiceCount / faceCount;
-    Mesh *m = new Mesh();
+    Mesh *m = new Mesh(parent);
 
     QVector<QVector3D> vertices;
     QVector<uint> indices;
@@ -273,7 +274,7 @@ Mesh * Primitive::fromFaces(GLfloat *facesVertices, uint *facesIndices, uint ind
     return m;
 }
 
-Mesh * Primitive::createCube()
+Mesh * Primitive::createCube(QObject *parent)
 {
     static GLfloat vertices[][3] =
     {
@@ -288,10 +289,10 @@ Mesh * Primitive::createCube()
         {0, 4, 7, 3}, {1, 2, 6, 5},
         {4, 5, 6, 7}, {0, 1, 5, 4}
     };
-    return fromFaces((GLfloat *)vertices, (uint *)faces_indices, 24, 6);
+    return fromFaces((GLfloat *)vertices, (uint *)faces_indices, 24, 6, parent);
 }
 
-Mesh * Primitive::createShearedParalpd(double width, double height, double theta)
+Mesh * Primitive::createShearedParalpd(double width, double height, double theta, QObject *parent)
 {
     GLfloat d = height / tan(radians(theta));
     GLfloat vertices[8][3] =
@@ -307,7 +308,7 @@ Mesh * Primitive::createShearedParalpd(double width, double height, double theta
         {0, 4, 5, 1}, {3, 2, 6, 7},
         {1, 5, 6, 2}, {0, 3, 7, 4}
     };
-    return fromFaces((GLfloat *)vertices, (uint *)faces_indices, 24, 6);
+    return fromFaces((GLfloat *)vertices, (uint *)faces_indices, 24, 6, parent);
 }
 
 double Primitive::shearedParalpdWidth(double baseWidth, double height, double theta)
