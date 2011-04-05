@@ -509,8 +509,10 @@ Mesh * Mesh::loadObj(const char *path, QObject *parent)
     QVector<QVector2D> & meshTexCoords = m->texCoords();
     QVector<uint> & meshIndices = m->indices();
     ObjPoint points[4];
+    QVector3D normal;
     uint indiceCount = 0;
     int maxPoints = 0;
+    bool computeNormals = false;
     while(fgets(line, sizeof(line), f) != 0)
     {
         float v1, v2, v3;
@@ -536,15 +538,26 @@ Mesh * Mesh::loadObj(const char *path, QObject *parent)
                 parseObjPoint(point3, &points[2]))
                 pointCount = 3;
         }
-        for(int i = 0; i < pointCount; i++, indiceCount++)
+        if(pointCount > 0)
         {
-            QVector3D v = vertices.value(points[i].vertexIndex - 1);
-            QVector3D n = normals.value(points[i].normalIndex - 1);
-            QVector2D tc = texCoords.value(points[i].texCoordsIndex - 1);
-            meshVertices.append(v);
-            meshNormals.append(n);
-            meshTexCoords.append(tc);
-            meshIndices.append(indiceCount);
+            computeNormals = ((normals.count() == 0) && (pointCount >= 3));
+            if(computeNormals)
+            {
+                QVector3D v1 = vertices.value(points[0].vertexIndex - 1);
+                QVector3D v2 = vertices.value(points[1].vertexIndex - 1);
+                QVector3D v3 = vertices.value(points[2].vertexIndex - 1);
+                normal = QVector3D::normal(v1, v2, v3);
+            }
+            for(int i = 0; i < pointCount; i++, indiceCount++)
+            {
+                meshVertices.append(vertices.value(points[i].vertexIndex - 1));
+                if(computeNormals)
+                    meshNormals.append(normal);
+                else
+                    meshNormals.append(normals.value(points[i].normalIndex - 1));
+                meshTexCoords.append(texCoords.value(points[i].texCoordsIndex - 1));
+                meshIndices.append(indiceCount);
+            }
         }
         maxPoints = std::max(maxPoints, pointCount);
     }

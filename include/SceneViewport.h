@@ -39,13 +39,15 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent *e);
     virtual void wheelEvent(QWheelEvent *e);
 
+private slots:
+    void updateFPS();
+
 private:
     void setupGLState();
     void setupGLViewport(int w, int h);
     void restoreGLState();
     void paintFPS(QPainter *p, float fps);
     void startFPS();
-    float updateFPS();
     void updateAnimationState();
     void draw_axis();
     void draw_axes();
@@ -60,7 +62,7 @@ private:
     void toggle_animation();
 
     Scene *m_scene;
-    QTimer *m_timer;
+    QTimer *m_renderTimer;
     QColor m_bgColor;
 
     QVector4D m_ambient0;
@@ -81,8 +83,10 @@ private:
     bool m_wireframe_mode;
     bool m_projection_mode;
     // FPS settings
+    QTimer *m_fpsTimer;
     clock_t m_start;
     uint m_frames;
+    float m_lastFPS;
 };
 
 #endif

@@ -33,6 +33,7 @@ Dragon::Dragon(Kind kind, DragonScene *scene) : QObject(scene)
 void Dragon::loadMeshes(DragonScene *scene)
 {
     scene->loadMeshObj("wing_membrane", "meshes/dragon_wing_membrane.obj");
+    scene->loadMeshObj("joint", "meshes/dragon_joint_x2.obj");
 }
 
 float Dragon::frontLegsAngle() const
@@ -206,16 +207,7 @@ void Dragon::drawTongue()
 
 void Dragon::drawJoint()
 {
-    float step = 360.0 / m_jointParts;
-    for(float theta = 0.0; theta < 360.0; theta += step)
-    {
-        glPushMatrix();
-            glTranslatef(0.40, 0.0, 0.0);
-            glRotatef(theta, 1.0, 0.0, 0.0);
-            glScalef(1.0, 0.5, 1.0);
-            m_scene->drawMesh("letter_s");
-        glPopMatrix();
-    }
+    m_scene->drawMesh("joint");
 }
 
 void Dragon::drawBody()

@@ -100,6 +100,7 @@ private:
     QMap<QString, Mesh *> m_meshes;
     Dragon *m_debugDragon;
     QList<Dragon *> m_dragons;
+    bool m_exportQueued;
 };
 
 #endif

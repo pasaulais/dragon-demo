@@ -24,6 +24,7 @@ DragonScene::DragonScene(QObject *parent) : Scene(parent)
     m_meshOutput = 0;
     m_camera = Camera_Static;
     m_output = Mesh::Output_VertexList;
+    m_exportQueued = false;
 
     m_debugDragon = new Dragon(Dragon::Floating, this);
     m_debugDragon->scalesMaterial() = debug_material;
@@ -115,9 +116,10 @@ void DragonScene::draw()
 {
     Item i = (Item)m_selected;
     drawItem(i);
-    if(m_selected != SCENE)
+    if(m_exportQueued)
     {
-        //exportItem(i, QString("meshes/%1.obj").arg(itemText(i)));
+        exportItem(i, QString("meshes/%1.obj").arg(itemText(i)));
+        m_exportQueued = false;
     }
 }
 
@@ -400,6 +402,8 @@ void DragonScene::keyReleaseEvent(QKeyEvent *e)
         m_camera = Camera_Flying;
     else if(key == Qt::Key_F3)
         m_camera = Camera_Jumping;
+    else if(key == Qt::Key_S)
+        m_exportQueued = true;
 }
 
 void DragonScene::drawMesh(Mesh *m)

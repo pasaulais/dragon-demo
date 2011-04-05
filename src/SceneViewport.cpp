@@ -14,8 +14,13 @@ SceneViewport::SceneViewport(Scene *scene, QWidget *parent) : QGLWidget(parent)
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setMinimumSize(640, 480);
     m_scene = scene;
-    m_timer = new QTimer(this);
-    m_timer->setInterval(1000 / 60);
+    m_renderTimer = new QTimer(this);
+    m_renderTimer->setInterval(1000 / 60);
+    m_start = 0;
+    m_frames = 0;
+    m_lastFPS = 0;
+    m_fpsTimer = new QTimer(this);
+    m_fpsTimer->setInterval(1000 / 6);
     //m_bgColor = palette().color(QPalette::Background);
     setAutoFillBackground(false);
     m_bgColor = QColor::fromRgbF(0.6, 0.6, 1.0, 1.0);
@@ -24,7 +29,8 @@ SceneViewport::SceneViewport(Scene *scene, QWidget *parent) : QGLWidget(parent)
     m_specular0 = QVector4D(1.0, 1.0, 1.0, 1.0);
     m_light0_pos = QVector4D(0.0, 1.0, 1.0, 0.0);
     connect(m_scene, SIGNAL(invalidated()), this, SLOT(update()));
-    connect(m_timer, SIGNAL(timeout()), m_scene, SLOT(animate()));
+    connect(m_renderTimer, SIGNAL(timeout()), m_scene, SLOT(animate()));
+    connect(m_fpsTimer, SIGNAL(timeout()), this, SLOT(updateFPS()));
 }
 
 SceneViewport::~SceneViewport()
@@ -101,11 +107,9 @@ void SceneViewport::paintEvent(QPaintEvent *)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
     paintGL();
-    if(m_timer->isActive())
-    {
-        float fps = updateFPS();
-        paintFPS(&painter, fps);
-    }
+    m_frames++;
+    if(m_fpsTimer->isActive())
+        paintFPS(&painter, m_lastFPS);
 }
 
 void SceneViewport::paintGL()
@@ -257,9 +261,9 @@ void SceneViewport::toggle_animation()
 {
     m_animate = !m_animate;
     if(m_animate)
-        m_timer->start();
+        m_renderTimer->start();
     else
-        m_timer->stop();
+        m_renderTimer->stop();
 }
 
 void SceneViewport::top_view()
@@ -282,17 +286,12 @@ void SceneViewport::startFPS()
     m_start = clock();
 }
 
-float SceneViewport::updateFPS()
+void SceneViewport::updateFPS()
 {
-    m_frames++;
     clock_t elapsed = clock() - m_start;
-    float fps = m_frames / ((float)elapsed / CLOCKS_PER_SEC);
-    if(m_frames > 10)
-    {
-        m_frames = 0;
-        startFPS();
-    }
-    return fps;
+    m_lastFPS = m_frames / ((float)elapsed / CLOCKS_PER_SEC);
+    m_frames = 0;
+    m_start = clock();
 }
 
 void SceneViewport::paintFPS(QPainter *p, float fps)
@@ -311,11 +310,13 @@ void SceneViewport::updateAnimationState()
     if(m_animate)
     {
         startFPS();
-        m_timer->start();
+        m_renderTimer->start();
+        m_fpsTimer->start();
     }
     else
     {
-        m_timer->stop();
+        m_renderTimer->stop();
+        m_fpsTimer->stop();
     }
 }
 
