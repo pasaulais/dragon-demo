@@ -281,81 +281,6 @@ void Mesh::drawFaceToMeshCopy(Mesh *out, uint destOffset, Face f)
     }
 }
 
-void Mesh::drawFaceToMeshQuad(Mesh *out, uint destOffset, Face f)
-{
-    QVector<uint> & outIndices = out->indices();
-    QVector<QVector3D> & outVertices = out->vertices();
-    QVector<QVector3D> & outNormals = out->normals();
-    QVector<QVector2D> & outTexCoords = out->texCoords();
-    QVector<QVector3D> lastVertices;
-    QVector<QVector3D> lastNormals;
-    QVector<QVector2D> lastTexCoords;
-    QMatrix4x4 vMap = currentGLMatrix();
-    QMatrix4x4 nMap = currentGLMatrixForNormals();
-    for(int i = 0; i < f.count; i++)
-    {
-        uint srcIndex = m_indices.value(f.offset + i);
-        lastVertices.append(vMap.map(m_vertices.value(srcIndex)));
-        lastNormals.append(nMap.map(m_normals.value(srcIndex)));
-        lastTexCoords.append(m_texCoords.value(srcIndex));
-        if(lastVertices.count() == 4)
-        {
-            static int Tri1[] = {0, 1, 2};
-            for(int j = 0; j < 3; j++, destOffset++)
-            {
-                outIndices[destOffset] = destOffset;
-                outVertices[destOffset] = lastVertices[Tri1[j]];
-                outNormals[destOffset] = lastNormals[Tri1[j]];
-                outTexCoords[destOffset] = lastTexCoords[Tri1[j]];
-            }
-            static int Tri2[] = {0, 2, 3};
-            for(int j = 0; j < 3; j++, destOffset++)
-            {
-                outIndices[destOffset] = destOffset;
-                outVertices[destOffset] = lastVertices[Tri2[j]];
-                outNormals[destOffset] = lastNormals[Tri2[j]];
-                outTexCoords[destOffset] = lastTexCoords[Tri2[j]];
-            }
-            lastVertices.clear();
-            lastNormals.clear();
-            lastTexCoords.clear();
-        }
-    }
-}
-
-void Mesh::drawFaceToMeshTriStrip(Mesh *out, uint destOffset, Face f)
-{
-    QVector<uint> & outIndices = out->indices();
-    QVector<QVector3D> & outVertices = out->vertices();
-    QVector<QVector3D> & outNormals = out->normals();
-    QVector<QVector2D> & outTexCoords = out->texCoords();
-    QVector<QVector3D> lastVertices;
-    QVector<QVector3D> lastNormals;
-    QVector<QVector2D> lastTexCoords;
-    QMatrix4x4 vMap = currentGLMatrix();
-    QMatrix4x4 nMap = currentGLMatrixForNormals();
-    for(int i = 0; i < f.count; i++)
-    {
-        uint srcIndex = m_indices.value(f.offset + i);
-        lastVertices.append(vMap.map(m_vertices.value(srcIndex)));
-        lastNormals.append((nMap.map(m_normals.value(srcIndex))));
-        lastTexCoords.append(m_texCoords.value(srcIndex));
-        if(i >= 2)
-        {
-            for(int j = 0; j < 3; j++, destOffset++)
-            {
-                outIndices[destOffset] = destOffset;
-                outVertices[destOffset] = lastVertices[j];
-                outNormals[destOffset] = lastNormals[j];
-                outTexCoords[destOffset] = lastTexCoords[j];
-            }
-            lastVertices.remove(0);
-            lastNormals.remove(0);
-            lastTexCoords.remove(0);
-        }
-    }
-}
-
 QMatrix4x4 Mesh::currentGLMatrix()
 {
     float m[4][4];
@@ -652,7 +577,7 @@ void Mesh::saveObj(QString path)
         switch(face.mode)
         {
         case GL_TRIANGLES:
-            saveObjIndicesCopy(f, face);
+            saveObjIndicesTri(f, face);
             break;
         case GL_QUADS:
             saveObjIndicesQuad(f, face);
@@ -665,25 +590,16 @@ void Mesh::saveObj(QString path)
     fclose(f);
 }
 
-void Mesh::saveObjIndicesCopy(FILE *f, Face face)
+void Mesh::saveObjIndicesTri(FILE *f, Face face)
 {
     bool normals = m_normals.count() > 0;
     bool texCoords = m_texCoords.count() > 0;
     for(int i = 0; i < face.count; i += 3)
     {
-        /*fprintf(f, "f ");
-        for(int j = 0; j < 3; j++)
-        {
-            if(j > 0)
-                fprintf(f, " ");
-            uint ind = m_indices[face.offset + i + j] + 1;
-            saveObjIndice(f, ind, normals, texCoords);
-        }
-        fprintf(f, "\n");*/
         uint ind1 = m_indices[face.offset + i + 0];
         uint ind2 = m_indices[face.offset + i + 1];
         uint ind3 = m_indices[face.offset + i + 2];
-        saveObjFace(f, );
+        saveObjFace(f, ind1, ind2, ind3, normals, texCoords);
     }
 }
 
@@ -694,14 +610,12 @@ void Mesh::saveObjIndicesQuad(FILE *f, Face face)
     QVector<uint> indices;
     for(int i = 0; i < face.count; i++)
     {
-        indices.append(m_indices.value(face.offset + i));
+        indices.append(m_indices[face.offset + i]);
         if(indices.count() == 4)
         {
             saveObjFace(f, indices[0], indices[1], indices[2], normals, texCoords);
             saveObjFace(f, indices[0], indices[2], indices[3], normals, texCoords);
-            lastVertices.clear();
-            lastNormals.clear();
-            lastTexCoords.clear();
+            indices.clear();
         }
     }
 }
@@ -710,23 +624,14 @@ void Mesh::saveObjIndicesTriStrip(FILE *f, Face face)
 {
     bool normals = m_normals.count() > 0;
     bool texCoords = m_texCoords.count() > 0;
-    QVector<uint> lastIndices;
+    QVector<uint> indices;
     for(int i = 0; i < face.count; i++)
     {
-        lastIndices.append(m_indices.value(face.offset + i));
-        if(lastIndices.count() == 3)
+        indices.append(m_indices[face.offset + i]);
+        if(indices.count() == 3)
         {
-            saveObjFace(f, lastIndices[0], lastIndices[1], lastIndices[2], normals, texCoords);
-            /*fprintf(f, "f ");
-            for(int j = 0; j < 3; j++)
-            {
-                if(j > 0)
-                    fprintf(f, " ");
-                uint ind = lastIndices.value(j) + 1;
-                saveObjIndice(f, ind, normals, texCoords);
-            }*/
-            lastIndices.remove(0);
-            //fprintf(f, "\n");
+            saveObjFace(f, indices[0], indices[1], indices[2], normals, texCoords);
+            indices.remove(0);
         }
     }
 }

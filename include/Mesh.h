@@ -18,13 +18,6 @@ typedef struct
     bool draw;
 } Face;
 
-typedef struct
-{
-    QVector3D vertex;
-    QVector3D normal;
-    QVector2D texCoords;
-} Point;
-
 class Mesh : public QObject
 {
 public:
@@ -79,11 +72,9 @@ private:
     void drawVertexList();
     void drawToMesh(Mesh *m);
     void drawFaceToMeshCopy(Mesh *out, uint offset, Face f);
-    void drawFaceToMeshQuad(Mesh *out, uint offset, Face f);
-    void drawFaceToMeshTriStrip(Mesh *out, uint offset, Face f);
     static QMatrix4x4 currentGLMatrix();
     static QMatrix4x4 currentGLMatrixForNormals();
-    void saveObjIndicesCopy(FILE *f, Face face);
+    void saveObjIndicesTri(FILE *f, Face face);
     void saveObjIndicesQuad(FILE *f, Face face);
     void saveObjIndicesTriStrip(FILE *f, Face face);
     void saveObjFace(FILE *f, uint ind1, uint ind2, uint ind3, bool normals, bool texCoords);

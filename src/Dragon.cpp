@@ -32,7 +32,7 @@ Dragon::Dragon(Kind kind, DragonScene *scene) : QObject(scene)
 
 void Dragon::loadMeshes(DragonScene *scene)
 {
-    scene->loadMeshStl("wing_membrane", "meshes/DRAGON_WING_MEMBRANE.stl");
+    scene->loadMeshObj("wing_membrane", "meshes/dragon_wing_membrane.obj");
 }
 
 float Dragon::frontLegsAngle() const

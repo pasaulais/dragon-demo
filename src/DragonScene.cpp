@@ -9,7 +9,6 @@
 #include "Dragon.h"
 #include "Mesh.h"
 #include "Material.h"
-#include "Letters.h"
 #include "Primitive.h"
 
 using namespace std;
@@ -79,10 +78,9 @@ QVector3D DragonScene::orientation() const
 bool DragonScene::load()
 {
     m_meshes.insert("floor", Primitive::createCube(this));
-    loadMeshObj("letter_p", "meshes/disk.obj");//"meshes/LETTER_P.obj");
+    loadMeshObj("letter_p", "meshes/LETTER_P.obj");
     loadMeshObj("letter_a", "meshes/LETTER_A.obj");
     loadMeshObj("letter_s", "meshes/LETTER_S.obj");
-    Letters::initMeshes();
     Dragon::loadMeshes(this);
     return m_meshes.count() > 0;
 }
@@ -117,7 +115,6 @@ void DragonScene::draw()
 {
     Item i = (Item)m_selected;
     drawItem(i);
-    //Letters::disk->saveObj("meshes/disk.obj");;
     if(m_selected != SCENE)
     {
         //exportItem(i, QString("meshes/%1.obj").arg(itemText(i)));
@@ -139,14 +136,12 @@ void DragonScene::drawItem(DragonScene::Item item)
         {
         case LETTER_P:
             drawMesh("letter_p");
-            //Letters::drawP(this);
             break;
         case LETTER_A:
             drawMesh("letter_a");
             break;
         case LETTER_S:
-            Letters::drawS(this);
-            //drawMesh("letter_s");
+            drawMesh("letter_s");
             break;
         case DRAGON:
             m_debugDragon->draw();
@@ -332,7 +327,7 @@ void DragonScene::drawDragonHoldingA(Dragon *d)
             glRotatef(-d->frontLegsAngle(), 0.0, 0.0, 1.0);
             glScalef(2.0/3.0, 2.0/3.0, 1.0/3.0);
             d->tongueMaterial().beginApply();
-            Letters::drawA(this);
+            drawMesh("letter_a");
             d->tongueMaterial().endApply();
         glPopMatrix();
     glPopMatrix();
@@ -349,7 +344,7 @@ void DragonScene::drawDragonHoldingP(Dragon *d)
             glRotatef(-170, 0.0, 0.0, 1.0);
             glScalef(1.0, 1.0, 0.5);
             d->tongueMaterial().beginApply();
-            Letters::drawP(this);
+            drawMesh("letter_p");
             d->tongueMaterial().endApply();
         glPopMatrix();
     glPopMatrix();
@@ -366,7 +361,7 @@ void DragonScene::drawDragonHoldingS(Dragon *d)
             glTranslatef(-0.4, 0.1, 0.0);
             glScalef(1.0, 1.0, 0.5);
             d->tongueMaterial().beginApply();
-            Letters::drawS(this);
+            drawMesh("letter_s");
             d->tongueMaterial().endApply();
         glPopMatrix();
     glPopMatrix();
