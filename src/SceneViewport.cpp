@@ -3,6 +3,7 @@
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QWheelEvent>
+#include <QPaintEvent>
 #include <QVector4D>
 #include "SceneViewport.h"
 #include "Scene.h"
@@ -16,13 +17,19 @@ SceneViewport::SceneViewport(Scene *scene, QWidget *parent) : QGLWidget(parent)
     m_timer = new QTimer(this);
     m_timer->setInterval(1000 / 60);
     //m_bgColor = palette().color(QPalette::Background);
+    setAutoFillBackground(false);
     m_bgColor = QColor::fromRgbF(0.6, 0.6, 1.0, 1.0);
+    m_ambient0 = QVector4D(1.0, 1.0, 1.0, 1.0);
+    m_diffuse0 = QVector4D(1.0, 1.0, 1.0, 1.0);
+    m_specular0 = QVector4D(1.0, 1.0, 1.0, 1.0);
+    m_light0_pos = QVector4D(0.0, 1.0, 1.0, 0.0);
     connect(m_scene, SIGNAL(invalidated()), this, SLOT(update()));
     connect(m_timer, SIGNAL(timeout()), m_scene, SLOT(animate()));
 }
 
 SceneViewport::~SceneViewport()
 {
+    m_scene->freeTextures();
 }
 
 Scene* SceneViewport::scene() const
@@ -32,25 +39,43 @@ Scene* SceneViewport::scene() const
 
 void SceneViewport::initializeGL()
 {
-    QVector4D ambient0(1.0, 1.0, 1.0, 1.0);
-    QVector4D diffuse0(1.0, 1.0, 1.0, 1.0);
-    QVector4D specular0(1.0, 1.0, 1.0, 1.0);
-    QVector4D light0_pos(0.0, 1.0, 1.0, 0.0);
-    glEnable(GL_DEPTH_TEST);
-    // we do non-uniform scaling and not all normals are one-unit-length
-    glEnable(GL_NORMALIZE);
-    glShadeModel(GL_SMOOTH);
-    glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-    glLightfv(GL_LIGHT0, GL_POSITION, (GLfloat *)&light0_pos);
-    glLightfv(GL_LIGHT0, GL_AMBIENT, (GLfloat *)&ambient0);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, (GLfloat *)&diffuse0);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, (GLfloat *)&specular0);
     m_scene->loadTextures();
     reset_camera();
 }
 
 void SceneViewport::resizeGL(int w, int h)
+{
+    setupGLViewport(w, h);
+}
+
+void SceneViewport::setupGLState()
+{
+    glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT);
+    glEnable(GL_DEPTH_TEST);
+    // we do non-uniform scaling and not all normals are one-unit-length
+    glEnable(GL_NORMALIZE);
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glLightfv(GL_LIGHT0, GL_POSITION, (GLfloat *)&m_light0_pos);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, (GLfloat *)&m_ambient0);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, (GLfloat *)&m_diffuse0);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, (GLfloat *)&m_specular0);
+    glPolygonMode(GL_FRONT_AND_BACK, m_wireframe_mode ? GL_LINE : GL_FILL);
+    setupGLViewport(width(), height());
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+}
+
+void SceneViewport::restoreGLState()
+{
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    glPopAttrib();
+}
+
+void SceneViewport::setupGLViewport(int w, int h)
 {
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
@@ -66,20 +91,31 @@ void SceneViewport::resizeGL(int w, int h)
                 1.0 * (GLfloat) h / (GLfloat) w, -10.0, 10.0);
         else
             glOrtho(-1.0 * (GLfloat) w / (GLfloat) h,
-                1.0 * (GLfloat) w / (GLfloat) h, -1.0, 1.0, -10.0, 10.0);   
+                1.0 * (GLfloat) w / (GLfloat) h, -1.0, 1.0, -10.0, 10.0);
     }
     glMatrixMode(GL_MODELVIEW);
 }
 
+void SceneViewport::paintEvent(QPaintEvent *)
+{
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
+    paintGL();
+    if(m_timer->isActive())
+    {
+        float fps = updateFPS();
+        paintFPS(&painter, fps);
+    }
+}
+
 void SceneViewport::paintGL()
 {
+    setupGLState();
     glClearColor(m_bgColor.redF(), m_bgColor.greenF(), m_bgColor.blueF(), 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glPolygonMode(GL_FRONT_AND_BACK, m_wireframe_mode ? GL_LINE : GL_FILL);
 
     // determine which rotation to apply from both the user and the scene
     QVector3D rot = m_theta + m_scene->orientation();
-    glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
         glLoadIdentity();
         glTranslatef(m_delta.x(), m_delta.y(), m_delta.z());
@@ -94,6 +130,7 @@ void SceneViewport::paintGL()
             draw_axis_grids(true, true, true);
     glPopMatrix();
     glFlush();
+    restoreGLState();
 }
 
 void SceneViewport::draw_axis()
@@ -207,16 +244,13 @@ void SceneViewport::reset_camera()
     m_trans_state.active = false;
     m_rot_state.active = false;
     m_sigma = 0.40;
-    m_animate = false;
+    m_animate = true;
     m_draw_axes = false;
     m_draw_grids = false;
     m_wireframe_mode = false;
     m_projection_mode = true;
     m_scene->reset();
-    if(m_animate)
-        m_timer->start();
-    else
-        m_timer->stop();
+    updateAnimationState();
 }
 
 void SceneViewport::toggle_animation()
@@ -241,6 +275,48 @@ void SceneViewport::side_view()
 void SceneViewport::front_view()
 {
     m_theta = QVector3D(-90.0, 0.0, 0.0);
+}
+
+void SceneViewport::startFPS()
+{
+    m_start = clock();
+}
+
+float SceneViewport::updateFPS()
+{
+    m_frames++;
+    clock_t elapsed = clock() - m_start;
+    float fps = m_frames / ((float)elapsed / CLOCKS_PER_SEC);
+    if(m_frames > 10)
+    {
+        m_frames = 0;
+        startFPS();
+    }
+    return fps;
+}
+
+void SceneViewport::paintFPS(QPainter *p, float fps)
+{
+    QFont f;
+    f.setPointSizeF(16.0);
+    f.setWeight(QFont::Bold);
+    p->setFont(f);
+    QString text = QString("%1 FPS").arg(fps, 0, 'g', 3);
+    p->setPen(QPen(Qt::white));
+    p->drawText(QRectF(QPointF(10, 5), QSizeF(100, 100)), text);
+}
+
+void SceneViewport::updateAnimationState()
+{
+    if(m_animate)
+    {
+        startFPS();
+        m_timer->start();
+    }
+    else
+    {
+        m_timer->stop();
+    }
 }
 
 void SceneViewport::keyReleaseEvent(QKeyEvent *e)

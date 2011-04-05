@@ -15,10 +15,10 @@ class DragonScene : public Scene
 
 public:
     DragonScene(QObject *parent = 0);
-    virtual ~DragonScene();
 
     virtual bool load();
     virtual void loadTextures();
+    virtual void freeTextures();
     bool meshLoaded() const;
 
     virtual QVector3D orientation() const;

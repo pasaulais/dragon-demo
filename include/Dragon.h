@@ -1,11 +1,12 @@
 #ifndef INITIALS_DRAGON_H
 #define INITIALS_DRAGON_H
 
+#include <QObject>
 #include "Material.h"
 
 class DragonScene;
 
-class Dragon
+class Dragon : public QObject
 {
 public:
     enum Kind

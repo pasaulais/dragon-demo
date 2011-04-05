@@ -17,6 +17,7 @@ public:
 
     virtual bool load();
     virtual void loadTextures();
+    virtual void freeTextures();
     virtual void draw() = 0;
     virtual void reset();
     virtual QVector3D orientation() const;

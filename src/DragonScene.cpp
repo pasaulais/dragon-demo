@@ -38,12 +38,6 @@ DragonScene::DragonScene(QObject *parent) : Scene(parent)
     animate();
 }
 
-DragonScene::~DragonScene()
-{
-    while(m_dragons.count() > 0)
-        delete m_dragons.takeFirst();
-}
-
 void DragonScene::loadTextures()
 {
     if(m_dragons.count() < 3)
@@ -55,6 +49,16 @@ void DragonScene::loadTextures()
     m_dragons.value(2)->scalesMaterial().loadTextureTIFF("scale_bronze.tiff");
     m_dragons.value(2)->wingMaterial().loadTextureTIFF("wing_bronze.tiff");
     floor_material.loadTextureTIFF("lava_green.tiff", true);
+}
+
+void DragonScene::freeTextures()
+{
+    foreach(Dragon *d, m_dragons)
+    {
+        d->scalesMaterial().freeTexture();
+        d->wingMaterial().freeTexture();
+    }
+    floor_material.freeTexture();
 }
 
 void DragonScene::reset()

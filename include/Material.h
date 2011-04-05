@@ -14,6 +14,7 @@ public:
 
     void setAmbient(const QVector4D &ambient);
     void setTexture(uint texture);
+    void freeTexture();
 
     void loadTextureTIFF(QString path, bool mipmaps = false);
 

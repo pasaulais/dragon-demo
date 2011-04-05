@@ -31,6 +31,15 @@ void Material::setTexture(uint texture)
     m_texture = texture;
 }
 
+void Material::freeTexture()
+{
+    if(m_texture != 0)
+    {
+        glDeleteTextures(1, &m_texture);
+        m_texture = 0;
+    }
+}
+
 void Material::beginApply()
 {
     glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT | GL_LIGHTING_BIT);

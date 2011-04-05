@@ -4,7 +4,7 @@
 #include "DragonScene.h"
 #include "Letters.h"
 
-Dragon::Dragon(Kind kind, DragonScene *scene)
+Dragon::Dragon(Kind kind, DragonScene *scene) : QObject(scene)
 {
     m_kind = kind;
     theta_jaw = 0.0;

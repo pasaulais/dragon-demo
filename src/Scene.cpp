@@ -23,6 +23,11 @@ void Scene::loadTextures()
 {
 }
 
+void Scene::freeTextures()
+{
+
+}
+
 QVector3D Scene::orientation() const
 {
     return QVector3D();

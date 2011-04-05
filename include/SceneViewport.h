@@ -1,10 +1,13 @@
 #ifndef INITIALS_SCENE_VIEWPORT_H
 #define INITIALS_SCENE_VIEWPORT_H
 
+#include <ctime>
 #include <QGLWidget>
 #include <QVector3D>
+#include <QVector4D>
 
 class QTimer;
+class QPainter;
 class Scene;
 
 typedef struct
@@ -29,6 +32,7 @@ protected:
     virtual void initializeGL();
     virtual void resizeGL(int width, int height);
     virtual void paintGL();
+    virtual void paintEvent(QPaintEvent *e);
     virtual void keyReleaseEvent(QKeyEvent *e);
     virtual void mouseMoveEvent(QMouseEvent *e);
     virtual void mousePressEvent(QMouseEvent *e);
@@ -36,6 +40,13 @@ protected:
     virtual void wheelEvent(QWheelEvent *e);
 
 private:
+    void setupGLState();
+    void setupGLViewport(int w, int h);
+    void restoreGLState();
+    void paintFPS(QPainter *p, float fps);
+    void startFPS();
+    float updateFPS();
+    void updateAnimationState();
     void draw_axis();
     void draw_axes();
     void draw_axis_grids(bool draw_x, bool draw_y, bool draw_z);
@@ -52,6 +63,11 @@ private:
     QTimer *m_timer;
     QColor m_bgColor;
 
+    QVector4D m_ambient0;
+    QVector4D m_diffuse0;
+    QVector4D m_specular0;
+    QVector4D m_light0_pos;
+
     // viewer settings
     QVector3D m_delta;
     QVector3D m_theta;
@@ -64,6 +80,9 @@ private:
     bool m_animate;
     bool m_wireframe_mode;
     bool m_projection_mode;
+    // FPS settings
+    clock_t m_start;
+    uint m_frames;
 };
 
 #endif
