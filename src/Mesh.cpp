@@ -517,3 +517,176 @@ void Mesh::saveStl(QString path)
     }
     fclose(f);
 }
+
+typedef struct
+{
+    uint vertexIndex;
+    uint normalIndex;
+    uint texCoordsIndex;
+} ObjPoint;
+
+static bool parseObjPoint(char *data, ObjPoint *p)
+{
+    int vertexIndex = 0;
+    int normalIndex = 0;
+    int texCoordsIndex = 0;
+    if(sscanf(data, "%d/%d/%d", &vertexIndex, &normalIndex, &texCoordsIndex) == 3)
+    {
+        if(p)
+        {
+            p->vertexIndex = vertexIndex;
+            p->normalIndex = normalIndex;
+            p->texCoordsIndex = texCoordsIndex;
+        }
+        return true;
+    }
+    else if(sscanf(data, "%d//%d", &vertexIndex, &normalIndex) == 2)
+    {
+        if(p)
+        {
+            p->vertexIndex = vertexIndex;
+            p->normalIndex = normalIndex;
+            p->texCoordsIndex = vertexIndex;
+        }
+        return true;
+    }
+    else if(sscanf(data, "%d/%d", &vertexIndex, &texCoordsIndex) == 2)
+    {
+        if(p)
+        {
+            p->vertexIndex = vertexIndex;
+            p->normalIndex = vertexIndex;
+            p->texCoordsIndex = texCoordsIndex;
+        }
+        return true;
+    }
+    else if(sscanf(data, "%d", &vertexIndex) == 1)
+    {
+        if(p)
+        {
+            p->vertexIndex = vertexIndex;
+            p->normalIndex = vertexIndex;
+            p->texCoordsIndex = vertexIndex;
+        }
+        return true;
+    }
+    return false;
+}
+
+Mesh * Mesh::loadObj(const char *path, QObject *parent)
+{
+    FILE *f = fopen(path, "r");
+    char line[512];
+    char point1[32];
+    char point2[32];
+    char point3[32];
+    char point4[32];
+    if(f == 0)
+    {
+        fprintf(stderr, "Could not open file '%s'.\n", path);
+        return 0;
+    }
+
+    Mesh *m = new Mesh(parent);
+    QVector<QVector3D> vertices;
+    QVector<QVector3D> normals;
+    QVector<QVector2D> texCoords;
+    QVector<QVector3D> & meshVertices = m->vertices();
+    QVector<QVector3D> & meshNormals = m->normals();
+    QVector<QVector2D> & meshTexCoords = m->texCoords();
+    QVector<uint> & meshIndices = m->indices();
+    ObjPoint points[4];
+    uint indiceCount = 0;
+    int maxPoints = 0;
+    while(fgets(line, sizeof(line), f) != 0)
+    {
+        float v1, v2, v3;
+        int pointCount = 0;
+        if(sscanf(line, "v %f %f %f", &v1, &v2, &v3))
+            vertices.append(QVector3D(v1, v2, v3));
+        else if(sscanf(line, "vn %f %f %f", &v1, &v2, &v3))
+            normals.append(QVector3D(v1, v2, v3));
+        else if(sscanf(line, "vt %f %f", &v1, &v2))
+            texCoords.append(QVector2D(v1, v2));
+        else if(sscanf(line, "f %s %s %s %s", point1, point2, point3, point4) == 4)
+        {
+            if(parseObjPoint(point1, &points[0]) &&
+                parseObjPoint(point2, &points[1]) &&
+                parseObjPoint(point3, &points[2]) &&
+                parseObjPoint(point4, &points[3]))
+                pointCount = 4;
+        }
+        else if(sscanf(line, "f %s %s %s", point1, point2, point3) == 3)
+        {
+            if(parseObjPoint(point1, &points[0]) &&
+                parseObjPoint(point2, &points[1]) &&
+                parseObjPoint(point3, &points[2]))
+                pointCount = 3;
+        }
+        for(int i = 0; i < pointCount; i++, indiceCount++)
+        {
+            QVector3D v = vertices.value(points[i].vertexIndex - 1);
+            QVector3D n = normals.value(points[i].normalIndex - 1);
+            QVector2D tc = texCoords.value(points[i].texCoordsIndex - 1);
+            meshVertices.append(v);
+            meshNormals.append(n);
+            meshTexCoords.append(tc);
+            meshIndices.append(indiceCount);
+        }
+        maxPoints = std::max(maxPoints, pointCount);
+    }
+    if((indiceCount > 0) && (maxPoints == 3))
+        m->addFace(GL_TRIANGLES, indiceCount, 0);
+    else if((indiceCount > 0) && (maxPoints == 4))
+        m->addFace(GL_QUADS, indiceCount, 0);
+    fclose(f);
+    return m;
+}
+
+void Mesh::saveObj(QString path)
+{
+    FILE *f = fopen(path.toUtf8().data(), "w");
+
+    // write file header
+    if(f == 0)
+    {
+        fprintf(stderr, "Could not open file '%s' for writing.\n", path.toUtf8().data());
+        return;
+    }
+    bool normals = m_normals.count() > 0;
+    bool texCoords = m_texCoords.count() > 0;
+    foreach(QVector3D vertex, m_vertices)
+        fprintf(f, "v %f %f %f\n", vertex.x(), vertex.y(), vertex.z());
+    foreach(QVector3D normal, m_normals)
+        fprintf(f, "vn %f %f %f\n", normal.x(), normal.y(), normal.z());
+    foreach(QVector2D texCoords, m_texCoords)
+        fprintf(f, "vt %f %f\n", texCoords.x(), texCoords.y());
+    foreach(Face face, m_faces)
+    {
+        if(face.mode != GL_TRIANGLES)
+            continue;
+
+        int i = 0;
+        while(i < face.count)
+        {
+            fprintf(f, "f ");
+            for(int j = 0; j < 3; j++)
+            {
+                if(j > 0)
+                    fprintf(f, " ");
+                uint ind = m_indices[face.offset + i + j] + 1;
+                if(texCoords && normals)
+                    fprintf(f, "%d/%d/%d", ind, ind, ind);
+                else if(normals)
+                    fprintf(f, "%d//%d", ind, ind);
+                else if(texCoords)
+                    fprintf(f, "%d/%d", ind, ind);
+                else
+                    fprintf(f, "%d", ind);
+            }
+            fprintf(f, "\n");
+            i += 3;
+        }
+    }
+    fclose(f);
+}

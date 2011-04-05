@@ -17,6 +17,13 @@ typedef struct
     bool draw;
 } Face;
 
+typedef struct
+{
+    QVector3D vertex;
+    QVector3D normal;
+    QVector2D texCoords;
+} Point;
+
 class Mesh : public QObject
 {
 public:
@@ -59,8 +66,10 @@ public:
     // Show normal vectors for every vertex in the mesh, for debugging purposes
     void drawNormals();
 
-    static Mesh * loadStl(const char *path, QObject *parent, bool compute_normals = true);
+    static Mesh * loadStl(const char *path, QObject *parent = 0, bool compute_normals = true);
+    static Mesh * loadObj(const char *path, QObject *parent = 0);
     void saveStl(QString path);
+    void saveObj(QString path);
 
 private:
     // draw the mesh using glBegin/glEnd/glVertex/etc
