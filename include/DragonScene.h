@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QVector3D>
 #include <QList>
+#include <QMap>
 #include "Scene.h"
 #include "Mesh.h"
 
@@ -19,12 +20,17 @@ public:
     virtual bool load();
     virtual void loadTextures();
     virtual void freeTextures();
-    bool meshLoaded() const;
 
     virtual QVector3D orientation() const;
 
+    QMap<QString, Mesh *> & meshes();
+    const QMap<QString, Mesh *> & meshes() const;
+
+    Mesh * loadMesh(QString name, QString path);
+
     virtual void draw();
     void drawMesh(Mesh *m);
+    void drawMesh(QString name);
 
     void select_next();
     void select_previous();
@@ -75,7 +81,6 @@ public slots:
     void animate();
 
 private:
-    Mesh * loadMesh(QString path);
     void drawItem(Item item);
     void drawScene();
     void drawFloor();
@@ -84,7 +89,6 @@ private:
     void drawDragonHoldingS(Dragon *d);
     static QString itemText(Item item);
 
-    int m_loadedMeshes, m_missingMeshes;
     bool m_drawNormals;
     int m_selected;
     int m_detailLevel;
@@ -92,7 +96,7 @@ private:
     QVector3D m_theta;
     Mesh::OutputMode m_output;
     Mesh *m_meshOutput;
-    Mesh *m_floor;
+    QMap<QString, Mesh *> m_meshes;
     Dragon *m_debugDragon;
     QList<Dragon *> m_dragons;
 };

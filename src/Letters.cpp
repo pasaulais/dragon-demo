@@ -72,7 +72,8 @@ void Letters::drawA(DragonScene *s)
         glPushMatrix();
             glTranslatef(m1w, y, 0.1);
             // make it slightly smaller to avoid texture problems
-            glScalef(m1w / 2.0 * 0.99, 0.1 * 0.99, 0.1 * 0.99);
+            //glScalef(m1w / 2.0 * 0.99, 0.1 * 0.99, 0.1 * 0.99);
+            glScalef(m1w / 2.0, 0.1, 0.1);
             s->drawMesh(cube);
         glPopMatrix();
     glPopMatrix();

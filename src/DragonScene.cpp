@@ -22,13 +22,10 @@ static Material floor_material(QVector4D(0.5, 0.5, 0.5, 1.0),
 
 DragonScene::DragonScene(QObject *parent) : Scene(parent)
 {
-    m_loadedMeshes = 0;
-    m_missingMeshes = 0;
     m_meshOutput = 0;
     m_camera = Camera_Static;
     m_output = Mesh::Output_VertexList;
 
-    m_floor = Primitive::createCube(this);
     m_debugDragon = new Dragon(Dragon::Floating, this);
     m_debugDragon->scalesMaterial() = debug_material;
     m_debugDragon->wingMaterial() = debug_material;
@@ -81,26 +78,28 @@ QVector3D DragonScene::orientation() const
 
 bool DragonScene::load()
 {
-    /*if(meshLoaded())
-        return true;
-    reset();
-    return meshLoaded();*/
-    return Letters::initMeshes();
+    m_meshes.insert("floor", Primitive::createCube(this));
+    Letters::initMeshes();
+    Dragon::loadMeshes(this);
+    return m_meshes.count() > 0;
 }
 
-Mesh * DragonScene::loadMesh(QString path)
+Mesh * DragonScene::loadMesh(QString name, QString path)
 {
     Mesh *m = Mesh::loadStl(path.toUtf8().constData(), this);
     if(m)
-        m_loadedMeshes++;
-    else
-        m_missingMeshes++;
+        m_meshes.insert(name, m);
     return m;
 }
 
-bool DragonScene::meshLoaded() const
+QMap<QString, Mesh *> & DragonScene::meshes()
 {
-    return Letters::meshLoaded();
+    return m_meshes;
+}
+
+const QMap<QString, Mesh *> & DragonScene::meshes() const
+{
+    return m_meshes;
 }
 
 void DragonScene::draw()
@@ -113,8 +112,6 @@ void DragonScene::draw()
 
 void DragonScene::drawItem(DragonScene::Item item)
 {
-    if(!meshLoaded())
-        return;
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     if(item == SCENE)
@@ -297,10 +294,11 @@ void DragonScene::drawScene()
 
 void DragonScene::drawFloor()
 {
+    Mesh *floor = m_meshes.value("floor");
     floor_material.beginApply();
     glPushMatrix();
         glScalef(1.0, 0.001, 1.0);
-        drawMesh(m_floor);
+        drawMesh(floor);
     glPopMatrix();
     floor_material.endApply();
 }
@@ -400,6 +398,11 @@ void DragonScene::drawMesh(Mesh *m)
     m->draw(m_output, m_meshOutput);
     if(m_drawNormals)
         m->drawNormals();
+}
+
+void DragonScene::drawMesh(QString name)
+{
+    drawMesh(m_meshes.value(name));
 }
 
 void DragonScene::animate()

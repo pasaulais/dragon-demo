@@ -18,6 +18,8 @@ public:
 
     Dragon(Kind kind, DragonScene *scene);
 
+    static void loadMeshes(DragonScene *scene);
+
     void setDetailLevel(int level);
 
     Material & tongueMaterial();
