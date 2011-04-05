@@ -5,6 +5,7 @@
 #include <QVector>
 #include <QVector2D>
 #include <QVector3D>
+#include <QMatrix4x4>
 
 bool fequal(double a, double b);
 
@@ -47,24 +48,36 @@ public:
 
     void computeNormals();
 
-    void draw();
-    // draw the mesh using glBegin/glEnd/glVertex/etc
-    void draw_immediate();
-    // draw the mesh using vertex lists, which is faster than calling glBegin/glEnd
-    void draw_vertex_list();
+    enum OutputMode
+    {
+        Output_Immediate,
+        Output_VertexList,
+        Output_Mesh
+    };
 
+    void draw(OutputMode mode, Mesh *output = 0);
     // Show normal vectors for every vertex in the mesh, for debugging purposes
-    void draw_normals();
+    void drawNormals();
 
-    static Mesh * load_stl(const char *path, QObject *parent, bool compute_normals = true);
+    static Mesh * loadStl(const char *path, QObject *parent, bool compute_normals = true);
+    void saveStl(QString path);
 
 private:
+    // draw the mesh using glBegin/glEnd/glVertex/etc
+    void drawImmediate();
+    // draw the mesh using vertex lists, which is faster than calling glBegin/glEnd
+    void drawVertexList();
+    void drawToMesh(Mesh *m);
+    void drawFaceToMeshCopy(Mesh *out, uint offset, Face f);
+    void drawFaceToMeshQuad(Mesh *out, uint offset, Face f);
+    void drawFaceToMeshTriStrip(Mesh *out, uint offset, Face f);
+    static QMatrix4x4 currentGLMatrix();
+
     QVector<QVector3D> m_vertices;
     QVector<QVector3D> m_normals;
     QVector<QVector2D> m_texCoords;
     QVector<uint> m_indices;
     QVector<Face> m_faces;
-    bool m_use_vertex_list;
 };
 
 #endif

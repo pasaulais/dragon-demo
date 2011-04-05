@@ -24,7 +24,9 @@ DragonScene::DragonScene(QObject *parent) : Scene(parent)
 {
     m_loadedMeshes = 0;
     m_missingMeshes = 0;
+    m_meshOutput = 0;
     m_camera = Camera_Static;
+    m_output = Mesh::Output_VertexList;
 
     m_floor = Primitive::createCube(this);
     m_debugDragon = new Dragon(Dragon::Floating, this);
@@ -84,7 +86,7 @@ bool DragonScene::load()
 
 Mesh * DragonScene::loadMesh(QString path)
 {
-    Mesh *m = Mesh::load_stl(path.toUtf8().constData(), this);
+    Mesh *m = Mesh::loadStl(path.toUtf8().constData(), this);
     if(m)
         m_loadedMeshes++;
     else
@@ -99,9 +101,16 @@ bool DragonScene::meshLoaded() const
 
 void DragonScene::draw()
 {
+    Item i = (Item)m_selected;
+    drawItem(i);
+    if(m_selected != SCENE)
+        exportItem(i, QString("item_%1.stl").arg(itemText(i)));
+}
+
+void DragonScene::drawItem(DragonScene::Item item)
+{
     if(!meshLoaded())
         return;
-    int item = m_selected;
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     if(item == SCENE)
@@ -167,12 +176,72 @@ void DragonScene::draw()
         case DRAGON_TAIL_END:
             m_debugDragon->drawTailEnd();
             break;
-
         }
-
         debug_material.endApply();
+
     }
     glPopMatrix();
+}
+
+void DragonScene::exportItem(Item item, QString path)
+{
+    Mesh::OutputMode oldOutput = m_output;
+    glPushMatrix();
+    glLoadIdentity();
+    m_output = Mesh::Output_Mesh;
+    m_meshOutput = new Mesh();
+    drawItem(item);
+    glPopMatrix();
+    m_output = oldOutput;
+    m_meshOutput->saveStl(path);
+    delete m_meshOutput;
+    m_meshOutput = 0;
+}
+
+QString DragonScene::itemText(DragonScene::Item item)
+{
+    switch(item)
+    {
+    case LETTER_P:
+        return "LETTER_P";
+    case LETTER_A:
+        return "LETTER_A";
+    case LETTER_S:
+        return "LETTER_S";
+    case DRAGON:
+        return "DRAGON";
+    case DRAGON_UPPER:
+        return "DRAGON_UPPER";
+    case DRAGON_HEAD:
+        return "DRAGON_HEAD";
+    case DRAGON_TONGUE:
+        return "DRAGON_TONGUE";
+    case DRAGON_JOINT:
+        return "DRAGON_JOINT";
+    case DRAGON_BODY:
+        return "DRAGON_BODY";
+    case DRAGON_CHEST:
+        return "DRAGON_CHEST";
+    case DRAGON_PAWS:
+        return "DRAGON_PAWS";
+    case DRAGON_PAW:
+        return "DRAGON_PAW";
+    case DRAGON_WING:
+        return "DRAGON_WING";
+    case DRAGON_WING_OUTER:
+        return "DRAGON_WING_OUTER";
+    case DRAGON_WING_PART:
+        return "DRAGON_WING_PART";
+    case DRAGON_WING_MEMBRANE:
+        return "DRAGON_WING_MEMBRANE";
+    case DRAGON_TAIL:
+        return "DRAGON_TAIL";
+    case DRAGON_TAIL_END:
+        return "DRAGON_TAIL_END";
+    case SCENE:
+        return "SCENE";
+    }
+    return "UNKNOWN";
 }
 
 void DragonScene::drawScene()
@@ -324,9 +393,9 @@ void DragonScene::drawMesh(Mesh *m)
 {
     if(!m)
         return;
-    m->draw();
+    m->draw(m_output, m_meshOutput);
     if(m_drawNormals)
-        m->draw_normals();
+        m->drawNormals();
 }
 
 void DragonScene::animate()

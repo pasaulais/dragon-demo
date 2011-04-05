@@ -79,6 +79,7 @@ void SceneViewport::paintGL()
 
     // determine which rotation to apply from both the user and the scene
     QVector3D rot = m_theta + m_scene->orientation();
+    glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
         glLoadIdentity();
         glTranslatef(m_delta.x(), m_delta.y(), m_delta.z());
@@ -206,7 +207,7 @@ void SceneViewport::reset_camera()
     m_trans_state.active = false;
     m_rot_state.active = false;
     m_sigma = 0.40;
-    m_animate = true;
+    m_animate = false;
     m_draw_axes = false;
     m_draw_grids = false;
     m_wireframe_mode = false;

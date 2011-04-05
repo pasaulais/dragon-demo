@@ -5,8 +5,8 @@
 #include <QVector3D>
 #include <QList>
 #include "Scene.h"
+#include "Mesh.h"
 
-class Mesh;
 class Dragon;
 
 class DragonScene : public Scene
@@ -69,16 +69,20 @@ public:
         LAST = DRAGON_TAIL_END
     };
 
+    void exportItem(Item item, QString path);
+
 public slots:
     void animate();
 
 private:
     Mesh * loadMesh(QString path);
+    void drawItem(Item item);
     void drawScene();
     void drawFloor();
     void drawDragonHoldingA(Dragon *d);
     void drawDragonHoldingP(Dragon *d);
     void drawDragonHoldingS(Dragon *d);
+    static QString itemText(Item item);
 
     int m_loadedMeshes, m_missingMeshes;
     bool m_drawNormals;
@@ -86,6 +90,8 @@ private:
     int m_detailLevel;
     Camera m_camera;
     QVector3D m_theta;
+    Mesh::OutputMode m_output;
+    Mesh *m_meshOutput;
     Mesh *m_floor;
     Dragon *m_debugDragon;
     QList<Dragon *> m_dragons;
