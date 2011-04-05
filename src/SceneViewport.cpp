@@ -206,12 +206,16 @@ void SceneViewport::reset_camera()
     m_trans_state.active = false;
     m_rot_state.active = false;
     m_sigma = 0.40;
-    m_animate = false;
+    m_animate = true;
     m_draw_axes = false;
     m_draw_grids = false;
     m_wireframe_mode = false;
     m_projection_mode = true;
     m_scene->reset();
+    if(m_animate)
+        m_timer->start();
+    else
+        m_timer->stop();
 }
 
 void SceneViewport::toggle_animation()

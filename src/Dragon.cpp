@@ -1,9 +1,12 @@
 #include <GL/gl.h>
+#include <cmath>
 #include "Dragon.h"
+#include "DragonScene.h"
 #include "Letters.h"
 
-Dragon::Dragon(DragonScene *scene)
+Dragon::Dragon(Kind kind, DragonScene *scene)
 {
+    m_kind = kind;
     theta_jaw = 0.0;
     theta_head_z = 0.0;
     theta_head_y = 0.0;
@@ -14,11 +17,43 @@ Dragon::Dragon(DragonScene *scene)
     theta_back_legs = 0.0;
     theta_paw = 0.0;
     theta_tail = 0.0;
-    alpha = 0.0;
-    beta = 0.0;
-    gamma = 0.0;
+    m_alpha = 0.0;
+    m_beta = 0.0;
+    m_tongueMaterial = Material(QVector4D(0.1, 0.0, 0.0, 1.0),
+        QVector4D(0.6, 0.0, 0.0, 1.0), QVector4D(1.0, 1.0, 1.0, 1.0), 50.0);
+    m_scalesMaterial = Material(QVector4D(0.2, 0.2, 0.2, 1.0),
+        QVector4D(0.8, 0.8, 0.8, 1.0), QVector4D(1.0, 1.0, 1.0, 1.0), 20.0);
+    m_wingMaterial = Material(QVector4D(0.2, 0.2, 0.2, 1.0),
+        QVector4D(1.0, 1.0, 1.0, 1.0), QVector4D(1.0, 1.0, 1.0, 1.0), 20.0);
+    m_membraneMaterial = Material(QVector4D(0.1, 0.0, 0.0, 1.0),
+        QVector4D(0.6, 0.0, 0.0, 1.0), QVector4D(0.2, 0.2, 0.2, 1.0), 20.0);
     setDetailLevel(0);
     m_scene = scene;
+}
+
+float Dragon::frontLegsAngle() const
+{
+    return theta_front_legs;
+}
+
+float Dragon::alpha() const
+{
+    return m_alpha;
+}
+
+float Dragon::beta() const
+{
+    return m_beta;
+}
+
+void Dragon::setAlpha(float v)
+{
+    m_alpha = v;
+}
+
+void Dragon::setBeta(float v)
+{
+    m_beta = v;
 }
 
 void Dragon::setDetailLevel(int level)
@@ -26,32 +61,52 @@ void Dragon::setDetailLevel(int level)
     switch(level)
     {
         case 1:
-            joint_parts = 1;
-            chest_parts = 2;
-            tail_end_parts = 1;
+            m_jointParts = 1;
+            m_chestParts = 2;
+            m_tailEndParts = 1;
             break;
         case 2:
-            joint_parts = 2;
-            chest_parts = 4;
-            tail_end_parts = 2;
+            m_jointParts = 2;
+            m_chestParts = 4;
+            m_tailEndParts = 2;
             break;
         default:
         case 3:
-            joint_parts = 4;
-            chest_parts = 8;
-            tail_end_parts = 4;
+            m_jointParts = 4;
+            m_chestParts = 8;
+            m_tailEndParts = 4;
             break;
         case 4:
-            joint_parts = 8;
-            chest_parts = 16;
-            tail_end_parts = 8;
+            m_jointParts = 8;
+            m_chestParts = 16;
+            m_tailEndParts = 8;
             break;
     }
 }
 
+Material & Dragon::tongueMaterial()
+{
+    return m_tongueMaterial;
+}
+
+Material & Dragon::scalesMaterial()
+{
+    return m_scalesMaterial;
+}
+
+Material & Dragon::wingMaterial()
+{
+    return m_wingMaterial;
+}
+
+Material & Dragon::membraneMaterial()
+{
+    return m_membraneMaterial;
+}
+
 void Dragon::draw()
 {
-    default_material.beginApply();
+    m_scalesMaterial.beginApply();
     glPushMatrix();
         glScalef(1.0/3.0, 1.0/3.0, 1.0/3.0);
         glPushMatrix();
@@ -74,7 +129,7 @@ void Dragon::draw()
             drawTail();
         glPopMatrix();
     glPopMatrix();
-    default_material.endApply();
+    m_scalesMaterial.endApply();
 }
 
 void Dragon::drawUpper()
@@ -118,12 +173,12 @@ void Dragon::drawHead()
         glPopMatrix();
         // tongue
         glPushMatrix();
-            tongue_material.beginApply();
+            m_tongueMaterial.beginApply();
             glTranslatef(0.1, 0.0, 0.0);
             glRotatef(-theta_jaw, 0.0, 0.0, 1.0);
             glScalef(0.9, 0.9, 0.9);
             drawTongue();
-            tongue_material.endApply();
+            m_tongueMaterial.endApply();
         glPopMatrix();
         // jaw
         glPushMatrix();
@@ -147,7 +202,7 @@ void Dragon::drawTongue()
 
 void Dragon::drawJoint()
 {
-    float step = 360.0 / joint_parts;
+    float step = 360.0 / m_jointParts;
     for(float theta = 0.0; theta < 360.0; theta += step)
     {
         glPushMatrix();
@@ -175,7 +230,7 @@ void Dragon::drawBody()
         glPopMatrix();
         
         // left wing
-        wing_material.beginApply();
+        m_wingMaterial.beginApply();
         glPushMatrix();
             glRotatef(theta_wing, 1.0, 0.0, 0.0);
             glRotatef(90.0, 0.0, 1.0, 0.0);
@@ -191,13 +246,13 @@ void Dragon::drawBody()
             glScalef(3.0, 3.0, 3.0);
             drawWing();
         glPopMatrix();
-        wing_material.endApply();
+        m_wingMaterial.endApply();
     glPopMatrix();
 }
 
 void Dragon::drawChest()
 {
-    float step = 360.0 / chest_parts;
+    float step = 360.0 / m_chestParts;
     for(float theta = 0.0; theta < 359.0; theta += step)
     {
         glPushMatrix();
@@ -237,7 +292,7 @@ void Dragon::drawWingPart()
         glScalef(1.0, 2.6, 0.20);
         Letters::drawA(m_scene);
     glPopMatrix();
-    wing_membrane_material.beginApply();
+    m_membraneMaterial.beginApply();
     glPushMatrix();
         glTranslatef(0.25, 0.0, 0.0);
         glScalef(0.26, 0.2, 0.2);
@@ -259,7 +314,7 @@ void Dragon::drawWingPart()
         glScalef(0.3, 0.2, 0.27);
         drawWingMembrane();
     glPopMatrix();
-    wing_membrane_material.endApply();
+    m_membraneMaterial.endApply();
 }
 
 void Dragon::drawWingMembrane()
@@ -405,12 +460,47 @@ void Dragon::drawTail()
 
 void Dragon::drawTailEnd()
 {
-    float step = 360.0 / (tail_end_parts * 2.0);
+    float step = 360.0 / (m_tailEndParts * 2.0);
     for(float theta = 0.0; theta < 359.0; theta += step)
     {
         glPushMatrix();
             glRotatef(theta, 1.0, 0.0, 0.0);
             Letters::drawA(m_scene);
         glPopMatrix();
+    }
+}
+
+void Dragon::animate(float t)
+{
+    theta_jaw = 10.0 * DragonScene::spaced_cos(t, 5.0, 2.0) + 10.0;
+    theta_head_y = 45.0 * DragonScene::spaced_cos(t, 5.0, 2.0);
+    theta_neck = 5.0 * cos(t * 3.0);
+    theta_wing = 45.0 * cos(t * 3.5);
+    theta_wing_joint = 60.0 - 30.0 * fabs(cos(t * 3.5) * cos(t));
+    theta_front_legs = 10.0 * cos(t * 3.0) + 40.0 + 45.0;
+    theta_back_legs = 10.0 * cos(t * 3.0) + 80.0 + 45.0;
+    theta_tail = 15.0 * cos(pow(t * 0.3, 2.0)) * cos(6.0 * t * 0.3);
+    switch(m_kind)
+    {
+    case Floating:
+        theta_head_z = -45.0;
+        theta_paw = 60.0;
+        break;
+    case Flying:
+        theta_head_z = -30.0;
+        theta_neck = 30.0;
+        theta_paw = 60.0;
+        break;
+    case Jumping:
+        theta_wing = 0.0;
+        theta_wing_joint = 20.0;
+        theta_neck = 30.0;
+        theta_paw = 60.0;
+        theta_neck = 30.0;
+        theta_paw = 60.0;
+        // this one is definitely having the time of its life
+        theta_head_z = 60.0 * DragonScene::spaced_cos(t, 1.0, 2.0) - 30.0;
+        theta_jaw = 10.0 * DragonScene::spaced_cos(t, 1.0, 2.0) + 10.0;
+        break;
     }
 }

@@ -24,8 +24,8 @@ int main(int argc, char **argv)
 
     // create viewport for animating the robot
     SimulationWindow w(&scene);
-    w.resize(1024, 768);
-    w.setWindowTitle("Computer Graphics Assignment");
+    w.setWindowState(Qt::WindowMaximized);
+    w.setWindowTitle("Dragons Demo");
     w.show();
     
     // main window loop

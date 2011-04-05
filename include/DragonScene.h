@@ -33,6 +33,11 @@ public:
 
     virtual void reset();
 
+    static float sawtooth(float t);
+    static float spaced_rect(float t, float w, float a);
+    static float spaced_sawtooth(float x, float w, float a);
+    static float spaced_cos(float x, float w, float a);
+
     enum Camera
     {
         Camera_Static,
@@ -74,11 +79,6 @@ private:
     void drawDragonHoldingA(Dragon *d);
     void drawDragonHoldingP(Dragon *d);
     void drawDragonHoldingS(Dragon *d);
-    static float sawtooth(float t);
-    static float spaced_rect(float t, float w, float a);
-    static float spaced_sawtooth(float x, float w, float a);
-    static float spaced_cos(float x, float w, float a);
-    void animateDragon(Dragon *d, float t);
 
     int m_loadedMeshes, m_missingMeshes;
     bool m_drawNormals;
@@ -87,6 +87,7 @@ private:
     Camera m_camera;
     QVector3D m_theta;
     Mesh *m_floor;
+    Dragon *m_debugDragon;
     QList<Dragon *> m_dragons;
 };
 
