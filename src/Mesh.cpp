@@ -241,18 +241,8 @@ void Mesh::drawToMesh(Mesh *out)
     uint indiceCount = 0;
     foreach(Face f, m_faces)
     {
-        switch(f.mode)
-        {
-        case GL_QUADS:
-            indiceCount += ((f.count * 6) / 4);
-            break;
-        case GL_TRIANGLES:
+        if(f.draw)
             indiceCount += f.count;
-            break;
-        case GL_TRIANGLE_STRIP:
-            indiceCount += ((f.count - 2) * 3);
-            break;
-        }
     }
 
     // allocate space for these vertices
@@ -264,26 +254,11 @@ void Mesh::drawToMesh(Mesh *out)
     uint destOffset = maxEnd;
     foreach(Face f, m_faces)
     {
-        // convert the face to a list of triangles
-        switch(f.mode)
+        if(f.draw && (f.count > 0))
         {
-        case GL_QUADS:
-            indiceCount = ((f.count * 6) / 4);
-            drawFaceToMeshQuad(out, destOffset, f);
-            break;
-        case GL_TRIANGLES:
-            indiceCount = f.count;
             drawFaceToMeshCopy(out, destOffset, f);
-            break;
-        case GL_TRIANGLE_STRIP:
-            indiceCount = ((f.count - 2) * 3);
-            drawFaceToMeshTriStrip(out, destOffset, f);
-            break;
-        }
-        if(indiceCount > 0)
-        {
-            out->addFace(GL_TRIANGLES, indiceCount, destOffset);
-            destOffset += indiceCount;
+            out->addFace(f.mode, f.count, destOffset);
+            destOffset += f.count;
         }
     }
 }
@@ -294,13 +269,14 @@ void Mesh::drawFaceToMeshCopy(Mesh *out, uint destOffset, Face f)
     QVector<QVector3D> & outVertices = out->vertices();
     QVector<QVector3D> & outNormals = out->normals();
     QVector<QVector2D> & outTexCoords = out->texCoords();
-    QMatrix4x4 m = currentGLMatrix();
+    QMatrix4x4 vMap = currentGLMatrix();
+    QMatrix4x4 nMap = currentGLMatrixForNormals();
     for(int i = 0; i < f.count; i++, destOffset++)
     {
         uint srcIndex = m_indices.value(f.offset + i);
         outIndices[destOffset] = destOffset;
-        outVertices[destOffset] = m.map(m_vertices.value(srcIndex));
-        outNormals[destOffset] = m_normals.value(srcIndex);
+        outVertices[destOffset] = vMap.map(m_vertices.value(srcIndex));
+        outNormals[destOffset] = nMap.map(m_normals.value(srcIndex));
         outTexCoords[destOffset] = m_texCoords.value(srcIndex);
     }
 }
@@ -314,12 +290,13 @@ void Mesh::drawFaceToMeshQuad(Mesh *out, uint destOffset, Face f)
     QVector<QVector3D> lastVertices;
     QVector<QVector3D> lastNormals;
     QVector<QVector2D> lastTexCoords;
-    QMatrix4x4 m = currentGLMatrix();
+    QMatrix4x4 vMap = currentGLMatrix();
+    QMatrix4x4 nMap = currentGLMatrixForNormals();
     for(int i = 0; i < f.count; i++)
     {
         uint srcIndex = m_indices.value(f.offset + i);
-        lastVertices.append(m.map(m_vertices.value(srcIndex)));
-        lastNormals.append(m_normals.value(srcIndex));
+        lastVertices.append(vMap.map(m_vertices.value(srcIndex)));
+        lastNormals.append(nMap.map(m_normals.value(srcIndex)));
         lastTexCoords.append(m_texCoords.value(srcIndex));
         if(lastVertices.count() == 4)
         {
@@ -355,12 +332,13 @@ void Mesh::drawFaceToMeshTriStrip(Mesh *out, uint destOffset, Face f)
     QVector<QVector3D> lastVertices;
     QVector<QVector3D> lastNormals;
     QVector<QVector2D> lastTexCoords;
-    QMatrix4x4 m = currentGLMatrix();
+    QMatrix4x4 vMap = currentGLMatrix();
+    QMatrix4x4 nMap = currentGLMatrixForNormals();
     for(int i = 0; i < f.count; i++)
     {
         uint srcIndex = m_indices.value(f.offset + i);
-        lastVertices.append(m.map(m_vertices.value(srcIndex)));
-        lastNormals.append(m_normals.value(srcIndex));
+        lastVertices.append(vMap.map(m_vertices.value(srcIndex)));
+        lastNormals.append((nMap.map(m_normals.value(srcIndex))));
         lastTexCoords.append(m_texCoords.value(srcIndex));
         if(i >= 2)
         {
@@ -386,6 +364,16 @@ QMatrix4x4 Mesh::currentGLMatrix()
                      m[0][1], m[1][1], m[2][1], m[3][1],
                      m[0][2], m[1][2], m[2][2], m[3][2],
                      m[0][3], m[1][3], m[2][3], m[3][3]);
+}
+
+QMatrix4x4 Mesh::currentGLMatrixForNormals()
+{
+    float m[4][4];
+    glGetFloatv(GL_MODELVIEW_MATRIX, (float *)m);
+    return QMatrix4x4(m[0][0], m[1][0], m[2][0], 0.0,
+                     m[0][1], m[1][1], m[2][1], 0.0,
+                     m[0][2], m[1][2], m[2][2], 0.0,
+                     m[0][3], m[1][3], m[2][3], 1.0);
 }
 
 /* Show the normal for every vertex in the mesh, for debugging purposes. */
@@ -602,11 +590,11 @@ Mesh * Mesh::loadObj(const char *path, QObject *parent)
     {
         float v1, v2, v3;
         int pointCount = 0;
-        if(sscanf(line, "v %f %f %f", &v1, &v2, &v3))
+        if(sscanf(line, "v %f %f %f", &v1, &v2, &v3) == 3)
             vertices.append(QVector3D(v1, v2, v3));
-        else if(sscanf(line, "vn %f %f %f", &v1, &v2, &v3))
+        else if(sscanf(line, "vn %f %f %f", &v1, &v2, &v3) == 3)
             normals.append(QVector3D(v1, v2, v3));
-        else if(sscanf(line, "vt %f %f", &v1, &v2))
+        else if(sscanf(line, "vt %f %f", &v1, &v2) == 2)
             texCoords.append(QVector2D(v1, v2));
         else if(sscanf(line, "f %s %s %s %s", point1, point2, point3, point4) == 4)
         {
@@ -653,8 +641,6 @@ void Mesh::saveObj(QString path)
         fprintf(stderr, "Could not open file '%s' for writing.\n", path.toUtf8().data());
         return;
     }
-    bool normals = m_normals.count() > 0;
-    bool texCoords = m_texCoords.count() > 0;
     foreach(QVector3D vertex, m_vertices)
         fprintf(f, "v %f %f %f\n", vertex.x(), vertex.y(), vertex.z());
     foreach(QVector3D normal, m_normals)
@@ -663,30 +649,107 @@ void Mesh::saveObj(QString path)
         fprintf(f, "vt %f %f\n", texCoords.x(), texCoords.y());
     foreach(Face face, m_faces)
     {
-        if(face.mode != GL_TRIANGLES)
-            continue;
-
-        int i = 0;
-        while(i < face.count)
+        switch(face.mode)
         {
-            fprintf(f, "f ");
+        case GL_TRIANGLES:
+            saveObjIndicesCopy(f, face);
+            break;
+        case GL_QUADS:
+            saveObjIndicesQuad(f, face);
+            break;
+        case GL_TRIANGLE_STRIP:
+            saveObjIndicesTriStrip(f, face);
+            break;
+        }
+    }
+    fclose(f);
+}
+
+void Mesh::saveObjIndicesCopy(FILE *f, Face face)
+{
+    bool normals = m_normals.count() > 0;
+    bool texCoords = m_texCoords.count() > 0;
+    for(int i = 0; i < face.count; i += 3)
+    {
+        /*fprintf(f, "f ");
+        for(int j = 0; j < 3; j++)
+        {
+            if(j > 0)
+                fprintf(f, " ");
+            uint ind = m_indices[face.offset + i + j] + 1;
+            saveObjIndice(f, ind, normals, texCoords);
+        }
+        fprintf(f, "\n");*/
+        uint ind1 = m_indices[face.offset + i + 0];
+        uint ind2 = m_indices[face.offset + i + 1];
+        uint ind3 = m_indices[face.offset + i + 2];
+        saveObjFace(f, );
+    }
+}
+
+void Mesh::saveObjIndicesQuad(FILE *f, Face face)
+{
+    bool normals = m_normals.count() > 0;
+    bool texCoords = m_texCoords.count() > 0;
+    QVector<uint> indices;
+    for(int i = 0; i < face.count; i++)
+    {
+        indices.append(m_indices.value(face.offset + i));
+        if(indices.count() == 4)
+        {
+            saveObjFace(f, indices[0], indices[1], indices[2], normals, texCoords);
+            saveObjFace(f, indices[0], indices[2], indices[3], normals, texCoords);
+            lastVertices.clear();
+            lastNormals.clear();
+            lastTexCoords.clear();
+        }
+    }
+}
+
+void Mesh::saveObjIndicesTriStrip(FILE *f, Face face)
+{
+    bool normals = m_normals.count() > 0;
+    bool texCoords = m_texCoords.count() > 0;
+    QVector<uint> lastIndices;
+    for(int i = 0; i < face.count; i++)
+    {
+        lastIndices.append(m_indices.value(face.offset + i));
+        if(lastIndices.count() == 3)
+        {
+            saveObjFace(f, lastIndices[0], lastIndices[1], lastIndices[2], normals, texCoords);
+            /*fprintf(f, "f ");
             for(int j = 0; j < 3; j++)
             {
                 if(j > 0)
                     fprintf(f, " ");
-                uint ind = m_indices[face.offset + i + j] + 1;
-                if(texCoords && normals)
-                    fprintf(f, "%d/%d/%d", ind, ind, ind);
-                else if(normals)
-                    fprintf(f, "%d//%d", ind, ind);
-                else if(texCoords)
-                    fprintf(f, "%d/%d", ind, ind);
-                else
-                    fprintf(f, "%d", ind);
-            }
-            fprintf(f, "\n");
-            i += 3;
+                uint ind = lastIndices.value(j) + 1;
+                saveObjIndice(f, ind, normals, texCoords);
+            }*/
+            lastIndices.remove(0);
+            //fprintf(f, "\n");
         }
     }
-    fclose(f);
+}
+
+void Mesh::saveObjFace(FILE *f, uint ind1, uint ind2, uint ind3, bool normals, bool texCoords)
+{
+    fprintf(f, "f ");
+    saveObjIndice(f, ind1 + 1, normals, texCoords);
+    fprintf(f, " ");
+    saveObjIndice(f, ind2 + 1, normals, texCoords);
+    fprintf(f, " ");
+    saveObjIndice(f, ind3 + 1, normals, texCoords);
+    fprintf(f, "\n");
+}
+
+void Mesh::saveObjIndice(FILE *f, uint ind, bool normals, bool texCoords)
+{
+    if(texCoords && normals)
+        fprintf(f, "%d/%d/%d", ind, ind, ind);
+    else if(normals)
+        fprintf(f, "%d//%d", ind, ind);
+    else if(texCoords)
+        fprintf(f, "%d/%d", ind, ind);
+    else
+        fprintf(f, "%d", ind);
 }

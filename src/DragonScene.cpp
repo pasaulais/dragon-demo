@@ -79,14 +79,25 @@ QVector3D DragonScene::orientation() const
 bool DragonScene::load()
 {
     m_meshes.insert("floor", Primitive::createCube(this));
+    loadMeshObj("letter_p", "meshes/disk.obj");//"meshes/LETTER_P.obj");
+    loadMeshObj("letter_a", "meshes/LETTER_A.obj");
+    loadMeshObj("letter_s", "meshes/LETTER_S.obj");
     Letters::initMeshes();
     Dragon::loadMeshes(this);
     return m_meshes.count() > 0;
 }
 
-Mesh * DragonScene::loadMesh(QString name, QString path)
+Mesh * DragonScene::loadMeshStl(QString name, QString path)
 {
     Mesh *m = Mesh::loadStl(path.toUtf8().constData(), this);
+    if(m)
+        m_meshes.insert(name, m);
+    return m;
+}
+
+Mesh * DragonScene::loadMeshObj(QString name, QString path)
+{
+    Mesh *m = Mesh::loadObj(path.toUtf8().constData(), this);
     if(m)
         m_meshes.insert(name, m);
     return m;
@@ -106,8 +117,11 @@ void DragonScene::draw()
 {
     Item i = (Item)m_selected;
     drawItem(i);
+    //Letters::disk->saveObj("meshes/disk.obj");;
     if(m_selected != SCENE)
-        exportItem(i, QString("item_%1.stl").arg(itemText(i)));
+    {
+        //exportItem(i, QString("meshes/%1.obj").arg(itemText(i)));
+    }
 }
 
 void DragonScene::drawItem(DragonScene::Item item)
@@ -124,13 +138,15 @@ void DragonScene::drawItem(DragonScene::Item item)
         switch(item)
         {
         case LETTER_P:
-            Letters::drawP(this);
+            drawMesh("letter_p");
+            //Letters::drawP(this);
             break;
         case LETTER_A:
-            Letters::drawA(this);
+            drawMesh("letter_a");
             break;
         case LETTER_S:
             Letters::drawS(this);
+            //drawMesh("letter_s");
             break;
         case DRAGON:
             m_debugDragon->draw();
@@ -194,7 +210,7 @@ void DragonScene::exportItem(Item item, QString path)
     drawItem(item);
     glPopMatrix();
     m_output = oldOutput;
-    m_meshOutput->saveStl(path);
+    m_meshOutput->saveObj(path);
     delete m_meshOutput;
     m_meshOutput = 0;
 }

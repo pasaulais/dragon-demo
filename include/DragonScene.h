@@ -26,7 +26,8 @@ public:
     QMap<QString, Mesh *> & meshes();
     const QMap<QString, Mesh *> & meshes() const;
 
-    Mesh * loadMesh(QString name, QString path);
+    Mesh * loadMeshObj(QString name, QString path);
+    Mesh * loadMeshStl(QString name, QString path);
 
     virtual void draw();
     void drawMesh(Mesh *m);

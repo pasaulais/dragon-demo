@@ -15,7 +15,6 @@ public:
     static void drawArcS(DragonScene *s);
     static void drawCube(DragonScene *s);
 
-private:
     static Mesh *arc_c;
     static Mesh *arc_s;
     static Mesh *disk;

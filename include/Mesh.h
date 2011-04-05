@@ -6,6 +6,7 @@
 #include <QVector2D>
 #include <QVector3D>
 #include <QMatrix4x4>
+#include <cstdio>
 
 bool fequal(double a, double b);
 
@@ -81,6 +82,12 @@ private:
     void drawFaceToMeshQuad(Mesh *out, uint offset, Face f);
     void drawFaceToMeshTriStrip(Mesh *out, uint offset, Face f);
     static QMatrix4x4 currentGLMatrix();
+    static QMatrix4x4 currentGLMatrixForNormals();
+    void saveObjIndicesCopy(FILE *f, Face face);
+    void saveObjIndicesQuad(FILE *f, Face face);
+    void saveObjIndicesTriStrip(FILE *f, Face face);
+    void saveObjFace(FILE *f, uint ind1, uint ind2, uint ind3, bool normals, bool texCoords);
+    void saveObjIndice(FILE *f, uint indice, bool normals, bool texCoords);
 
     QVector<QVector3D> m_vertices;
     QVector<QVector3D> m_normals;
