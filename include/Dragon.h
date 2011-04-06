@@ -4,6 +4,7 @@
 #include <QObject>
 #include "Material.h"
 
+class RenderState;
 class Scene;
 
 class Dragon : public QObject
@@ -16,9 +17,9 @@ public:
         Jumping
     };
 
-    Dragon(Kind kind, Scene *scene);
+    Dragon(Kind kind, RenderState *state,  QObject *parent = 0);
 
-    static void loadMeshes(Scene *scene);
+    static void loadMeshes(RenderState *scene);
 
     void setDetailLevel(int level);
 
@@ -57,7 +58,7 @@ public:
     void animate(float t);
 
 private:
-    Scene *m_scene;
+    RenderState *m_state;
     Kind m_kind;
     uint m_jointParts;
     uint m_chestParts;

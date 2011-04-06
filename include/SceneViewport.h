@@ -8,7 +8,9 @@
 
 class QTimer;
 class QPainter;
+class QGLFormat;
 class Scene;
+class RenderState;
 
 typedef struct
 {
@@ -23,10 +25,13 @@ class SceneViewport : public QGLWidget
     Q_OBJECT
 
 public:
-    SceneViewport(Scene *scene = 0, QWidget *parent = 0);
+    SceneViewport(const QGLFormat &format, QWidget *parent = 0);
     virtual ~SceneViewport();
 
+    RenderState *state() const;
+
     Scene* scene() const;
+    void setScene(Scene *newScene);
 
 protected:
     virtual void initializeGL();
@@ -64,6 +69,8 @@ private:
     Scene *m_scene;
     QTimer *m_renderTimer;
     QColor m_bgColor;
+
+    RenderState *m_state;
 
     QVector4D m_ambient0;
     QVector4D m_diffuse0;

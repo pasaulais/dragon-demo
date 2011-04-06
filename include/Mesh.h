@@ -10,6 +10,8 @@
 
 bool fequal(double a, double b);
 
+class RenderState;
+
 typedef struct
 {
     uint mode;
@@ -56,7 +58,7 @@ public:
         Output_Mesh
     };
 
-    void draw(OutputMode mode, Mesh *output = 0);
+    void draw(OutputMode mode, RenderState *s, Mesh *output = 0);
     // Show normal vectors for every vertex in the mesh, for debugging purposes
     void drawNormals();
 
@@ -70,10 +72,8 @@ private:
     void drawImmediate();
     // draw the mesh using vertex lists, which is faster than calling glBegin/glEnd
     void drawVertexList();
-    void drawToMesh(Mesh *m);
-    void drawFaceToMeshCopy(Mesh *out, uint offset, Face f);
-    static QMatrix4x4 currentGLMatrix();
-    static QMatrix4x4 currentGLMatrixForNormals();
+    void drawToMesh(Mesh *m, RenderState *s);
+    void drawFaceToMeshCopy(Mesh *out, RenderState *s, uint offset, Face f);
     void saveObjIndicesTri(FILE *f, Face face);
     void saveObjIndicesQuad(FILE *f, Face face);
     void saveObjIndicesTriStrip(FILE *f, Face face);

@@ -4,10 +4,9 @@
 #include <QObject>
 #include <QVector3D>
 #include <QList>
-#include <QMap>
-#include "Mesh.h"
 
 class QKeyEvent;
+class RenderState;
 class Dragon;
 
 class Scene : public QObject
@@ -15,7 +14,7 @@ class Scene : public QObject
     Q_OBJECT
 
 public:
-    Scene(QObject *parent = 0);
+    Scene(RenderState *state, QObject *parent = 0);
 
     bool load();
     void loadTextures();
@@ -23,15 +22,7 @@ public:
 
     QVector3D orientation() const;
 
-    QMap<QString, Mesh *> & meshes();
-    const QMap<QString, Mesh *> & meshes() const;
-
-    Mesh * loadMeshObj(QString name, QString path);
-    Mesh * loadMeshStl(QString name, QString path);
-
     void draw();
-    void drawMesh(Mesh *m);
-    void drawMesh(QString name);
 
     void select_next();
     void select_previous();
@@ -93,14 +84,11 @@ private:
     void drawDragonHoldingS(Dragon *d);
     static QString itemText(Item item);
 
-    bool m_drawNormals;
+    RenderState *m_state;
     int m_selected;
     int m_detailLevel;
     Camera m_camera;
     QVector3D m_theta;
-    Mesh::OutputMode m_output;
-    Mesh *m_meshOutput;
-    QMap<QString, Mesh *> m_meshes;
     Dragon *m_debugDragon;
     QList<Dragon *> m_dragons;
     bool m_exportQueued;

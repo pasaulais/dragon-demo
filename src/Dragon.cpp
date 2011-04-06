@@ -1,9 +1,10 @@
 #include <GL/gl.h>
 #include <cmath>
 #include "Dragon.h"
+#include "RenderState.h"
 #include "Scene.h"
 
-Dragon::Dragon(Kind kind, Scene *scene) : QObject(scene)
+Dragon::Dragon(Kind kind, RenderState *state, QObject *parent) : QObject(parent)
 {
     m_kind = kind;
     theta_jaw = 0.0;
@@ -27,16 +28,16 @@ Dragon::Dragon(Kind kind, Scene *scene) : QObject(scene)
     m_membraneMaterial = Material(QVector4D(0.1, 0.0, 0.0, 1.0),
         QVector4D(0.6, 0.0, 0.0, 1.0), QVector4D(0.2, 0.2, 0.2, 1.0), 20.0);
     setDetailLevel(4);
-    m_scene = scene;
+    m_state = state;
 }
 
-void Dragon::loadMeshes(Scene *scene)
+void Dragon::loadMeshes(RenderState *state)
 {
-    scene->loadMeshObj("wing_membrane", "meshes/dragon_wing_membrane.obj");
-    scene->loadMeshObj("joint", "meshes/dragon_joint_spin.obj");
-    scene->loadMeshObj("dragon_chest", "meshes/dragon_chest.obj");
-    scene->loadMeshObj("dragon_head", "meshes/dragon_head.obj");
-    scene->loadMeshObj("dragon_tail_end", "meshes/dragon_tail_end.obj");
+    state->loadMeshObj("wing_membrane", "meshes/dragon_wing_membrane.obj");
+    state->loadMeshObj("joint", "meshes/dragon_joint_spin.obj");
+    state->loadMeshObj("dragon_chest", "meshes/dragon_chest.obj");
+    state->loadMeshObj("dragon_head", "meshes/dragon_head.obj");
+    state->loadMeshObj("dragon_tail_end", "meshes/dragon_tail_end.obj");
 }
 
 float Dragon::frontLegsAngle() const
@@ -160,7 +161,7 @@ void Dragon::drawUpper()
 void Dragon::drawHead()
 {
     glPushMatrix();
-        m_scene->drawMesh("dragon_head");
+        m_state->drawMesh("dragon_head");
         // tongue
         glPushMatrix();
             m_tongueMaterial.beginApply();
@@ -175,7 +176,7 @@ void Dragon::drawHead()
             glRotatef(-theta_jaw, 0.0, 0.0, 1.0);
             glRotatef(90.0, 1.0, 0.0, 0.0);
             glScalef(1.0, 0.75, 0.5);
-            m_scene->drawMesh("letter_a");
+            m_state->drawMesh("letter_a");
         glPopMatrix();
     glPopMatrix();
 }
@@ -186,13 +187,13 @@ void Dragon::drawTongue()
         glTranslatef(0.47, 0.0, 0.0);
         glScalef(1.1, 0.275, 1.1);
         glRotatef(180.0, 1.0, 0.0, 0.0);
-        m_scene->drawMesh("letter_s");
+        m_state->drawMesh("letter_s");
     glPopMatrix();
 }
 
 void Dragon::drawJoint()
 {
-    m_scene->drawMesh("joint");
+    m_state->drawMesh("joint");
 }
 
 void Dragon::drawBody()
@@ -233,7 +234,7 @@ void Dragon::drawBody()
 
 void Dragon::drawChest()
 {
-    m_scene->drawMesh("dragon_chest");
+    m_state->drawMesh("dragon_chest");
 }
 
 void Dragon::drawWing()
@@ -255,7 +256,7 @@ void Dragon::drawWingPart()
     glPushMatrix();
         glRotatef(90.0, 1.0, 0.0, 0.0);
         glScalef(1.0, 2.6, 0.20);
-        m_scene->drawMesh("letter_a");
+        m_state->drawMesh("letter_a");
     glPopMatrix();
     m_membraneMaterial.beginApply();
     glPushMatrix();
@@ -284,7 +285,7 @@ void Dragon::drawWingPart()
 
 void Dragon::drawWingMembrane()
 {
-    m_scene->drawMesh("wing_membrane");
+    m_state->drawMesh("wing_membrane");
 }
 
 void Dragon::drawWingOuter()
@@ -345,7 +346,7 @@ void Dragon::drawPaw()
         glRotatef(theta_paw, 0.0, 0.0, 1.0);
         glRotatef(90.0, 1.0, 0.0, 0.0);
         glScalef(0.5, 0.5, 0.5);
-        m_scene->drawMesh("letter_a");
+        m_state->drawMesh("letter_a");
     glPopMatrix();
     glPushMatrix();
         glScalef(0.6, 0.5, 0.5);
@@ -398,7 +399,7 @@ void Dragon::drawTail()
 
 void Dragon::drawTailEnd()
 {
-    m_scene->drawMesh("dragon_tail_end");
+    m_state->drawMesh("dragon_tail_end");
 }
 
 void Dragon::animate(float t)

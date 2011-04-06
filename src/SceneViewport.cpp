@@ -8,12 +8,13 @@
 #include "SceneViewport.h"
 #include "Scene.h"
 #include "Material.h"
+#include "RenderState.h"
 
-SceneViewport::SceneViewport(Scene *scene, QWidget *parent) : QGLWidget(parent)
+SceneViewport::SceneViewport(const QGLFormat &format, QWidget *parent) : QGLWidget(format, parent)
 {
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setMinimumSize(640, 480);
-    m_scene = scene;
+    m_scene = 0;
+    m_state = new RenderState(this);
     m_renderTimer = new QTimer(this);
     m_renderTimer->setInterval(1000 / 60);
     m_start = 0;
@@ -28,14 +29,18 @@ SceneViewport::SceneViewport(Scene *scene, QWidget *parent) : QGLWidget(parent)
     m_diffuse0 = QVector4D(1.0, 1.0, 1.0, 1.0);
     m_specular0 = QVector4D(1.0, 1.0, 1.0, 1.0);
     m_light0_pos = QVector4D(0.0, 1.0, 1.0, 0.0);
-    connect(m_scene, SIGNAL(invalidated()), this, SLOT(update()));
-    connect(m_renderTimer, SIGNAL(timeout()), m_scene, SLOT(animate()));
     connect(m_fpsTimer, SIGNAL(timeout()), this, SLOT(updateFPS()));
 }
 
 SceneViewport::~SceneViewport()
 {
-    m_scene->freeTextures();
+    if(m_scene)
+        m_scene->freeTextures();
+}
+
+RenderState *SceneViewport::state() const
+{
+    return m_state;
 }
 
 Scene* SceneViewport::scene() const
@@ -43,9 +48,32 @@ Scene* SceneViewport::scene() const
     return m_scene;
 }
 
+void SceneViewport::setScene(Scene *newScene)
+{
+    if(m_scene)
+    {
+        m_scene->freeTextures();
+        disconnect(m_scene, SIGNAL(invalidated()), this, SLOT(update()));
+        disconnect(m_renderTimer, SIGNAL(timeout()), m_scene, SLOT(animate()));
+    }
+    m_scene = newScene;
+    if(newScene)
+    {
+        if(context())
+        {
+            makeCurrent();
+            newScene->loadTextures();
+        }
+        connect(newScene, SIGNAL(invalidated()), this, SLOT(update()));
+        connect(m_renderTimer, SIGNAL(timeout()), newScene, SLOT(animate()));
+    }
+    update();
+}
+
 void SceneViewport::initializeGL()
 {
-    m_scene->loadTextures();
+    if(m_scene)
+        m_scene->loadTextures();
     reset_camera();
 }
 
@@ -119,7 +147,9 @@ void SceneViewport::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // determine which rotation to apply from both the user and the scene
-    QVector3D rot = m_theta + m_scene->orientation();
+    QVector3D rot = m_theta;
+    if(m_scene)
+        rot += m_scene->orientation();
     glPushMatrix();
         glLoadIdentity();
         glTranslatef(m_delta.x(), m_delta.y(), m_delta.z());
@@ -127,7 +157,8 @@ void SceneViewport::paintGL()
         glRotatef(rot.y(), 0.0, 1.0, 0.0);
         glRotatef(rot.z(), 0.0, 0.0, 1.0);
         glScalef(m_sigma, m_sigma, m_sigma);
-        m_scene->draw();
+        if(m_scene)
+            m_scene->draw();
         if(m_draw_axes)
             draw_axes();
         if(m_draw_grids)
@@ -253,7 +284,9 @@ void SceneViewport::reset_camera()
     m_draw_grids = false;
     m_wireframe_mode = false;
     m_projection_mode = true;
-    m_scene->reset();
+    m_state->reset();
+    if(m_scene)
+        m_scene->reset();
     updateAnimationState();
 }
 
@@ -353,7 +386,7 @@ void SceneViewport::keyReleaseEvent(QKeyEvent *e)
 		side_view();
 	else if(key == Qt::Key_1)
 		front_view();
-    else
+    else if(m_scene)
         m_scene->keyReleaseEvent(e);
     QGLWidget::keyReleaseEvent(e);
     update();

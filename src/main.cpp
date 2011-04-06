@@ -3,6 +3,7 @@
 #include <QMessageBox>
 #include "SceneViewport.h"
 #include "Scene.h"
+#include "RenderState.h"
 
 int main(int argc, char **argv)
 {
@@ -12,18 +13,19 @@ int main(int argc, char **argv)
     QGLFormat f;
     f.setAlpha(true);
     f.setSampleBuffers(true);
-    QGLFormat::setDefaultFormat(f);
 
-    // load the scene
-    Scene scene;
+    // create viewport for rendering the scene and the scene
+    SceneViewport w(f);
+    RenderState *s = w.state();
+    Scene scene(s);
     if(!scene.load())
     {
         QMessageBox::critical(0, "Error", "Could not load the mesh files (they should be in the 'meshes' sub-directory).");
         return 1;
     }
+    w.setScene(&scene);
 
-    // create viewport for rendering the scene
-    SceneViewport w(&scene);
+    // show the viewport
     w.setWindowState(Qt::WindowMaximized);
     w.setWindowTitle("Dragons Demo");
     w.show();

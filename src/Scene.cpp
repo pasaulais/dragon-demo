@@ -9,6 +9,7 @@
 #include "Dragon.h"
 #include "Mesh.h"
 #include "Material.h"
+#include "RenderState.h"
 
 using namespace std;
 
@@ -18,19 +19,18 @@ static Material debug_material(QVector4D(0.2, 0.2, 0.2, 1.0),
 static Material floor_material(QVector4D(0.5, 0.5, 0.5, 1.0),
     QVector4D(1.0, 1.0, 1.0, 1.0), QVector4D(1.0, 1.0, 1.0, 1.0), 00.0);
 
-Scene::Scene(QObject *parent) : QObject(parent)
+Scene::Scene(RenderState *state, QObject *parent) : QObject(parent)
 {
-    m_meshOutput = 0;
+    m_state = state;
     m_camera = Camera_Static;
-    m_output = Mesh::Output_VertexList;
     m_exportQueued = false;
 
-    m_debugDragon = new Dragon(Dragon::Floating, this);
+    m_debugDragon = new Dragon(Dragon::Floating, m_state, this);
     m_debugDragon->scalesMaterial() = debug_material;
     m_debugDragon->wingMaterial() = debug_material;
-    m_dragons.append(new Dragon(Dragon::Floating, this));
-    m_dragons.append(new Dragon(Dragon::Flying, this));
-    m_dragons.append(new Dragon(Dragon::Jumping, this));
+    m_dragons.append(new Dragon(Dragon::Floating, m_state, this));
+    m_dragons.append(new Dragon(Dragon::Flying, m_state, this));
+    m_dragons.append(new Dragon(Dragon::Jumping, m_state, this));
     animate();
 }
 
@@ -60,7 +60,6 @@ void Scene::freeTextures()
 void Scene::reset()
 {
     m_selected = SCENE;
-    m_drawNormals = false;
     m_theta = QVector3D(0, 0, 0);
     m_detailLevel = 4;
     m_camera = Camera_Static;
@@ -77,38 +76,12 @@ QVector3D Scene::orientation() const
 
 bool Scene::load()
 {
-    loadMeshObj("floor", "meshes/floor.obj");
-    loadMeshObj("letter_p", "meshes/LETTER_P.obj");
-    loadMeshObj("letter_a", "meshes/LETTER_A.obj");
-    loadMeshObj("letter_s", "meshes/LETTER_S.obj");
-    Dragon::loadMeshes(this);
-    return m_meshes.count() > 0;
-}
-
-Mesh * Scene::loadMeshStl(QString name, QString path)
-{
-    Mesh *m = Mesh::loadStl(path.toUtf8().constData(), this);
-    if(m)
-        m_meshes.insert(name, m);
-    return m;
-}
-
-Mesh * Scene::loadMeshObj(QString name, QString path)
-{
-    Mesh *m = Mesh::loadObj(path.toUtf8().constData(), this);
-    if(m)
-        m_meshes.insert(name, m);
-    return m;
-}
-
-QMap<QString, Mesh *> & Scene::meshes()
-{
-    return m_meshes;
-}
-
-const QMap<QString, Mesh *> & Scene::meshes() const
-{
-    return m_meshes;
+    m_state->loadMeshObj("floor", "meshes/floor.obj");
+    m_state->loadMeshObj("letter_p", "meshes/LETTER_P.obj");
+    m_state->loadMeshObj("letter_a", "meshes/LETTER_A.obj");
+    m_state->loadMeshObj("letter_s", "meshes/LETTER_S.obj");
+    Dragon::loadMeshes(m_state);
+    return m_state->meshes().count() > 0;
 }
 
 void Scene::draw()
@@ -136,13 +109,13 @@ void Scene::drawItem(Scene::Item item)
         switch(item)
         {
         case LETTER_P:
-            drawMesh("letter_p");
+            m_state->drawMesh("letter_p");
             break;
         case LETTER_A:
-            drawMesh("letter_a");
+            m_state->drawMesh("letter_a");
             break;
         case LETTER_S:
-            drawMesh("letter_s");
+            m_state->drawMesh("letter_s");
             break;
         case DRAGON:
             m_debugDragon->draw();
@@ -198,17 +171,9 @@ void Scene::drawItem(Scene::Item item)
 
 void Scene::exportItem(Item item, QString path)
 {
-    Mesh::OutputMode oldOutput = m_output;
-    glPushMatrix();
-    glLoadIdentity();
-    m_output = Mesh::Output_Mesh;
-    m_meshOutput = new Mesh();
+    m_state->beginExportMesh(path);
     drawItem(item);
-    glPopMatrix();
-    m_output = oldOutput;
-    m_meshOutput->saveObj(path);
-    delete m_meshOutput;
-    m_meshOutput = 0;
+    m_state->endExportMesh();
 }
 
 QString Scene::itemText(Scene::Item item)
@@ -306,11 +271,10 @@ void Scene::drawScene()
 
 void Scene::drawFloor()
 {
-    Mesh *floor = m_meshes.value("floor");
     floor_material.beginApply();
     glPushMatrix();
         glScalef(1.0, 0.001, 1.0);
-        drawMesh(floor);
+        m_state->drawMesh("floor");
     glPopMatrix();
     floor_material.endApply();
 }
@@ -328,7 +292,7 @@ void Scene::drawDragonHoldingA(Dragon *d)
             glRotatef(-d->frontLegsAngle(), 0.0, 0.0, 1.0);
             glScalef(2.0/3.0, 2.0/3.0, 1.0/3.0);
             d->tongueMaterial().beginApply();
-            drawMesh("letter_a");
+            m_state->drawMesh("letter_a");
             d->tongueMaterial().endApply();
         glPopMatrix();
     glPopMatrix();
@@ -345,7 +309,7 @@ void Scene::drawDragonHoldingP(Dragon *d)
             glRotatef(-170, 0.0, 0.0, 1.0);
             glScalef(1.0, 1.0, 0.5);
             d->tongueMaterial().beginApply();
-            drawMesh("letter_p");
+            m_state->drawMesh("letter_p");
             d->tongueMaterial().endApply();
         glPopMatrix();
     glPopMatrix();
@@ -362,7 +326,7 @@ void Scene::drawDragonHoldingS(Dragon *d)
             glTranslatef(-0.4, 0.1, 0.0);
             glScalef(1.0, 1.0, 0.5);
             d->tongueMaterial().beginApply();
-            drawMesh("letter_s");
+            m_state->drawMesh("letter_s");
             d->tongueMaterial().endApply();
         glPopMatrix();
     glPopMatrix();
@@ -394,7 +358,7 @@ void Scene::keyReleaseEvent(QKeyEvent *e)
     else if((key == Qt::Key_Minus)  || (key == Qt::Key_Left))
         select_previous();
     else if(key == Qt::Key_N)
-        m_drawNormals = !m_drawNormals;
+        m_state->toggleNormals();
     else if(key == Qt::Key_F1)
         m_camera = Camera_Static;
     else if(key == Qt::Key_F2)
@@ -403,20 +367,6 @@ void Scene::keyReleaseEvent(QKeyEvent *e)
         m_camera = Camera_Jumping;
     else if(key == Qt::Key_S)
         m_exportQueued = true;
-}
-
-void Scene::drawMesh(Mesh *m)
-{
-    if(!m)
-        return;
-    m->draw(m_output, m_meshOutput);
-    if(m_drawNormals)
-        m->drawNormals();
-}
-
-void Scene::drawMesh(QString name)
-{
-    drawMesh(m_meshes.value(name));
 }
 
 void Scene::animate()

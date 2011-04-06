@@ -4,6 +4,7 @@
 #include <cstdio>
 #include "Mesh.h"
 #include "Material.h"
+#include "RenderState.h"
 
 bool fequal(double a, double b)
 {
@@ -154,7 +155,7 @@ void Mesh::computeNormals()
     }
 }
 
-void Mesh::draw(Mesh::OutputMode mode, Mesh *output)
+void Mesh::draw(Mesh::OutputMode mode, RenderState *s, Mesh *output)
 {
     switch(mode)
     {
@@ -166,7 +167,7 @@ void Mesh::draw(Mesh::OutputMode mode, Mesh *output)
         drawImmediate();
         break;
     case Output_Mesh:
-        drawToMesh(output);
+        drawToMesh(output, s);
         break;
     }
 }
@@ -225,9 +226,9 @@ void Mesh::drawVertexList()
     glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void Mesh::drawToMesh(Mesh *out)
+void Mesh::drawToMesh(Mesh *out, RenderState *s)
 {
-    if(!out)
+    if(!out || !s)
         return;
     // determine the end of the indices buffer
     uint maxEnd = 0;
@@ -256,21 +257,21 @@ void Mesh::drawToMesh(Mesh *out)
     {
         if(f.draw && (f.count > 0))
         {
-            drawFaceToMeshCopy(out, destOffset, f);
+            drawFaceToMeshCopy(out, s, destOffset, f);
             out->addFace(f.mode, f.count, destOffset);
             destOffset += f.count;
         }
     }
 }
 
-void Mesh::drawFaceToMeshCopy(Mesh *out, uint destOffset, Face f)
+void Mesh::drawFaceToMeshCopy(Mesh *out, RenderState *s, uint destOffset, Face f)
 {
     QVector<uint> & outIndices = out->indices();
     QVector<QVector3D> & outVertices = out->vertices();
     QVector<QVector3D> & outNormals = out->normals();
     QVector<QVector2D> & outTexCoords = out->texCoords();
-    QMatrix4x4 vMap = currentGLMatrix();
-    QMatrix4x4 nMap = currentGLMatrixForNormals();
+    QMatrix4x4 vMap = s->currentGLMatrix();
+    QMatrix4x4 nMap = s->currentGLMatrixForNormals();
     for(int i = 0; i < f.count; i++, destOffset++)
     {
         uint srcIndex = m_indices.value(f.offset + i);
@@ -279,26 +280,6 @@ void Mesh::drawFaceToMeshCopy(Mesh *out, uint destOffset, Face f)
         outNormals[destOffset] = nMap.map(m_normals.value(srcIndex));
         outTexCoords[destOffset] = m_texCoords.value(srcIndex);
     }
-}
-
-QMatrix4x4 Mesh::currentGLMatrix()
-{
-    float m[4][4];
-    glGetFloatv(GL_MODELVIEW_MATRIX, (float *)m);
-    return QMatrix4x4(m[0][0], m[1][0], m[2][0], m[3][0],
-                     m[0][1], m[1][1], m[2][1], m[3][1],
-                     m[0][2], m[1][2], m[2][2], m[3][2],
-                     m[0][3], m[1][3], m[2][3], m[3][3]);
-}
-
-QMatrix4x4 Mesh::currentGLMatrixForNormals()
-{
-    float m[4][4];
-    glGetFloatv(GL_MODELVIEW_MATRIX, (float *)m);
-    return QMatrix4x4(m[0][0], m[1][0], m[2][0], 0.0,
-                     m[0][1], m[1][1], m[2][1], 0.0,
-                     m[0][2], m[1][2], m[2][2], 0.0,
-                     m[0][3], m[1][3], m[2][3], 1.0);
 }
 
 /* Show the normal for every vertex in the mesh, for debugging purposes. */
