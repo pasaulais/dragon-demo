@@ -1,8 +1,8 @@
 #include <QApplication>
 #include <QGLFormat>
 #include <QMessageBox>
-#include "SimulationWindow.h"
-#include "DragonScene.h"
+#include "SceneViewport.h"
+#include "Scene.h"
 
 int main(int argc, char **argv)
 {
@@ -15,15 +15,15 @@ int main(int argc, char **argv)
     QGLFormat::setDefaultFormat(f);
 
     // load the scene
-    DragonScene scene;
+    Scene scene;
     if(!scene.load())
     {
         QMessageBox::critical(0, "Error", "Could not load the mesh files (they should be in the 'meshes' sub-directory).");
         return 1;
     }
 
-    // create viewport for animating the robot
-    SimulationWindow w(&scene);
+    // create viewport for rendering the scene
+    SceneViewport w(&scene);
     w.setWindowState(Qt::WindowMaximized);
     w.setWindowTitle("Dragons Demo");
     w.show();

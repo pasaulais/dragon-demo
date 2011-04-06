@@ -1,9 +1,9 @@
 #include <GL/gl.h>
 #include <cmath>
 #include "Dragon.h"
-#include "DragonScene.h"
+#include "Scene.h"
 
-Dragon::Dragon(Kind kind, DragonScene *scene) : QObject(scene)
+Dragon::Dragon(Kind kind, Scene *scene) : QObject(scene)
 {
     m_kind = kind;
     theta_jaw = 0.0;
@@ -30,7 +30,7 @@ Dragon::Dragon(Kind kind, DragonScene *scene) : QObject(scene)
     m_scene = scene;
 }
 
-void Dragon::loadMeshes(DragonScene *scene)
+void Dragon::loadMeshes(Scene *scene)
 {
     scene->loadMeshObj("wing_membrane", "meshes/dragon_wing_membrane.obj");
     scene->loadMeshObj("joint", "meshes/dragon_joint_spin.obj");
@@ -403,8 +403,8 @@ void Dragon::drawTailEnd()
 
 void Dragon::animate(float t)
 {
-    theta_jaw = 10.0 * DragonScene::spaced_cos(t, 5.0, 2.0) + 10.0;
-    theta_head_y = 45.0 * DragonScene::spaced_cos(t, 5.0, 2.0);
+    theta_jaw = 10.0 * Scene::spaced_cos(t, 5.0, 2.0) + 10.0;
+    theta_head_y = 45.0 * Scene::spaced_cos(t, 5.0, 2.0);
     theta_neck = 5.0 * cos(t * 3.0);
     theta_wing = 45.0 * cos(t * 3.5);
     theta_wing_joint = 60.0 - 30.0 * fabs(cos(t * 3.5) * cos(t));
@@ -430,8 +430,8 @@ void Dragon::animate(float t)
         theta_neck = 30.0;
         theta_paw = 60.0;
         // this one is definitely having the time of its life
-        theta_head_z = 60.0 * DragonScene::spaced_cos(t, 1.0, 2.0) - 30.0;
-        theta_jaw = 10.0 * DragonScene::spaced_cos(t, 1.0, 2.0) + 10.0;
+        theta_head_z = 60.0 * Scene::spaced_cos(t, 1.0, 2.0) - 30.0;
+        theta_jaw = 10.0 * Scene::spaced_cos(t, 1.0, 2.0) + 10.0;
         break;
     }
 }
