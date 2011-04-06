@@ -40,11 +40,11 @@ void DragonScene::loadTextures()
     if(m_dragons.count() < 3)
         return;
     m_dragons.value(0)->scalesMaterial().loadTextureTIFF("scale_green.tiff");
-    m_dragons.value(0)->wingMaterial().loadTextureTIFF("wing_green.tiff");
+    m_dragons.value(0)->wingMaterial().loadTextureTIFF("scale_green.tiff");
     m_dragons.value(1)->scalesMaterial().loadTextureTIFF("scale_black.tiff");
-    m_dragons.value(1)->wingMaterial().loadTextureTIFF("wing_black.tiff");
+    m_dragons.value(1)->wingMaterial().loadTextureTIFF("scale_black.tiff");
     m_dragons.value(2)->scalesMaterial().loadTextureTIFF("scale_bronze.tiff");
-    m_dragons.value(2)->wingMaterial().loadTextureTIFF("wing_bronze.tiff");
+    m_dragons.value(2)->wingMaterial().loadTextureTIFF("scale_bronze.tiff");
     floor_material.loadTextureTIFF("lava_green.tiff", true);
 }
 
@@ -423,7 +423,7 @@ void DragonScene::drawMesh(QString name)
 void DragonScene::animate()
 {
     clock_t ticks = clock();
-    float t = (float)ticks / (float)CLOCKS_PER_SEC;
+    float t = ((float)ticks / (float)CLOCKS_PER_SEC) * 2.0;
 
     double angle = fmod(t * 45.0, 360.0);
 

@@ -26,14 +26,17 @@ Dragon::Dragon(Kind kind, DragonScene *scene) : QObject(scene)
         QVector4D(1.0, 1.0, 1.0, 1.0), QVector4D(1.0, 1.0, 1.0, 1.0), 20.0);
     m_membraneMaterial = Material(QVector4D(0.1, 0.0, 0.0, 1.0),
         QVector4D(0.6, 0.0, 0.0, 1.0), QVector4D(0.2, 0.2, 0.2, 1.0), 20.0);
-    setDetailLevel(0);
+    setDetailLevel(4);
     m_scene = scene;
 }
 
 void Dragon::loadMeshes(DragonScene *scene)
 {
     scene->loadMeshObj("wing_membrane", "meshes/dragon_wing_membrane.obj");
-    scene->loadMeshObj("joint", "meshes/dragon_joint_x2.obj");
+    scene->loadMeshObj("joint", "meshes/dragon_joint_spin.obj");
+    scene->loadMeshObj("dragon_chest", "meshes/dragon_chest.obj");
+    scene->loadMeshObj("dragon_head", "meshes/dragon_head.obj");
+    scene->loadMeshObj("dragon_tail_end", "meshes/dragon_tail_end.obj");
 }
 
 float Dragon::frontLegsAngle() const
@@ -157,25 +160,7 @@ void Dragon::drawUpper()
 void Dragon::drawHead()
 {
     glPushMatrix();
-        // top of the head
-        glPushMatrix();
-            glScalef(1.0, 1.0, 3.0);
-            m_scene->drawMesh("letter_p");
-        glPopMatrix();
-        // left nostril
-        glPushMatrix();
-            glTranslatef(1.0, 0.49/7.0, -0.10);
-            glScalef(0.33, 0.4, 1.2);
-            glRotatef(180.0, 0.0, 1.0, 0.0);
-            m_scene->drawMesh("letter_p");
-        glPopMatrix();
-        // right nostril
-        glPushMatrix();
-            glTranslatef(1.0, 0.49/7.0, 0.10);
-            glScalef(0.33, 0.4, 1.2);
-            glRotatef(180.0, 0.0, 1.0, 0.0);
-            m_scene->drawMesh("letter_p");
-        glPopMatrix();
+        m_scene->drawMesh("dragon_head");
         // tongue
         glPushMatrix();
             m_tongueMaterial.beginApply();
@@ -248,23 +233,7 @@ void Dragon::drawBody()
 
 void Dragon::drawChest()
 {
-    float step = 360.0 / m_chestParts;
-    for(float theta = 0.0; theta < 359.0; theta += step)
-    {
-        glPushMatrix();
-            glTranslatef(-1.0, 0.0, 0.0);
-            glRotatef(theta, 1.0, 0.0, 0.0);
-            glScalef(2.0, 2.0, 2.0);
-            m_scene->drawMesh("letter_p");
-        glPopMatrix();
-        glPushMatrix();
-            glTranslatef(1.0, 0.0, 0.0);
-            glRotatef(theta, 1.0, 0.0, 0.0);
-            glRotatef(180.0, 0.0, 1.0, 0.0);
-            glScalef(2.0, 2.0, 2.0);
-            m_scene->drawMesh("letter_p");
-        glPopMatrix();
-    }
+    m_scene->drawMesh("dragon_chest");
 }
 
 void Dragon::drawWing()
@@ -429,14 +398,7 @@ void Dragon::drawTail()
 
 void Dragon::drawTailEnd()
 {
-    float step = 360.0 / (m_tailEndParts * 2.0);
-    for(float theta = 0.0; theta < 359.0; theta += step)
-    {
-        glPushMatrix();
-            glRotatef(theta, 1.0, 0.0, 0.0);
-            m_scene->drawMesh("letter_a");
-        glPopMatrix();
-    }
+    m_scene->drawMesh("dragon_tail_end");
 }
 
 void Dragon::animate(float t)
