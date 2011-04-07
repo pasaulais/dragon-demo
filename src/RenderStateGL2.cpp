@@ -14,18 +14,18 @@ RenderStateGL2::RenderStateGL2(QObject *parent) : RenderState(parent)
     m_light0_pos = vec4(0.0, 1.0, 1.0, 0.0);
 }
 
-bool RenderStateGL2::useGL = true;
+bool RenderStateGL2::useGL = false;
+bool RenderStateGL2::testMatrices = true;
 
 void RenderStateGL2::drawMesh(Mesh *m)
 {
     if(!m)
         return;
-    /*glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glMultMatrixf((const GLfloat *)m_matrix[(int)Projection].d);
-    */
     if(!useGL)
     {
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glMultMatrixf((const GLfloat *)m_matrix[(int)Projection].d);
         glMatrixMode(GL_TEXTURE);
         glLoadIdentity();
         glMultMatrixf((const GLfloat *)m_matrix[(int)Texture].d);
@@ -59,7 +59,7 @@ void RenderStateGL2::loadIdentity()
 {
     int i = (int)m_matrixMode;
     m_matrix[i].setIdentity();
-    if(useGL)
+    if(testMatrices)
     {
         glLoadIdentity();
         compareMatrix(ModelView);
@@ -71,7 +71,7 @@ void RenderStateGL2::multiplyMatrix(const matrix4 &m)
 {
     int i = (int)m_matrixMode;
     m_matrix[i] = m_matrix[i] * m;
-    if(useGL)
+    if(testMatrices)
     {
         glMultMatrixf((const GLfloat *)m.d);
         compareMatrix(ModelView);
@@ -83,7 +83,7 @@ void RenderStateGL2::pushMatrix()
 {
     int i = (int)m_matrixMode;
     m_matrixStack[i].append(m_matrix[i]);
-    if(useGL)
+    if(testMatrices)
     {
         glPushMatrix();
         compareMatrix(ModelView);
@@ -95,7 +95,7 @@ void RenderStateGL2::popMatrix()
 {
     int i = (int)m_matrixMode;
     m_matrix[i] = m_matrixStack[i].takeLast();
-    if(useGL)
+    if(testMatrices)
     {
         glPopMatrix();
         compareMatrix(ModelView);
@@ -106,9 +106,8 @@ void RenderStateGL2::popMatrix()
 void RenderStateGL2::translate(float dx, float dy, float dz)
 {
     multiplyMatrix(matrix4::translate(dx, dy, dz));
-    if(useGL)
+    if(testMatrices)
     {
-        //glTranslatef(dx, dy, dz);
         compareMatrix(ModelView);
         compareMatrix(Texture);
     }
@@ -117,9 +116,8 @@ void RenderStateGL2::translate(float dx, float dy, float dz)
 void RenderStateGL2::rotate(float angle, float rx, float ry, float rz)
 {
     multiplyMatrix(matrix4::rotate(angle, rx, ry, rz));
-    if(useGL)
+    if(testMatrices)
     {
-        //glRotatef(angle, rx, ry, rz);
         compareMatrix(ModelView);
         compareMatrix(Texture);
     }
@@ -128,9 +126,8 @@ void RenderStateGL2::rotate(float angle, float rx, float ry, float rz)
 void RenderStateGL2::scale(float sx, float sy, float sz)
 {
     multiplyMatrix(matrix4::scale(sx, sy, sz));
-    if(useGL)
+    if(testMatrices)
     {
-        //glScalef(sx, sy, sz);
         compareMatrix(ModelView);
         compareMatrix(Texture);
     }
@@ -253,7 +250,9 @@ void RenderStateGL2::setupViewport(int w, int h)
 {
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
+    setMatrixMode(Projection);
     glLoadIdentity();
+    loadIdentity();
     if(m_projection)
     {
         gluPerspective(45.0f, (GLfloat)w / (GLfloat)h, 0.1f, 100.0f);
@@ -267,11 +266,10 @@ void RenderStateGL2::setupViewport(int w, int h)
             glOrtho(-1.0 * (GLfloat) w / (GLfloat) h,
                 1.0 * (GLfloat) w / (GLfloat) h, -1.0, 1.0, -10.0, 10.0);
     }
-    /*glMatrixMode(GL_MODELVIEW);
-    setMatrixMode(RenderStateGL2::Projection);
     matrix4 m;
     glGetFloatv(GL_PROJECTION_MATRIX, (float *)m.d);
-    loadIdentity();
-    multiplyMatrix(m);*/
-    setMatrixMode(RenderStateGL2::ModelView);
+    multiplyMatrix(m);
+    glLoadIdentity();
+    glMatrixMode(GL_MODELVIEW);
+    setMatrixMode(ModelView);
 }

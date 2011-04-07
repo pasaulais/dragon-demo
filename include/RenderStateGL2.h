@@ -48,7 +48,7 @@ private:
     matrix4 m_matrix[3];
     QList<matrix4> m_matrixStack[3];
 
-    static bool useGL;
+    static bool useGL, testMatrices;
 };
 
 #endif
