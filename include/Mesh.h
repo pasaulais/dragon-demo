@@ -15,8 +15,6 @@ public:
 
     virtual void addVertices(VertexGroup *vg) = 0;
 
-    virtual void computeNormals();
-
     enum OutputMode
     {
         RenderToScreen,

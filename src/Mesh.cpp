@@ -13,10 +13,6 @@ Mesh::~Mesh()
 {
 }
 
-void Mesh::computeNormals()
-{
-}
-
 /* Show the normal for every vertex in the mesh, for debugging purposes. */
 void Mesh::drawNormals(RenderState *s)
 {
