@@ -270,8 +270,8 @@ void Mesh::drawFaceToMeshCopy(Mesh *out, RenderState *s, uint destOffset, Face f
     QVector<QVector3D> & outVertices = out->vertices();
     QVector<QVector3D> & outNormals = out->normals();
     QVector<QVector2D> & outTexCoords = out->texCoords();
-    QMatrix4x4 vMap = s->currentGLMatrix();
-    QMatrix4x4 nMap = s->currentGLMatrixForNormals();
+    QMatrix4x4 vMap = s->currentMatrix();
+    QMatrix4x4 nMap = s->currentMatrixForNormals();
     for(int i = 0; i < f.count; i++, destOffset++)
     {
         uint srcIndex = m_indices.value(f.offset + i);

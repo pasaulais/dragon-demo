@@ -1,12 +1,13 @@
 INCLUDEPATH += include
 HEADERS = include/SceneViewport.h \
-    include/Dragon.h include/Mesh.h \
-    include/Scene.h include/Material.h \
-    include/RenderState.h
+    include/RenderState.h include/RenderStateGL1.h \
+    include/Mesh.h include/Material.h \
+    include/Dragon.h include/Scene.h
+
 SOURCES = src/main.cpp src/SceneViewport.cpp \
-    src/Dragon.cpp src/Mesh.cpp \
-    src/Scene.cpp src/Material.cpp \
-    src/RenderState.cpp
+    src/RenderState.cpp src/RenderStateGL1.cpp \
+    src/Mesh.cpp src/Material.cpp \
+    src/Scene.cpp src/Dragon.cpp
 LIBS += -lm -ltiff
 
 QMAKE_CFLAGS_DEBUG += -std=c99

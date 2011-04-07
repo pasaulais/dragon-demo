@@ -9,12 +9,13 @@
 #include "Scene.h"
 #include "Material.h"
 #include "RenderState.h"
+#include "RenderStateGL1.h"
 
 SceneViewport::SceneViewport(const QGLFormat &format, QWidget *parent) : QGLWidget(format, parent)
 {
     setMinimumSize(640, 480);
     m_scene = 0;
-    m_state = new RenderState(this);
+    m_state = new RenderStateGL1(this);
     m_renderTimer = new QTimer(this);
     m_renderTimer->setInterval(1000 / 60);
     m_start = 0;

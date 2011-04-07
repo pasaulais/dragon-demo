@@ -5,7 +5,6 @@
 #include <QMatrix4x4>
 #include <QColor>
 #include <QMap>
-#include <QList>
 #include "Mesh.h"
 #include "Material.h"
 
@@ -14,25 +13,25 @@ class RenderState : public QObject
 public:
     RenderState(QObject *parent = 0);
 
-    bool drawNormals() const;
-    void toggleNormals();
-    void toggleWireframe();
-    void toggleProjection();
+    virtual bool drawNormals() const;
+    virtual void toggleNormals();
+    virtual void toggleWireframe();
+    virtual void toggleProjection();
 
-    void reset();
+    virtual void reset();
 
     // mesh operations
-    void drawMesh(Mesh *m);
-    void drawMesh(QString name);
+    virtual void drawMesh(Mesh *m) = 0;
+    virtual void drawMesh(QString name);
 
-    void beginExportMesh(QString path);
-    void endExportMesh();
+    virtual void beginExportMesh(QString path);
+    virtual void endExportMesh();
 
-    QMap<QString, Mesh *> & meshes();
-    const QMap<QString, Mesh *> & meshes() const;
+    virtual QMap<QString, Mesh *> & meshes();
+    virtual const QMap<QString, Mesh *> & meshes() const;
 
-    Mesh * loadMeshObj(QString name, QString path);
-    Mesh * loadMeshStl(QString name, QString path);
+    virtual Mesh * loadMeshObj(QString name, QString path);
+    virtual Mesh * loadMeshStl(QString name, QString path);
 
     // matrix operations
 
@@ -43,43 +42,35 @@ public:
         Texture
     };
 
-    void setMatrixMode(MatrixMode newMode);
+    virtual void setMatrixMode(MatrixMode newMode) = 0;
 
-    void loadIdentity();
-    void pushMatrix();
-    void popMatrix();
+    virtual void loadIdentity() = 0;
+    virtual void pushMatrix() = 0;
+    virtual void popMatrix() = 0;
 
-    void translate(float dx, float dy, float dz);
-    void rotate(float angle, float rx, float ry, float rz);
-    void scale(float sx, float sy, float sz);
+    virtual void translate(float dx, float dy, float dz) = 0;
+    virtual void rotate(float angle, float rx, float ry, float rz) = 0;
+    virtual void scale(float sx, float sy, float sz) = 0;
 
-    QMatrix4x4 currentGLMatrix() const;
-    QMatrix4x4 currentGLMatrixForNormals() const;
+    virtual QMatrix4x4 currentMatrix() const = 0;
+    virtual QMatrix4x4 currentMatrixForNormals() const = 0;
 
     // general state operations
-    void beginFrame(int width, int heigth);
-    void setupViewport(int width, int heigth);
-    void endFrame();
+    virtual void beginFrame(int width, int heigth) = 0;
+    virtual void setupViewport(int width, int heigth) = 0;
+    virtual void endFrame() = 0;
 
     // material operations
 
-    void pushMaterial(const Material &m);
-    void popMaterial();
+    virtual void pushMaterial(const Material &m) = 0;
+    virtual void popMaterial() = 0;
 
-private:
-    void beginApplyMaterial(const Material &m);
-    void endApplyMaterial();
-
+protected:
     Mesh::OutputMode m_output;
     bool m_drawNormals;
     bool m_projection;
     bool m_wireframe;
     QColor m_bgColor;
-    QVector4D m_ambient0;
-    QVector4D m_diffuse0;
-    QVector4D m_specular0;
-    QVector4D m_light0_pos;
-
     Mesh *m_meshOutput;
     QMap<QString, Mesh *> m_meshes;
 
@@ -87,7 +78,6 @@ private:
     bool m_exporting;
     QString m_exportPath;
     Mesh::OutputMode m_oldOutput;
-    QList<Material> m_materialStack;
 };
 
 class StateObject : public QObject
