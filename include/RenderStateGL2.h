@@ -8,6 +8,9 @@ class RenderStateGL2 : public RenderState
 {
 public:
     RenderStateGL2(QObject *parent = 0);
+    virtual ~RenderStateGL2();
+
+    virtual void init();
 
     virtual void drawMesh(Mesh *m);
 
@@ -38,6 +41,9 @@ private:
     void beginApplyMaterial(const Material &m);
     void endApplyMaterial();
     void compareMatrix(RenderState::MatrixMode mode) const;
+    char * loadShaderSource(const char *path) const;
+    uint loadShader(const char *path, uint type) const;
+    bool loadShaders();
 
     vec4 m_ambient0;
     vec4 m_diffuse0;
@@ -47,8 +53,11 @@ private:
     RenderState::MatrixMode m_matrixMode;
     matrix4 m_matrix[3];
     QList<matrix4> m_matrixStack[3];
-
-    static bool useGL, testMatrices;
+    uint m_vertexShader;
+    uint m_pixelShader;
+    uint m_program;
+    int m_modelViewMatrixLoc;
+    int m_projMatrixLoc;
 };
 
 #endif

@@ -15,3 +15,7 @@ QMAKE_CFLAGS_DEBUG += -std=c99
 TARGET = glinitials
 CONFIG += qt warn_on debug thread
 QT += opengl
+
+OTHER_FILES += \
+    fragment.glsl \
+    vertex.glsl

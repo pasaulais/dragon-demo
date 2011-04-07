@@ -13,6 +13,8 @@ class RenderState : public QObject
 public:
     RenderState(QObject *parent = 0);
 
+    virtual void init();
+
     virtual bool drawNormals() const;
     virtual void toggleNormals();
     virtual void toggleWireframe();

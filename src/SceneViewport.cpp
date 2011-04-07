@@ -68,6 +68,7 @@ void SceneViewport::setScene(Scene *newScene)
 
 void SceneViewport::initializeGL()
 {
+    m_state->init();
     if(m_scene)
         m_scene->loadTextures();
     resetCamera();

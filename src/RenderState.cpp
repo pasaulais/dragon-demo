@@ -94,6 +94,10 @@ void RenderState::endExportMesh()
     m_exporting = false;
 }
 
+void RenderState::init()
+{
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 StateObject::StateObject(RenderState *s, QObject *parent) : QObject(parent)
