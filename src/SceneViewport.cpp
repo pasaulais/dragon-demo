@@ -22,13 +22,7 @@ SceneViewport::SceneViewport(const QGLFormat &format, QWidget *parent) : QGLWidg
     m_lastFPS = 0;
     m_fpsTimer = new QTimer(this);
     m_fpsTimer->setInterval(1000 / 6);
-    //m_bgColor = palette().color(QPalette::Background);
     setAutoFillBackground(false);
-    m_bgColor = QColor::fromRgbF(0.6, 0.6, 1.0, 1.0);
-    m_ambient0 = QVector4D(1.0, 1.0, 1.0, 1.0);
-    m_diffuse0 = QVector4D(1.0, 1.0, 1.0, 1.0);
-    m_specular0 = QVector4D(1.0, 1.0, 1.0, 1.0);
-    m_light0_pos = QVector4D(0.0, 1.0, 1.0, 0.0);
     connect(m_fpsTimer, SIGNAL(timeout()), this, SLOT(updateFPS()));
 }
 
@@ -74,60 +68,12 @@ void SceneViewport::initializeGL()
 {
     if(m_scene)
         m_scene->loadTextures();
-    reset_camera();
+    resetCamera();
 }
 
 void SceneViewport::resizeGL(int w, int h)
 {
-    setupGLViewport(w, h);
-}
-
-void SceneViewport::setupGLState()
-{
-    glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT);
-    glEnable(GL_DEPTH_TEST);
-    // we do non-uniform scaling and not all normals are one-unit-length
-    glEnable(GL_NORMALIZE);
-    glShadeModel(GL_SMOOTH);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glLightfv(GL_LIGHT0, GL_POSITION, (GLfloat *)&m_light0_pos);
-    glLightfv(GL_LIGHT0, GL_AMBIENT, (GLfloat *)&m_ambient0);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, (GLfloat *)&m_diffuse0);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, (GLfloat *)&m_specular0);
-    glPolygonMode(GL_FRONT_AND_BACK, m_wireframe_mode ? GL_LINE : GL_FILL);
-    setupGLViewport(width(), height());
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-}
-
-void SceneViewport::restoreGLState()
-{
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glPopAttrib();
-}
-
-void SceneViewport::setupGLViewport(int w, int h)
-{
-    glViewport(0, 0, w, h);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    if(m_projection_mode)
-    {
-        gluPerspective(45.0f, (GLfloat)w / (GLfloat)h, 0.1f, 100.0f);
-    }
-    else
-    {
-        if (w <= h)
-            glOrtho(-1.0, 1.0, -1.0 * (GLfloat) h / (GLfloat) w,
-                1.0 * (GLfloat) h / (GLfloat) w, -10.0, 10.0);
-        else
-            glOrtho(-1.0 * (GLfloat) w / (GLfloat) h,
-                1.0 * (GLfloat) w / (GLfloat) h, -1.0, 1.0, -10.0, 10.0);
-    }
-    glMatrixMode(GL_MODELVIEW);
+    m_state->setupViewport(w, h);
 }
 
 void SceneViewport::paintEvent(QPaintEvent *)
@@ -142,156 +88,37 @@ void SceneViewport::paintEvent(QPaintEvent *)
 
 void SceneViewport::paintGL()
 {
-    setupGLState();
-    glClearColor(m_bgColor.redF(), m_bgColor.greenF(), m_bgColor.blueF(), 1.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // determine which rotation to apply from both the user and the scene
+    m_state->beginFrame(width(), height());
     QVector3D rot = m_theta;
     if(m_scene)
         rot += m_scene->orientation();
-    m_state->setMatrixMode(RenderState::ModelView);
-    m_state->pushMatrix();
-        glLoadIdentity();
-        glTranslatef(m_delta.x(), m_delta.y(), m_delta.z());
-        glRotatef(rot.x(), 1.0, 0.0, 0.0);
-        glRotatef(rot.y(), 0.0, 1.0, 0.0);
-        glRotatef(rot.z(), 0.0, 0.0, 1.0);
-        glScalef(m_sigma, m_sigma, m_sigma);
-        if(m_scene)
-            m_scene->draw();
-        if(m_draw_axes)
-            draw_axes();
-        if(m_draw_grids)
-            draw_axis_grids(true, true, true);
-    m_state->popMatrix();
-    glFlush();
-    restoreGLState();
+    m_state->translate((float)m_delta.x(), (float)m_delta.y(), (float)m_delta.z());
+    m_state->rotate((float)rot.x(), 1.0, 0.0, 0.0);
+    m_state->rotate((float)rot.y(), 0.0, 1.0, 0.0);
+    m_state->rotate((float)rot.z(), 0.0, 0.0, 1.0);
+    m_state->scale(m_sigma, m_sigma, m_sigma);
+    if(m_scene)
+        m_scene->draw();
+    m_state->endFrame();
 }
 
-void SceneViewport::draw_axis()
-{
-    glLineWidth(3.0);
-    glBegin(GL_LINES);
-        glVertex3f(0.0, 0.0, 0.0);
-        glVertex3f(0.8, 0.0, 0.0);
-    glEnd();
-    glLineWidth(1.0);
-
-    glPushMatrix();
-        glTranslatef(0.8, 0.0, 0.0);
-        glRotatef(90.0, 0.0, 1.0, 0.0);
-        //glutSolidCone(0.04, 0.2, 10, 10);
-    glPopMatrix();
-}
-
-void SceneViewport::draw_axes()
-{
-    Material m;
-    glPushMatrix();
-        // X axis
-        m.setAmbient(QVector4D(1.0, 0.0, 0.0, 1.0));
-        m_state->pushMaterial(m);
-        draw_axis();
-        m_state->popMaterial();
-        // Y axis
-        m.setAmbient(QVector4D(0.0, 1.0, 0.0, 1.0));
-        m_state->pushMaterial(m);
-        glRotatef(90.0, 0.0, 0.0, 1.0);
-        draw_axis();
-        m_state->popMaterial();
-        // Z axis
-        m.setAmbient(QVector4D(0.0, 0.0, 1.0, 1.0));
-        m_state->pushMaterial(m);
-        glRotatef(-90.0, 0.0, 1.0, 0.0);
-        draw_axis();
-        m_state->popMaterial();
-    glPopMatrix();
-}
-
-void SceneViewport::draw_axis_grids(bool draw_x, bool draw_y, bool draw_z)
-{
-    static Material m(QVector4D(0.0, 0.0, 0.0, 1.0), QVector4D(0.0, 0.0, 0.0, 1.0),
-                      QVector4D(0.0, 0.0, 0.0, 0.0), 0.0);
-
-    m_state->pushMaterial(m);
-    if(draw_x)
-    {
-        draw_axis_grid();
-    }
-
-    if(draw_y)
-    {
-        glPushMatrix();
-            glRotatef(-90.0, 1.0, 0.0, 0.0);
-            draw_axis_grid();
-        glPopMatrix();
-    }
-
-    if(draw_z)
-    {
-        glPushMatrix();
-            glRotatef(90.0, 0.0, 1.0, 0.0);
-            glRotatef(180.0, 0.0, 0.0, 1.0);
-            draw_axis_grid();
-        glPopMatrix();
-    }
-    m_state->popMaterial();
-}
-
-void SceneViewport::draw_axis_grid()
-{
-    glLineStipple(1, 0xAAAA); //line style = fine dots
-    glEnable(GL_LINE_STIPPLE);
-    glBegin(GL_LINES);
-    for(int i = -10; i <= 10; i++)
-    {
-        if(i != 0)
-        {
-            glVertex3f(-1.0 * i, -10.0, 0.0);
-            glVertex3f(-1.0 * i, 10.0, 0.0);
-            glVertex3f(-10.0, -1.0 * i, 0.0);
-            glVertex3f(10.0, -1.0 * i, 0.0);
-        }
-    }
-    glEnd();
-    glDisable(GL_LINE_STIPPLE);
-
-    glLineWidth(3.0);
-    glBegin(GL_LINES);
-        glVertex3f(0.0, -10.0, 0.0);
-        glVertex3f(0.0, -1.0, 0.0);
-        glVertex3f(0.0, 0.0, 0.0);
-        glVertex3f(0.0, 10.0, 0.0);
-        glVertex3f(-10.0, 0.0, 0.0);
-        glVertex3f(0.0, 0.0, 0.0);
-        glVertex3f(1.0, 0.0, 0.0);
-        glVertex3f(10.0, 0.0, 0.0);
-    glEnd();
-    glLineWidth(1.0);
-}
-
-void SceneViewport::reset_camera()
+void SceneViewport::resetCamera()
 {
     m_delta = QVector3D(-0.0, -0.5, -5.0);
     m_theta = QVector3D(21.0, -37.0, 0.0);
-    m_trans_state.last = QVector3D();
-    m_rot_state.last = QVector3D();
-    m_trans_state.active = false;
-    m_rot_state.active = false;
+    m_transState.last = QVector3D();
+    m_rotState.last = QVector3D();
+    m_transState.active = false;
+    m_rotState.active = false;
     m_sigma = 0.40;
     m_animate = true;
-    m_draw_axes = false;
-    m_draw_grids = false;
-    m_wireframe_mode = false;
-    m_projection_mode = true;
     m_state->reset();
     if(m_scene)
         m_scene->reset();
     updateAnimationState();
 }
 
-void SceneViewport::toggle_animation()
+void SceneViewport::toggleAnimation()
 {
     m_animate = !m_animate;
     if(m_animate)
@@ -300,17 +127,17 @@ void SceneViewport::toggle_animation()
         m_renderTimer->stop();
 }
 
-void SceneViewport::top_view()
+void SceneViewport::topView()
 {
     m_theta = QVector3D(0.0, 0.0, 0.0);
 }
 
-void SceneViewport::side_view()
+void SceneViewport::sideView()
 {
     m_theta = QVector3D(-90.0, 0.0, -90.0);
 }
 
-void SceneViewport::front_view()
+void SceneViewport::frontView()
 {
     m_theta = QVector3D(-90.0, 0.0, 0.0);
 }
@@ -370,23 +197,19 @@ void SceneViewport::keyReleaseEvent(QKeyEvent *e)
     else if(key == Qt::Key_6)
         m_theta.setZ(m_theta.z() - 5.0);
     else if(key == Qt::Key_R)
-        reset_camera();
-    else if(key == Qt::Key_Period)
-        m_draw_axes = !m_draw_axes;
-    else if(key == Qt::Key_G)
-        m_draw_grids = !m_draw_grids;
+        resetCamera();
     else if(key == Qt::Key_Z)
-        m_wireframe_mode = !m_wireframe_mode;
+        m_state->toggleWireframe();
     else if(key == Qt::Key_P)
-        m_projection_mode = !m_projection_mode;
+        m_state->toggleProjection();
     else if(key == Qt::Key_Space)
-		toggle_animation();
+        toggleAnimation();
 	else if(key == Qt::Key_7)
-		top_view();
+        topView();
 	else if(key == Qt::Key_3)
-		side_view();
+        sideView();
 	else if(key == Qt::Key_1)
-		front_view();
+        frontView();
     else if(m_scene)
         m_scene->keyReleaseEvent(e);
     QGLWidget::keyReleaseEvent(e);
@@ -398,21 +221,21 @@ void SceneViewport::mouseMoveEvent(QMouseEvent *e)
     int x = e->x();
     int y = e->y();
     
-    if(m_trans_state.active)
+    if(m_transState.active)
     {
-        int dx = m_trans_state.x0 - x;
-        int dy = m_trans_state.y0 - y;
-        m_delta.setX(m_trans_state.last.x() - (dx / 100.0));
-        m_delta.setY(m_trans_state.last.y() + (dy / 100.0));
+        int dx = m_transState.x0 - x;
+        int dy = m_transState.y0 - y;
+        m_delta.setX(m_transState.last.x() - (dx / 100.0));
+        m_delta.setY(m_transState.last.y() + (dy / 100.0));
         update();
     }
     
-    if(m_rot_state.active)
+    if(m_rotState.active)
     {
-        int dx = m_rot_state.x0 - x;
-        int dy = m_rot_state.y0 - y;
-        m_theta.setX(m_rot_state.last.x() + (dy * 2.0));
-        m_theta.setY(m_rot_state.last.y() + (dx * 2.0));
+        int dx = m_rotState.x0 - x;
+        int dy = m_rotState.y0 - y;
+        m_theta.setX(m_rotState.last.x() + (dy * 2.0));
+        m_theta.setY(m_rotState.last.y() + (dx * 2.0));
         update();
     }
 }
@@ -423,17 +246,17 @@ void SceneViewport::mousePressEvent(QMouseEvent *e)
     int y = e->y();
     if(e->button() & Qt::MiddleButton)       // middle button pans the scene
     {
-        m_trans_state.active = true;
-        m_trans_state.x0 = x;
-        m_trans_state.y0 = y;
-        m_trans_state.last = m_delta;
+        m_transState.active = true;
+        m_transState.x0 = x;
+        m_transState.y0 = y;
+        m_transState.last = m_delta;
     }
     else if(e->button() & Qt::LeftButton)   // left button rotates the scene
     {
-        m_rot_state.active = true;
-        m_rot_state.x0 = x;
-        m_rot_state.y0 = y;
-        m_rot_state.last = m_theta;
+        m_rotState.active = true;
+        m_rotState.x0 = x;
+        m_rotState.y0 = y;
+        m_rotState.last = m_theta;
 		setFocus();
     }
     else
@@ -448,9 +271,9 @@ void SceneViewport::mousePressEvent(QMouseEvent *e)
 void SceneViewport::mouseReleaseEvent(QMouseEvent *e)
 {
     if(e->button() & Qt::MiddleButton)
-        m_trans_state.active = false;
+        m_transState.active = false;
     else if(e->button() & Qt::LeftButton)
-        m_rot_state.active = false;
+        m_rotState.active = false;
     else
     {
         e->ignore();

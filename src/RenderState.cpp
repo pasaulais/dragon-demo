@@ -1,4 +1,5 @@
 #include <GL/gl.h>
+#include <GL/glu.h>
 #include "RenderState.h"
 
 RenderState::RenderState(QObject *parent) : QObject(parent)
@@ -6,6 +7,11 @@ RenderState::RenderState(QObject *parent) : QObject(parent)
     m_meshOutput = 0;
     m_exporting = false;
     m_oldOutput = m_output;
+    m_bgColor = QColor::fromRgbF(0.6, 0.6, 1.0, 1.0);
+    m_ambient0 = QVector4D(1.0, 1.0, 1.0, 1.0);
+    m_diffuse0 = QVector4D(1.0, 1.0, 1.0, 1.0);
+    m_specular0 = QVector4D(1.0, 1.0, 1.0, 1.0);
+    m_light0_pos = QVector4D(0.0, 1.0, 1.0, 0.0);
     reset();
 }
 
@@ -45,10 +51,22 @@ void RenderState::toggleNormals()
     m_drawNormals = !m_drawNormals;
 }
 
+void RenderState::toggleWireframe()
+{
+    m_wireframe = !m_wireframe;
+}
+
+void RenderState::toggleProjection()
+{
+    m_projection = !m_projection;
+}
+
 void RenderState::reset()
 {
     m_output = Mesh::Output_VertexList;
     m_drawNormals = false;
+    m_projection = true;
+    m_wireframe = false;
 }
 
 void RenderState::drawMesh(Mesh *m)
@@ -72,8 +90,8 @@ void RenderState::beginExportMesh(QString path)
     m_exporting = true;
     m_exportPath = path;
     m_oldOutput = m_output;
-    glPushMatrix();
-    glLoadIdentity();
+    pushMatrix();
+    loadIdentity();
     m_output = Mesh::Output_Mesh;
     m_meshOutput = new Mesh();
 }
@@ -82,7 +100,7 @@ void RenderState::endExportMesh()
 {
     if(!m_exporting)
         return;
-    glPopMatrix();
+    popMatrix();
     m_output = m_oldOutput;
     m_meshOutput->saveObj(m_exportPath);
     delete m_meshOutput;
@@ -105,6 +123,11 @@ void RenderState::setMatrixMode(RenderState::MatrixMode newMode)
         glMatrixMode(GL_TEXTURE);
         break;
     }
+}
+
+void RenderState::loadIdentity()
+{
+    glLoadIdentity();
 }
 
 void RenderState::pushMatrix()
@@ -182,11 +205,68 @@ void RenderState::endApplyMaterial()
     glPopAttrib();
 }
 
+void RenderState::beginFrame(int w, int h)
+{
+    glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT);
+    glEnable(GL_DEPTH_TEST);
+    // we do non-uniform scaling and not all normals are one-unit-length
+    glEnable(GL_NORMALIZE);
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glLightfv(GL_LIGHT0, GL_POSITION, (GLfloat *)&m_light0_pos);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, (GLfloat *)&m_ambient0);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, (GLfloat *)&m_diffuse0);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, (GLfloat *)&m_specular0);
+    glPolygonMode(GL_FRONT_AND_BACK, m_wireframe ? GL_LINE : GL_FILL);
+    setupViewport(w, h);
+    setMatrixMode(RenderState::ModelView);
+    pushMatrix();
+    loadIdentity();
+    glClearColor(m_bgColor.redF(), m_bgColor.greenF(), m_bgColor.blueF(), 1.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void RenderState::endFrame()
+{
+    glFlush();
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    setMatrixMode(RenderState::ModelView);
+    popMatrix();
+    glPopAttrib();
+}
+
+void RenderState::setupViewport(int w, int h)
+{
+    glViewport(0, 0, w, h);
+    setMatrixMode(RenderState::Projection);
+    loadIdentity();
+    if(m_projection)
+    {
+        gluPerspective(45.0f, (GLfloat)w / (GLfloat)h, 0.1f, 100.0f);
+    }
+    else
+    {
+        if (w <= h)
+            glOrtho(-1.0, 1.0, -1.0 * (GLfloat) h / (GLfloat) w,
+                1.0 * (GLfloat) h / (GLfloat) w, -10.0, 10.0);
+        else
+            glOrtho(-1.0 * (GLfloat) w / (GLfloat) h,
+                1.0 * (GLfloat) w / (GLfloat) h, -1.0, 1.0, -10.0, 10.0);
+    }
+    setMatrixMode(RenderState::ModelView);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 StateObject::StateObject(RenderState *s, QObject *parent) : QObject(parent)
 {
     m_state = s;
+}
+
+void StateObject::loadIdentity()
+{
+    m_state->loadIdentity();
 }
 
 void StateObject::pushMatrix()

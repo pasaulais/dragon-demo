@@ -48,47 +48,27 @@ private slots:
     void updateFPS();
 
 private:
-    void setupGLState();
-    void setupGLViewport(int w, int h);
-    void restoreGLState();
     void paintFPS(QPainter *p, float fps);
     void startFPS();
     void updateAnimationState();
-    void draw_axis();
-    void draw_axes();
-    void draw_axis_grids(bool draw_x, bool draw_y, bool draw_z);
-    void draw_axis_grid();
-
-    void reset_camera();
-    void top_view();
-    void side_view();
-    void front_view();
-
-    void toggle_animation();
+    void toggleAnimation();
+    void resetCamera();
+    void topView();
+    void sideView();
+    void frontView();
 
     Scene *m_scene;
-    QTimer *m_renderTimer;
-    QColor m_bgColor;
-
     RenderState *m_state;
-
-    QVector4D m_ambient0;
-    QVector4D m_diffuse0;
-    QVector4D m_specular0;
-    QVector4D m_light0_pos;
+    QTimer *m_renderTimer;
 
     // viewer settings
     QVector3D m_delta;
     QVector3D m_theta;
     float m_sigma;
-    MouseState m_trans_state;
-    MouseState m_rot_state;
-    // on/off settings
-    bool m_draw_axes;
-    bool m_draw_grids;
+    MouseState m_transState;
+    MouseState m_rotState;
     bool m_animate;
-    bool m_wireframe_mode;
-    bool m_projection_mode;
+
     // FPS settings
     QTimer *m_fpsTimer;
     clock_t m_start;
