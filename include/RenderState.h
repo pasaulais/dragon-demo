@@ -4,7 +4,9 @@
 #include <QObject>
 #include <QMatrix4x4>
 #include <QMap>
+#include <QList>
 #include "Mesh.h"
+#include "Material.h"
 
 class RenderState : public QObject
 {
@@ -47,7 +49,13 @@ public:
     QMatrix4x4 currentGLMatrix() const;
     QMatrix4x4 currentGLMatrixForNormals() const;
 
+    void pushMaterial(const Material &m);
+    void popMaterial();
+
 private:
+    void beginApplyMaterial(const Material &m);
+    void endApplyMaterial();
+
     Mesh::OutputMode m_output;
     bool m_drawNormals;
     Mesh *m_meshOutput;
@@ -56,7 +64,7 @@ private:
     bool m_exporting;
     QString m_exportPath;
     Mesh::OutputMode m_oldOutput;
-    // material stack?
+    QList<Material> m_materialStack;
 };
 
 class StateObject : public QObject
@@ -73,6 +81,9 @@ public:
 
     void drawMesh(Mesh *m);
     void drawMesh(QString name);
+
+    void pushMaterial(const Material &m);
+    void popMaterial();
 
 protected:
     RenderState *m_state;

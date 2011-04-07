@@ -191,21 +191,21 @@ void SceneViewport::draw_axes()
     glPushMatrix();
         // X axis
         m.setAmbient(QVector4D(1.0, 0.0, 0.0, 1.0));
-        m.beginApply();
+        m_state->pushMaterial(m);
         draw_axis();
-        m.endApply();
+        m_state->popMaterial();
         // Y axis
         m.setAmbient(QVector4D(0.0, 1.0, 0.0, 1.0));
-        m.beginApply();
+        m_state->pushMaterial(m);
         glRotatef(90.0, 0.0, 0.0, 1.0);
         draw_axis();
-        m.endApply();
+        m_state->popMaterial();
         // Z axis
         m.setAmbient(QVector4D(0.0, 0.0, 1.0, 1.0));
-        m.beginApply();
+        m_state->pushMaterial(m);
         glRotatef(-90.0, 0.0, 1.0, 0.0);
         draw_axis();
-        m.endApply();
+        m_state->popMaterial();
     glPopMatrix();
 }
 
@@ -214,7 +214,7 @@ void SceneViewport::draw_axis_grids(bool draw_x, bool draw_y, bool draw_z)
     static Material m(QVector4D(0.0, 0.0, 0.0, 1.0), QVector4D(0.0, 0.0, 0.0, 1.0),
                       QVector4D(0.0, 0.0, 0.0, 0.0), 0.0);
 
-    m.beginApply();
+    m_state->pushMaterial(m);
     if(draw_x)
     {
         draw_axis_grid();
@@ -236,7 +236,7 @@ void SceneViewport::draw_axis_grids(bool draw_x, bool draw_y, bool draw_z)
             draw_axis_grid();
         glPopMatrix();
     }
-    m.endApply();
+    m_state->popMaterial();
 }
 
 void SceneViewport::draw_axis_grid()

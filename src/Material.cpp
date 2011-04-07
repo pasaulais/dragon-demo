@@ -21,9 +21,49 @@ Material::Material(QVector4D ambient, QVector4D diffuse, QVector4D specular, flo
     m_texture = 0;
 }
 
+const QVector4D & Material::ambient() const
+{
+    return m_ambient;
+}
+
+const QVector4D & Material::diffuse() const
+{
+    return m_diffuse;
+}
+
+const QVector4D & Material::specular() const
+{
+    return m_specular;
+}
+
+float Material::shine() const
+{
+    return m_shine;
+}
+
 void Material::setAmbient(const QVector4D &ambient)
 {
     m_ambient = ambient;
+}
+
+void Material::setDiffuse(const QVector4D &diffuse)
+{
+    m_diffuse = diffuse;
+}
+
+void Material::setSpecular(const QVector4D &specular)
+{
+    m_specular = specular;
+}
+
+void Material::setShine(float shine)
+{
+    m_shine = shine;
+}
+
+uint Material::texture() const
+{
+    return m_texture;
 }
 
 void Material::setTexture(uint texture)
@@ -40,17 +80,6 @@ void Material::freeTexture()
     }
 }
 
-void Material::beginApply()
-{
-    glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT | GL_LIGHTING_BIT);
-    glMaterialfv(GL_FRONT, GL_AMBIENT, (GLfloat *)&m_ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, (GLfloat *)&m_diffuse);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, (GLfloat *)&m_specular);
-    glMaterialf(GL_FRONT, GL_SHININESS, m_shine);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, m_texture);
-}
-
 void Material::setTextureParams(uint target, bool mipmaps)
 {
     if(mipmaps)
@@ -60,11 +89,6 @@ void Material::setTextureParams(uint target, bool mipmaps)
     glTexParameterf(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameterf(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-}
-
-void Material::endApply()
-{
-    glPopAttrib();
 }
 
 void Material::loadTextureTIFF(QString path, bool mipmaps)

@@ -101,7 +101,7 @@ void Scene::drawItem(Scene::Item item)
     }
     else
     {
-        debug_material.beginApply();
+        pushMaterial(debug_material);
         switch(item)
         {
         case LETTER_P:
@@ -159,8 +159,7 @@ void Scene::drawItem(Scene::Item item)
             m_debugDragon->drawTailEnd();
             break;
         }
-        debug_material.endApply();
-
+        popMaterial();
     }
     popMatrix();
 }
@@ -267,12 +266,12 @@ void Scene::drawScene()
 
 void Scene::drawFloor()
 {
-    floor_material.beginApply();
+    pushMaterial(floor_material);
     pushMatrix();
         scale(1.0, 0.001, 1.0);
         drawMesh("floor");
     popMatrix();
-    floor_material.endApply();
+    popMaterial();
 }
 
 void Scene::drawDragonHoldingA(Dragon *d)
@@ -287,9 +286,9 @@ void Scene::drawDragonHoldingA(Dragon *d)
             rotate(15.0, 0.0, 1.0, 0.0);
             rotate(-d->frontLegsAngle(), 0.0, 0.0, 1.0);
             scale(2.0/3.0, 2.0/3.0, 1.0/3.0);
-            d->tongueMaterial().beginApply();
+            pushMaterial(d->tongueMaterial());
             drawMesh("letter_a");
-            d->tongueMaterial().endApply();
+            popMaterial();
         popMatrix();
     popMatrix();
 }
@@ -304,9 +303,9 @@ void Scene::drawDragonHoldingP(Dragon *d)
             translate(0.2, -0.1, 0.0);
             rotate(-170, 0.0, 0.0, 1.0);
             scale(1.0, 1.0, 0.5);
-            d->tongueMaterial().beginApply();
+            pushMaterial(d->tongueMaterial());
             drawMesh("letter_p");
-            d->tongueMaterial().endApply();
+            popMaterial();
         popMatrix();
     popMatrix();
 }
@@ -321,9 +320,9 @@ void Scene::drawDragonHoldingS(Dragon *d)
             // need to change the center of the rotation
             translate(-0.4, 0.1, 0.0);
             scale(1.0, 1.0, 0.5);
-            d->tongueMaterial().beginApply();
+            pushMaterial(d->tongueMaterial());
             drawMesh("letter_s");
-            d->tongueMaterial().endApply();
+            popMaterial();
         popMatrix();
     popMatrix();
 }

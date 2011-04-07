@@ -283,13 +283,13 @@ void Mesh::drawFaceToMeshCopy(Mesh *out, RenderState *s, uint destOffset, Face f
 }
 
 /* Show the normal for every vertex in the mesh, for debugging purposes. */
-void Mesh::drawNormals()
+void Mesh::drawNormals(RenderState *s)
 {
     static Material mat(QVector4D(1.0, 1.0, 1.0, 1.0),
         QVector4D(0.0, 0.0, 0.0, 1.0), QVector4D(0.0, 0.0, 0.0, 1.0), 0.0);
     if(m_normals.count() == 0)
         return;
-    mat.beginApply();
+    s->pushMaterial(mat);
     glLineWidth(3.0);
     glBegin(GL_LINES);
     foreach(Face face, m_faces)
@@ -307,7 +307,7 @@ void Mesh::drawNormals()
     }
     glEnd();
     glLineWidth(1.0);
-    mat.endApply();
+    s->popMaterial();
 }
 
 Mesh * Mesh::loadStl(const char *path, QObject *parent, bool compute_normals)

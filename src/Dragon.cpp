@@ -113,7 +113,7 @@ Material & Dragon::membraneMaterial()
 
 void Dragon::draw()
 {
-    m_scalesMaterial.beginApply();
+    pushMaterial(m_scalesMaterial);
     pushMatrix();
         scale(1.0/3.0, 1.0/3.0, 1.0/3.0);
         pushMatrix();
@@ -136,7 +136,7 @@ void Dragon::draw()
             drawTail();
         popMatrix();
     popMatrix();
-    m_scalesMaterial.endApply();
+    popMaterial();
 }
 
 void Dragon::drawUpper()
@@ -162,12 +162,12 @@ void Dragon::drawHead()
         drawMesh("dragon_head");
         // tongue
         pushMatrix();
-            m_tongueMaterial.beginApply();
+            pushMaterial(m_tongueMaterial);
             translate(0.1, 0.0, 0.0);
             rotate(-theta_jaw, 0.0, 0.0, 1.0);
             scale(0.9, 0.9, 0.9);
             drawTongue();
-            m_tongueMaterial.endApply();
+            popMaterial();
         popMatrix();
         // jaw
         pushMatrix();
@@ -210,7 +210,7 @@ void Dragon::drawBody()
         popMatrix();
         
         // left wing
-        m_wingMaterial.beginApply();
+        pushMaterial(m_wingMaterial);
         pushMatrix();
             rotate(theta_wing, 1.0, 0.0, 0.0);
             rotate(90.0, 0.0, 1.0, 0.0);
@@ -226,7 +226,7 @@ void Dragon::drawBody()
             scale(3.0, 3.0, 3.0);
             drawWing();
         popMatrix();
-        m_wingMaterial.endApply();
+        popMaterial();
     popMatrix();
 }
 
@@ -256,7 +256,7 @@ void Dragon::drawWingPart()
         scale(1.0, 2.6, 0.20);
         drawMesh("letter_a");
     popMatrix();
-    m_membraneMaterial.beginApply();
+    pushMaterial(m_membraneMaterial);
     pushMatrix();
         translate(0.25, 0.0, 0.0);
         scale(0.26, 0.2, 0.2);
@@ -278,7 +278,7 @@ void Dragon::drawWingPart()
         scale(0.3, 0.2, 0.27);
         drawWingMembrane();
     popMatrix();
-    m_membraneMaterial.endApply();
+    popMaterial();
 }
 
 void Dragon::drawWingMembrane()

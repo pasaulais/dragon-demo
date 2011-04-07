@@ -57,7 +57,7 @@ void RenderState::drawMesh(Mesh *m)
         return;
     m->draw(m_output, this, m_meshOutput);
     if(m_drawNormals)
-        m->drawNormals();
+        m->drawNormals(this);
 }
 
 void RenderState::drawMesh(QString name)
@@ -152,6 +152,36 @@ QMatrix4x4 RenderState::currentGLMatrixForNormals() const
                      m[0][3], m[1][3], m[2][3], 1.0);
 }
 
+void RenderState::pushMaterial(const Material &m)
+{
+    m_materialStack.append(m);
+    beginApplyMaterial(m);
+}
+
+void RenderState::popMaterial()
+{
+    m_materialStack.removeLast();
+    endApplyMaterial();
+    if(m_materialStack.count() > 0)
+        beginApplyMaterial(m_materialStack.last());
+}
+
+void RenderState::beginApplyMaterial(const Material &m)
+{
+    glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT | GL_LIGHTING_BIT);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, (GLfloat *)&m.ambient());
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, (GLfloat *)&m.diffuse());
+    glMaterialfv(GL_FRONT, GL_SPECULAR, (GLfloat *)&m.specular());
+    glMaterialf(GL_FRONT, GL_SHININESS, m.shine());
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, m.texture());
+}
+
+void RenderState::endApplyMaterial()
+{
+    glPopAttrib();
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 StateObject::StateObject(RenderState *s, QObject *parent) : QObject(parent)
@@ -192,4 +222,14 @@ void StateObject::drawMesh(Mesh *m)
 void StateObject::drawMesh(QString name)
 {
     m_state->drawMesh(name);
+}
+
+void StateObject::pushMaterial(const Material &m)
+{
+    m_state->pushMaterial(m);
+}
+
+void StateObject::popMaterial()
+{
+    m_state->popMaterial();
 }

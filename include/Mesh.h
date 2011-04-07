@@ -60,7 +60,7 @@ public:
 
     void draw(OutputMode mode, RenderState *s, Mesh *output = 0);
     // Show normal vectors for every vertex in the mesh, for debugging purposes
-    void drawNormals();
+    void drawNormals(RenderState *s);
 
     static Mesh * loadStl(const char *path, QObject *parent = 0, bool compute_normals = true);
     static Mesh * loadObj(const char *path, QObject *parent = 0);

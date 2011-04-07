@@ -9,10 +9,17 @@ class Material
 public:
     Material();
     Material(QVector4D ambient, QVector4D diffuse, QVector4D specular, float shine);
-    void beginApply();
-    void endApply();
 
+    const QVector4D & ambient() const;
+    const QVector4D & diffuse() const;
+    const QVector4D & specular() const;
+    float shine() const;
     void setAmbient(const QVector4D &ambient);
+    void setDiffuse(const QVector4D &diffuse);
+    void setSpecular(const QVector4D &specular);
+    void setShine(float shine);
+
+    uint texture() const;
     void setTexture(uint texture);
     void freeTexture();
 
