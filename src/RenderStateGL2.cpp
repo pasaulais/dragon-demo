@@ -160,11 +160,11 @@ void RenderStateGL2::popMaterial()
 void RenderStateGL2::beginApplyMaterial(const Material &m)
 {
     glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT | GL_LIGHTING_BIT);
-    /*glMaterialfv(GL_FRONT, GL_AMBIENT, (GLfloat *)&m.ambient());
+    glMaterialfv(GL_FRONT, GL_AMBIENT, (GLfloat *)&m.ambient());
     glMaterialfv(GL_FRONT, GL_DIFFUSE, (GLfloat *)&m.diffuse());
     glMaterialfv(GL_FRONT, GL_SPECULAR, (GLfloat *)&m.specular());
     glMaterialf(GL_FRONT, GL_SHININESS, m.shine());
-    glEnable(GL_TEXTURE_2D);
+    /*glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, m.texture());*/
 }
 
@@ -236,11 +236,15 @@ char * RenderStateGL2::loadShaderSource(const char *path) const
     if(size >= 0)
     {
         fseek(f, 0, SEEK_SET);
-        code = new char[(size_t)size];
+        code = new char[(size_t)size + 1];
         if((size_t)size > fread(code, 1, (size_t)size, f))
         {
             free(code);
             code = 0;
+        }
+        else
+        {
+            code[size] = '\0';
         }
     }
     fclose(f);
