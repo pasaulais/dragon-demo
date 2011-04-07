@@ -2,21 +2,21 @@
 #define INITIALS_MATERIAL_H
 
 #include <QString>
-#include <QVector4D>
+#include "Vertex.h"
 
 class Material
 {
 public:
     Material();
-    Material(QVector4D ambient, QVector4D diffuse, QVector4D specular, float shine);
+    Material(vec4 ambient, vec4 diffuse, vec4 specular, float shine);
 
-    const QVector4D & ambient() const;
-    const QVector4D & diffuse() const;
-    const QVector4D & specular() const;
+    const vec4 & ambient() const;
+    const vec4 & diffuse() const;
+    const vec4 & specular() const;
     float shine() const;
-    void setAmbient(const QVector4D &ambient);
-    void setDiffuse(const QVector4D &diffuse);
-    void setSpecular(const QVector4D &specular);
+    void setAmbient(const vec4 &ambient);
+    void setDiffuse(const vec4 &diffuse);
+    void setSpecular(const vec4 &specular);
     void setShine(float shine);
 
     uint texture() const;
@@ -30,9 +30,9 @@ private:
     static uint textureFromTIFFImage(QString path, bool mipmaps);
     static void setTextureParams(uint target, bool mipmaps);
 
-    QVector4D m_ambient;
-    QVector4D m_diffuse;
-    QVector4D m_specular;
+    vec4 m_ambient;
+    vec4 m_diffuse;
+    vec4 m_specular;
     float m_shine;
     uint m_texture;
 };

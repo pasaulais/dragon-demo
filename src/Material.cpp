@@ -5,14 +5,14 @@
 
 Material::Material()
 {
-    m_ambient = QVector4D(0.0, 0.0, 0.0, 0.0);
-    m_diffuse = QVector4D(0.0, 0.0, 0.0, 0.0);
-    m_specular = QVector4D(0.0, 0.0, 0.0, 0.0);
+    m_ambient = vec4(0.0, 0.0, 0.0, 0.0);
+    m_diffuse = vec4(0.0, 0.0, 0.0, 0.0);
+    m_specular = vec4(0.0, 0.0, 0.0, 0.0);
     m_shine = 0.0;
     m_texture = 0;
 }
 
-Material::Material(QVector4D ambient, QVector4D diffuse, QVector4D specular, float shine)
+Material::Material(vec4 ambient, vec4 diffuse, vec4 specular, float shine)
 {
     m_ambient = ambient;
     m_diffuse = diffuse;
@@ -21,17 +21,17 @@ Material::Material(QVector4D ambient, QVector4D diffuse, QVector4D specular, flo
     m_texture = 0;
 }
 
-const QVector4D & Material::ambient() const
+const vec4 & Material::ambient() const
 {
     return m_ambient;
 }
 
-const QVector4D & Material::diffuse() const
+const vec4 & Material::diffuse() const
 {
     return m_diffuse;
 }
 
-const QVector4D & Material::specular() const
+const vec4 & Material::specular() const
 {
     return m_specular;
 }
@@ -41,17 +41,17 @@ float Material::shine() const
     return m_shine;
 }
 
-void Material::setAmbient(const QVector4D &ambient)
+void Material::setAmbient(const vec4 &ambient)
 {
     m_ambient = ambient;
 }
 
-void Material::setDiffuse(const QVector4D &diffuse)
+void Material::setDiffuse(const vec4 &diffuse)
 {
     m_diffuse = diffuse;
 }
 
-void Material::setSpecular(const QVector4D &specular)
+void Material::setSpecular(const vec4 &specular)
 {
     m_specular = specular;
 }

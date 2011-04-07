@@ -3,8 +3,7 @@
 
 #include <ctime>
 #include <QGLWidget>
-#include <QVector3D>
-#include <QVector4D>
+#include "Vertex.h"
 
 class QTimer;
 class QPainter;
@@ -17,7 +16,7 @@ typedef struct
     bool active;
     int x0;
     int y0;
-    QVector3D last;        // value of delta/theta when the user last clicked
+    vec3 last;        // value of delta/theta when the user last clicked
 } MouseState;
 
 class SceneViewport : public QGLWidget
@@ -62,8 +61,8 @@ private:
     QTimer *m_renderTimer;
 
     // viewer settings
-    QVector3D m_delta;
-    QVector3D m_theta;
+    vec3 m_delta;
+    vec3 m_theta;
     float m_sigma;
     MouseState m_transState;
     MouseState m_rotState;

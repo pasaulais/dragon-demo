@@ -3,8 +3,7 @@
 
 #include <QObject>
 #include <QVector>
-#include <QVector2D>
-#include <QVector3D>
+#include "Vertex.h"
 #include <QMatrix4x4>
 #include <cstdio>
 
@@ -26,16 +25,16 @@ public:
     Mesh(QObject *parent = 0);
     virtual ~Mesh();
 
-    QVector<QVector3D> & vertices();
-    const QVector<QVector3D> & vertices() const;
+    QVector<vec3> & vertices();
+    const QVector<vec3> & vertices() const;
     void setVertices(float *vertices, int n);
 
-    QVector<QVector3D> & normals();
-    const QVector<QVector3D> & normals() const;
+    QVector<vec3> & normals();
+    const QVector<vec3> & normals() const;
     void setNormals(float *normals, int n);
 
-    QVector<QVector2D> & texCoords();
-    const QVector<QVector2D> & texCoords() const;
+    QVector<vec2> & texCoords();
+    const QVector<vec2> & texCoords() const;
     void setTexCoords(float *texCoords, int n);
 
     QVector<uint> & indices();
@@ -80,9 +79,9 @@ private:
     void saveObjFace(FILE *f, uint ind1, uint ind2, uint ind3, bool normals, bool texCoords);
     void saveObjIndice(FILE *f, uint indice, bool normals, bool texCoords);
 
-    QVector<QVector3D> m_vertices;
-    QVector<QVector3D> m_normals;
-    QVector<QVector2D> m_texCoords;
+    QVector<vec3> m_vertices;
+    QVector<vec3> m_normals;
+    QVector<vec2> m_texCoords;
     QVector<uint> m_indices;
     QVector<Face> m_faces;
 };

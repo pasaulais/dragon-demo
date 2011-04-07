@@ -4,10 +4,10 @@
 
 RenderStateGL1::RenderStateGL1(QObject *parent) : RenderState(parent)
 {
-    m_ambient0 = QVector4D(1.0, 1.0, 1.0, 1.0);
-    m_diffuse0 = QVector4D(1.0, 1.0, 1.0, 1.0);
-    m_specular0 = QVector4D(1.0, 1.0, 1.0, 1.0);
-    m_light0_pos = QVector4D(0.0, 1.0, 1.0, 0.0);
+    m_ambient0 = vec4(1.0, 1.0, 1.0, 1.0);
+    m_diffuse0 = vec4(1.0, 1.0, 1.0, 1.0);
+    m_specular0 = vec4(1.0, 1.0, 1.0, 1.0);
+    m_light0_pos = vec4(0.0, 1.0, 1.0, 0.0);
 }
 
 void RenderStateGL1::drawMesh(Mesh *m)

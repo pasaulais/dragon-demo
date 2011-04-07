@@ -2,9 +2,9 @@
 #define INITIALS_SCENE_H
 
 #include <QObject>
-#include <QVector3D>
 #include <QList>
 #include "RenderState.h"
+#include "Vertex.h"
 
 class QKeyEvent;
 class Dragon;
@@ -20,7 +20,7 @@ public:
     void loadTextures();
     void freeTextures();
 
-    QVector3D orientation() const;
+    vec3 orientation() const;
 
     void draw();
 
@@ -87,7 +87,7 @@ private:
     int m_selected;
     int m_detailLevel;
     Camera m_camera;
-    QVector3D m_theta;
+    vec3 m_theta;
     Dragon *m_debugDragon;
     QList<Dragon *> m_dragons;
     bool m_exportQueued;

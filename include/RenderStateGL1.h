@@ -38,10 +38,10 @@ private:
     void beginApplyMaterial(const Material &m);
     void endApplyMaterial();
 
-    QVector4D m_ambient0;
-    QVector4D m_diffuse0;
-    QVector4D m_specular0;
-    QVector4D m_light0_pos;
+    vec4 m_ambient0;
+    vec4 m_diffuse0;
+    vec4 m_specular0;
+    vec4 m_light0_pos;
     QList<Material> m_materialStack;
 };
 

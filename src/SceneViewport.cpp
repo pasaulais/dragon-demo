@@ -4,8 +4,8 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QPaintEvent>
-#include <QVector4D>
 #include "SceneViewport.h"
+#include "Vertex.h"
 #include "Scene.h"
 #include "Material.h"
 #include "RenderState.h"
@@ -90,7 +90,7 @@ void SceneViewport::paintEvent(QPaintEvent *)
 void SceneViewport::paintGL()
 {
     m_state->beginFrame(width(), height());
-    QVector3D rot = m_theta;
+    vec3 rot = m_theta;
     if(m_scene)
         rot += m_scene->orientation();
     m_state->translate((float)m_delta.x(), (float)m_delta.y(), (float)m_delta.z());
@@ -105,10 +105,10 @@ void SceneViewport::paintGL()
 
 void SceneViewport::resetCamera()
 {
-    m_delta = QVector3D(-0.0, -0.5, -5.0);
-    m_theta = QVector3D(21.0, -37.0, 0.0);
-    m_transState.last = QVector3D();
-    m_rotState.last = QVector3D();
+    m_delta = vec3(-0.0, -0.5, -5.0);
+    m_theta = vec3(21.0, -37.0, 0.0);
+    m_transState.last = vec3();
+    m_rotState.last = vec3();
     m_transState.active = false;
     m_rotState.active = false;
     m_sigma = 0.40;
@@ -130,17 +130,17 @@ void SceneViewport::toggleAnimation()
 
 void SceneViewport::topView()
 {
-    m_theta = QVector3D(0.0, 0.0, 0.0);
+    m_theta = vec3(0.0, 0.0, 0.0);
 }
 
 void SceneViewport::sideView()
 {
-    m_theta = QVector3D(-90.0, 0.0, -90.0);
+    m_theta = vec3(-90.0, 0.0, -90.0);
 }
 
 void SceneViewport::frontView()
 {
-    m_theta = QVector3D(-90.0, 0.0, 0.0);
+    m_theta = vec3(-90.0, 0.0, 0.0);
 }
 
 void SceneViewport::startFPS()

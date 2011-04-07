@@ -1,7 +1,6 @@
 #include <ctime>
 #include <cmath>
 #include <iostream>
-#include <QVector3D>
 #include <QMatrix4x4>
 #include <QKeyEvent>
 #include "Scene.h"
@@ -11,11 +10,11 @@
 
 using namespace std;
 
-static Material debug_material(QVector4D(0.2, 0.2, 0.2, 1.0),
-    QVector4D(1.0, 4.0/6.0, 0.0, 1.0), QVector4D(0.2, 0.2, 0.2, 1.0), 20.0);
+static Material debug_material(vec4(0.2, 0.2, 0.2, 1.0),
+    vec4(1.0, 4.0/6.0, 0.0, 1.0), vec4(0.2, 0.2, 0.2, 1.0), 20.0);
 
-static Material floor_material(QVector4D(0.5, 0.5, 0.5, 1.0),
-    QVector4D(1.0, 1.0, 1.0, 1.0), QVector4D(1.0, 1.0, 1.0, 1.0), 00.0);
+static Material floor_material(vec4(0.5, 0.5, 0.5, 1.0),
+    vec4(1.0, 1.0, 1.0, 1.0), vec4(1.0, 1.0, 1.0, 1.0), 00.0);
 
 Scene::Scene(RenderState *state, QObject *parent) : StateObject(state, parent)
 {
@@ -57,18 +56,18 @@ void Scene::freeTextures()
 void Scene::reset()
 {
     m_selected = SCENE;
-    m_theta = QVector3D(0, 0, 0);
+    m_theta = vec3(0, 0, 0);
     m_detailLevel = 4;
     m_camera = Camera_Static;
     emit invalidated();
 }
 
-QVector3D Scene::orientation() const
+vec3 Scene::orientation() const
 {
     if(m_selected == SCENE)
         return m_theta;
     else
-        return QVector3D();
+        return vec3();
 }
 
 bool Scene::load()

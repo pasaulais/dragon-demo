@@ -18,14 +18,14 @@ Dragon::Dragon(Kind kind, RenderState *state, QObject *parent) : StateObject(sta
     theta_tail = 0.0;
     m_alpha = 0.0;
     m_beta = 0.0;
-    m_tongueMaterial = Material(QVector4D(0.1, 0.0, 0.0, 1.0),
-        QVector4D(0.6, 0.0, 0.0, 1.0), QVector4D(1.0, 1.0, 1.0, 1.0), 50.0);
-    m_scalesMaterial = Material(QVector4D(0.2, 0.2, 0.2, 1.0),
-        QVector4D(0.8, 0.8, 0.8, 1.0), QVector4D(1.0, 1.0, 1.0, 1.0), 20.0);
-    m_wingMaterial = Material(QVector4D(0.2, 0.2, 0.2, 1.0),
-        QVector4D(1.0, 1.0, 1.0, 1.0), QVector4D(1.0, 1.0, 1.0, 1.0), 20.0);
-    m_membraneMaterial = Material(QVector4D(0.1, 0.0, 0.0, 1.0),
-        QVector4D(0.6, 0.0, 0.0, 1.0), QVector4D(0.2, 0.2, 0.2, 1.0), 20.0);
+    m_tongueMaterial = Material(vec4(0.1, 0.0, 0.0, 1.0),
+        vec4(0.6, 0.0, 0.0, 1.0), vec4(1.0, 1.0, 1.0, 1.0), 50.0);
+    m_scalesMaterial = Material(vec4(0.2, 0.2, 0.2, 1.0),
+        vec4(0.8, 0.8, 0.8, 1.0), vec4(1.0, 1.0, 1.0, 1.0), 20.0);
+    m_wingMaterial = Material(vec4(0.2, 0.2, 0.2, 1.0),
+        vec4(1.0, 1.0, 1.0, 1.0), vec4(1.0, 1.0, 1.0, 1.0), 20.0);
+    m_membraneMaterial = Material(vec4(0.1, 0.0, 0.0, 1.0),
+        vec4(0.6, 0.0, 0.0, 1.0), vec4(0.2, 0.2, 0.2, 1.0), 20.0);
     setDetailLevel(4);
 }
 
