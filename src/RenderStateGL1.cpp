@@ -1,6 +1,7 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include "RenderStateGL1.h"
+#include "MeshGL1.h"
 
 RenderStateGL1::RenderStateGL1(QObject *parent) : RenderState(parent)
 {
@@ -8,6 +9,13 @@ RenderStateGL1::RenderStateGL1(QObject *parent) : RenderState(parent)
     m_diffuse0 = vec4(1.0, 1.0, 1.0, 1.0);
     m_specular0 = vec4(1.0, 1.0, 1.0, 1.0);
     m_light0_pos = vec4(0.0, 1.0, 1.0, 0.0);
+}
+
+Mesh * RenderStateGL1::createMesh(VertexGroup *vg, QObject *parent) const
+{
+    MeshGL1 *m = new MeshGL1(parent);
+    m->addVertices(vg);
+    return m;
 }
 
 void RenderStateGL1::drawMesh(Mesh *m)

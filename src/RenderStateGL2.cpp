@@ -31,6 +31,11 @@ RenderStateGL2::~RenderStateGL2()
         glDeleteProgram(m_program);
 }
 
+Mesh * RenderStateGL2::createMesh(VertexGroup *vg, QObject *parent) const
+{
+    return 0;
+}
+
 void RenderStateGL2::drawMesh(Mesh *m)
 {
     if(!m)
@@ -194,7 +199,7 @@ char * RenderStateGL2::loadShaderSource(const char *path) const
         code = new char[(size_t)size + 1];
         if((size_t)size > fread(code, 1, (size_t)size, f))
         {
-            free(code);
+            delete [] code;
             code = 0;
         }
         else

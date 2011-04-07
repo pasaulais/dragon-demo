@@ -32,6 +32,7 @@ public:
     virtual QMap<QString, Mesh *> & meshes();
     virtual const QMap<QString, Mesh *> & meshes() const;
 
+    virtual Mesh * createMesh(VertexGroup *vg, QObject *parent = 0) const = 0;
     virtual Mesh * loadMeshObj(QString name, QString path);
     virtual Mesh * loadMeshStl(QString name, QString path);
 

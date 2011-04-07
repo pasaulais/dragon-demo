@@ -1,6 +1,8 @@
 #ifndef INITIALS_VERTEX_H
 #define INITIALS_VERTEX_H
 
+#include <inttypes.h>
+
 bool fequal(double a, double b);
 
 class vec2
@@ -88,5 +90,24 @@ public:
 };
 
 matrix4 operator*(const matrix4 &a, const matrix4 &b);
+
+class VertexData
+{
+public:
+    vec3 position;
+    vec3 normal;
+    vec2 texCoords;
+};
+
+class VertexGroup
+{
+public:
+    VertexGroup(uint32_t mode, uint32_t count);
+    virtual ~VertexGroup();
+
+    uint32_t mode;
+    uint32_t count;
+    VertexData *data;
+};
 
 #endif

@@ -219,3 +219,18 @@ void matrix4::dump() const
     qDebug("%f %f %f %f", d[8], d[9], d[10], d[11]);
     qDebug("%f %f %f %f", d[12], d[13], d[14], d[15]);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+VertexGroup::VertexGroup(uint32_t mode, uint32_t count)
+{
+    this->mode = mode;
+    this->count = count;
+    this->data = new VertexData[count];
+    memset(this->data, 0, sizeof(VertexData) * count);
+}
+
+VertexGroup::~VertexGroup()
+{
+    delete [] data;
+}

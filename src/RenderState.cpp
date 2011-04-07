@@ -21,17 +21,29 @@ const QMap<QString, Mesh *> & RenderState::meshes() const
 
 Mesh * RenderState::loadMeshStl(QString name, QString path)
 {
-    Mesh *m = Mesh::loadStl(path.toUtf8().constData(), this);
-    if(m)
-        m_meshes.insert(name, m);
+    Mesh *m;
+    VertexGroup *vg = Mesh::loadStl(path.toUtf8().constData());
+    if(vg)
+    {
+        m = createMesh(vg);
+        if(m)
+            m_meshes.insert(name, m);
+        delete vg;
+    }
     return m;
 }
 
 Mesh * RenderState::loadMeshObj(QString name, QString path)
 {
-    Mesh *m = Mesh::loadObj(path.toUtf8().constData(), this);
-    if(m)
-        m_meshes.insert(name, m);
+    Mesh *m;
+    VertexGroup *vg = Mesh::loadObj(path.toUtf8().constData());
+    if(vg)
+    {
+        m = createMesh(vg);
+        if(m)
+            m_meshes.insert(name, m);
+        delete vg;
+    }
     return m;
 }
 
@@ -57,7 +69,7 @@ void RenderState::toggleProjection()
 
 void RenderState::reset()
 {
-    m_output = Mesh::Output_VertexList;
+    m_output = Mesh::RenderToScreen;
     m_drawNormals = false;
     m_projection = true;
     m_wireframe = false;
@@ -77,8 +89,8 @@ void RenderState::beginExportMesh(QString path)
     m_oldOutput = m_output;
     pushMatrix();
     loadIdentity();
-    m_output = Mesh::Output_Mesh;
-    m_meshOutput = new Mesh();
+    m_output = Mesh::RenderToMesh;
+    m_meshOutput = createMesh(0);
 }
 
 void RenderState::endExportMesh()

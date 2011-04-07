@@ -12,6 +12,7 @@ public:
 
     virtual void init();
 
+    virtual Mesh * createMesh(VertexGroup *vg, QObject *parent = 0) const;
     virtual void drawMesh(Mesh *m);
 
     // matrix operations
