@@ -5,11 +5,16 @@
 RenderStateGL2::RenderStateGL2(QObject *parent) : RenderState(parent)
 {
     m_matrixMode = ModelView;
+    m_matrix[(int)ModelView].setIdentity();
+    m_matrix[(int)Projection].setIdentity();
+    m_matrix[(int)Texture].setIdentity();
     m_ambient0 = vec4(1.0, 1.0, 1.0, 1.0);
     m_diffuse0 = vec4(1.0, 1.0, 1.0, 1.0);
     m_specular0 = vec4(1.0, 1.0, 1.0, 1.0);
     m_light0_pos = vec4(0.0, 1.0, 1.0, 0.0);
 }
+
+bool RenderStateGL2::useGL = true;
 
 void RenderStateGL2::drawMesh(Mesh *m)
 {
@@ -18,9 +23,16 @@ void RenderStateGL2::drawMesh(Mesh *m)
     /*glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glMultMatrixf((const GLfloat *)m_matrix[(int)Projection].d);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glMultMatrixf((const GLfloat *)m_matrix[(int)ModelView].d);*/
+    */
+    if(!useGL)
+    {
+        glMatrixMode(GL_TEXTURE);
+        glLoadIdentity();
+        glMultMatrixf((const GLfloat *)m_matrix[(int)Texture].d);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        glMultMatrixf((const GLfloat *)m_matrix[(int)ModelView].d);
+    }
     m->draw(m_output, this, m_meshOutput);
     if(m_drawNormals)
         m->drawNormals(this);
@@ -47,46 +59,81 @@ void RenderStateGL2::loadIdentity()
 {
     int i = (int)m_matrixMode;
     m_matrix[i].setIdentity();
-    glLoadIdentity();
-    compareMatrix(ModelView);
+    if(useGL)
+    {
+        glLoadIdentity();
+        compareMatrix(ModelView);
+        compareMatrix(Texture);
+    }
 }
 
 void RenderStateGL2::multiplyMatrix(const matrix4 &m)
 {
     int i = (int)m_matrixMode;
     m_matrix[i] = m_matrix[i] * m;
-    glMultMatrixf((const GLfloat *)m.d);
-    compareMatrix(ModelView);
+    if(useGL)
+    {
+        glMultMatrixf((const GLfloat *)m.d);
+        compareMatrix(ModelView);
+        compareMatrix(Texture);
+    }
 }
 
 void RenderStateGL2::pushMatrix()
 {
     int i = (int)m_matrixMode;
     m_matrixStack[i].append(m_matrix[i]);
-    glPushMatrix();
+    if(useGL)
+    {
+        glPushMatrix();
+        compareMatrix(ModelView);
+        compareMatrix(Texture);
+    }
 }
 
 void RenderStateGL2::popMatrix()
 {
     int i = (int)m_matrixMode;
     m_matrix[i] = m_matrixStack[i].takeLast();
-    glPopMatrix();
-    compareMatrix(ModelView);
+    if(useGL)
+    {
+        glPopMatrix();
+        compareMatrix(ModelView);
+        compareMatrix(Texture);
+    }
 }
 
 void RenderStateGL2::translate(float dx, float dy, float dz)
 {
     multiplyMatrix(matrix4::translate(dx, dy, dz));
+    if(useGL)
+    {
+        //glTranslatef(dx, dy, dz);
+        compareMatrix(ModelView);
+        compareMatrix(Texture);
+    }
 }
 
 void RenderStateGL2::rotate(float angle, float rx, float ry, float rz)
 {
     multiplyMatrix(matrix4::rotate(angle, rx, ry, rz));
+    if(useGL)
+    {
+        //glRotatef(angle, rx, ry, rz);
+        compareMatrix(ModelView);
+        compareMatrix(Texture);
+    }
 }
 
 void RenderStateGL2::scale(float sx, float sy, float sz)
 {
     multiplyMatrix(matrix4::scale(sx, sy, sz));
+    if(useGL)
+    {
+        //glScalef(sx, sy, sz);
+        compareMatrix(ModelView);
+        compareMatrix(Texture);
+    }
 }
 
 matrix4 RenderStateGL2::currentMatrix() const
@@ -96,8 +143,6 @@ matrix4 RenderStateGL2::currentMatrix() const
 
 void RenderStateGL2::compareMatrix(RenderState::MatrixMode mode) const
 {
-    return;
-
     GLenum glMode;
     switch(mode)
     {
@@ -113,7 +158,7 @@ void RenderStateGL2::compareMatrix(RenderState::MatrixMode mode) const
     }
 
     bool equal = true;
-    matrix4 ourMat = currentMatrix();
+    matrix4 ourMat = m_matrix[(int)mode];
     matrix4 glMat;
     glGetFloatv(glMode, (float *)glMat.d);
     for(int j = 0; j < 4; j++)
@@ -188,7 +233,7 @@ void RenderStateGL2::beginFrame(int w, int h)
     glLightfv(GL_LIGHT0, GL_SPECULAR, (GLfloat *)&m_specular0);
     glPolygonMode(GL_FRONT_AND_BACK, m_wireframe ? GL_LINE : GL_FILL);
     setupViewport(w, h);
-    setMatrixMode(RenderStateGL2::ModelView);
+    setMatrixMode(ModelView);
     pushMatrix();
     loadIdentity();
     glClearColor(m_bgColor.redF(), m_bgColor.greenF(), m_bgColor.blueF(), 1.0);
@@ -199,7 +244,7 @@ void RenderStateGL2::endFrame()
 {
     glFlush();
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    setMatrixMode(RenderStateGL2::ModelView);
+    setMatrixMode(ModelView);
     popMatrix();
     glPopAttrib();
 }

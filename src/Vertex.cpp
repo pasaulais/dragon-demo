@@ -4,7 +4,7 @@
 
 bool fequal(double a, double b)
 {
-    return fabs(a - b) < 1e-16;
+    return fabs(a - b) < 1e-3;
 }
 
 vec3 vec3::normal(const vec3 &a, const vec3 &b, const vec3 &c)

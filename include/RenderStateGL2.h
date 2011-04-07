@@ -47,6 +47,8 @@ private:
     RenderState::MatrixMode m_matrixMode;
     matrix4 m_matrix[3];
     QList<matrix4> m_matrixStack[3];
+
+    static bool useGL;
 };
 
 #endif
