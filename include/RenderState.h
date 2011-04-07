@@ -2,11 +2,11 @@
 #define INITIALS_RENDER_STATE_H
 
 #include <QObject>
-#include <QMatrix4x4>
 #include <QColor>
 #include <QMap>
 #include "Mesh.h"
 #include "Material.h"
+#include "Vertex.h"
 
 class RenderState : public QObject
 {
@@ -52,8 +52,8 @@ public:
     virtual void rotate(float angle, float rx, float ry, float rz) = 0;
     virtual void scale(float sx, float sy, float sz) = 0;
 
-    virtual QMatrix4x4 currentMatrix() const = 0;
-    virtual QMatrix4x4 currentMatrixForNormals() const = 0;
+    virtual matrix4 currentMatrix() const = 0;
+    virtual matrix4 currentMatrixForNormals() const = 0;
 
     // general state operations
     virtual void beginFrame(int width, int heigth) = 0;

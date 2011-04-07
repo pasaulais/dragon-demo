@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QVector>
 #include "Vertex.h"
-#include <QMatrix4x4>
 #include <cstdio>
 
 bool fequal(double a, double b);

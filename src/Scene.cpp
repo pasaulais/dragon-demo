@@ -1,14 +1,10 @@
 #include <ctime>
 #include <cmath>
-#include <iostream>
-#include <QMatrix4x4>
 #include <QKeyEvent>
 #include "Scene.h"
 #include "Dragon.h"
 #include "Mesh.h"
 #include "Material.h"
-
-using namespace std;
 
 static Material debug_material(vec4(0.2, 0.2, 0.2, 1.0),
     vec4(1.0, 4.0/6.0, 0.0, 1.0), vec4(0.2, 0.2, 0.2, 1.0), 20.0);

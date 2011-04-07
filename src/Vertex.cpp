@@ -39,3 +39,31 @@ vec3 operator-(const vec3 &a, const vec3 &b)
     u.z = a.z - b.z;
     return u;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+matrix4::matrix4()
+{
+    for(int i = 0; i < 16; i++)
+        d[i] = 0.0;
+}
+
+vec3 matrix4::map(const vec3 &v)
+{
+    float v_w = 1.0;
+    float x = d[0] * v.x + d[1] * v.y + d[2] * v.z + d[3] * v_w;
+    float y = d[4] * v.x + d[5] * v.y + d[6] * v.z + d[7] * v_w;
+    float z = d[8] * v.x + d[9] * v.y + d[10] * v.z + d[11] * v_w;
+    float w = d[12] * v.x + d[13] * v.y + d[14] * v.z + d[15] * v_w;
+    return vec3(x / w, y / w, z / w);
+}
+
+vec3 matrix4::mapNormal(const vec3 &v)
+{
+    float v_w = 1.0;
+    float x = d[0] * v.x + d[1] * v.y + d[2] * v.z;
+    float y = d[4] * v.x + d[5] * v.y + d[6] * v.z;
+    float z = d[8] * v.x + d[9] * v.y + d[10] * v.z;
+    float w = d[12] * v.x + d[13] * v.y + d[14] * v.z + v_w;
+    return vec3(x / w, y / w, z / w);
+}

@@ -22,8 +22,8 @@ public:
     virtual void rotate(float angle, float rx, float ry, float rz);
     virtual void scale(float sx, float sy, float sz);
 
-    virtual QMatrix4x4 currentMatrix() const;
-    virtual QMatrix4x4 currentMatrixForNormals() const;
+    virtual matrix4 currentMatrix() const;
+    virtual matrix4 currentMatrixForNormals() const;
 
     // general state operations
     virtual void beginFrame(int width, int heigth);

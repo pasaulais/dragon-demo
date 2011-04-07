@@ -65,24 +65,22 @@ void RenderStateGL1::scale(float sx, float sy, float sz)
     glScalef(sx, sy, sz);
 }
 
-QMatrix4x4 RenderStateGL1::currentMatrix() const
+matrix4 RenderStateGL1::currentMatrix() const
 {
-    float m[4][4];
-    glGetFloatv(GL_MODELVIEW_MATRIX, (float *)m);
-    return QMatrix4x4(m[0][0], m[1][0], m[2][0], m[3][0],
-                     m[0][1], m[1][1], m[2][1], m[3][1],
-                     m[0][2], m[1][2], m[2][2], m[3][2],
-                     m[0][3], m[1][3], m[2][3], m[3][3]);
+    matrix4 m;
+    glGetFloatv(GL_MODELVIEW_MATRIX, (float *)m.d);
+    return m;
 }
 
-QMatrix4x4 RenderStateGL1::currentMatrixForNormals() const
+matrix4 RenderStateGL1::currentMatrixForNormals() const
 {
-    float m[4][4];
-    glGetFloatv(GL_MODELVIEW_MATRIX, (float *)m);
-    return QMatrix4x4(m[0][0], m[1][0], m[2][0], 0.0,
-                     m[0][1], m[1][1], m[2][1], 0.0,
-                     m[0][2], m[1][2], m[2][2], 0.0,
-                     m[0][3], m[1][3], m[2][3], 1.0);
+    matrix4 m;
+    glGetFloatv(GL_MODELVIEW_MATRIX, (float *)m.d);
+    for(int i = 0; i < 16; i++)
+        if((i % 4) == 3)
+            m.d[i] = 0;
+    m.d[15] = 1.0;
+    return m;
 }
 
 void RenderStateGL1::pushMaterial(const Material &m)

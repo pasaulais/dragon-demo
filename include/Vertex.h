@@ -74,4 +74,15 @@ public:
     }
 };
 
+class matrix4
+{
+public:
+    float d[16];
+
+    matrix4();
+
+    vec3 map(const vec3 &v);
+    vec3 mapNormal(const vec3 &v);
+};
+
 #endif

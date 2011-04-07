@@ -1,5 +1,4 @@
 #include <GL/gl.h>
-#include <QMatrix4x4>
 #include <cmath>
 #include <cstdio>
 #include "Mesh.h"
@@ -270,8 +269,8 @@ void Mesh::drawFaceToMeshCopy(Mesh *out, RenderState *s, uint destOffset, Face f
     QVector<vec3> & outVertices = out->vertices();
     QVector<vec3> & outNormals = out->normals();
     QVector<vec2> & outTexCoords = out->texCoords();
-    QMatrix4x4 vMap = s->currentMatrix();
-    QMatrix4x4 nMap = s->currentMatrixForNormals();
+    matrix4 vMap = s->currentMatrix();
+    matrix4 nMap = s->currentMatrixForNormals();
     for(int i = 0; i < f.count; i++, destOffset++)
     {
         uint srcIndex = m_indices.value(f.offset + i);
