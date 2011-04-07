@@ -85,8 +85,8 @@ void RenderStateGL1::pushMaterial(const Material &m)
 
 void RenderStateGL1::popMaterial()
 {
-    m_materialStack.removeLast();
-    endApplyMaterial();
+    Material m = m_materialStack.takeLast();
+    endApplyMaterial(m);
     if(m_materialStack.count() > 0)
         beginApplyMaterial(m_materialStack.last());
 }
@@ -102,8 +102,10 @@ void RenderStateGL1::beginApplyMaterial(const Material &m)
     glBindTexture(GL_TEXTURE_2D, m.texture());
 }
 
-void RenderStateGL1::endApplyMaterial()
+void RenderStateGL1::endApplyMaterial(const Material &m)
 {
+    if(m.texture() != 0)
+        glBindTexture(GL_TEXTURE_2D, 0);
     glPopAttrib();
 }
 

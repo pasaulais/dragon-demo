@@ -138,7 +138,7 @@ void RenderStateGL2::beginFrame(int w, int h)
     glUseProgram(m_program);
     initShaders();
     glEnable(GL_DEPTH_TEST);
-    //TODO smooth shading, VertexAttrib
+    //TODO VertexAttrib, fallback to GL1 when in a pinch
     setUniformValue("u_light_ambient", m_ambient0);
     setUniformValue("u_light_diffuse", m_diffuse0);
     setUniformValue("u_light_specular", m_specular0);

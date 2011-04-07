@@ -30,8 +30,8 @@ void Scene::loadTextures()
 {
     if(m_dragons.count() < 3)
         return;
-    m_dragons.value(0)->scalesMaterial().loadTextureTIFF("scale_green.tiff");
-    m_dragons.value(0)->wingMaterial().loadTextureTIFF("scale_green.tiff");
+    m_dragons.value(0)->scalesMaterial().loadTextureTIFF("scale_gold.tiff");
+    m_dragons.value(0)->wingMaterial().loadTextureTIFF("scale_gold.tiff");
     m_dragons.value(1)->scalesMaterial().loadTextureTIFF("scale_black.tiff");
     m_dragons.value(1)->wingMaterial().loadTextureTIFF("scale_black.tiff");
     m_dragons.value(2)->scalesMaterial().loadTextureTIFF("scale_bronze.tiff");

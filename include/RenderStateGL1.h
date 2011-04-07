@@ -36,7 +36,7 @@ public:
 
 private:
     void beginApplyMaterial(const Material &m);
-    void endApplyMaterial();
+    void endApplyMaterial(const Material &m);
 
     vec4 m_ambient0;
     vec4 m_diffuse0;
