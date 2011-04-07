@@ -5,11 +5,6 @@
 #include "Material.h"
 #include "RenderState.h"
 
-bool fequal(double a, double b)
-{
-    return fabs(a - b) < 1e-16;
-}
-
 Mesh::Mesh(QObject *parent) : QObject(parent)
 {
 }
@@ -269,14 +264,13 @@ void Mesh::drawFaceToMeshCopy(Mesh *out, RenderState *s, uint destOffset, Face f
     QVector<vec3> & outVertices = out->vertices();
     QVector<vec3> & outNormals = out->normals();
     QVector<vec2> & outTexCoords = out->texCoords();
-    matrix4 vMap = s->currentMatrix();
-    matrix4 nMap = s->currentMatrixForNormals();
+    matrix4 m = s->currentMatrix();
     for(int i = 0; i < f.count; i++, destOffset++)
     {
         uint srcIndex = m_indices.value(f.offset + i);
         outIndices[destOffset] = destOffset;
-        outVertices[destOffset] = vMap.map(m_vertices.value(srcIndex));
-        outNormals[destOffset] = nMap.map(m_normals.value(srcIndex));
+        outVertices[destOffset] = m.map(m_vertices.value(srcIndex));
+        outNormals[destOffset] = m.mapNormal(m_normals.value(srcIndex));
         outTexCoords[destOffset] = m_texCoords.value(srcIndex);
     }
 }

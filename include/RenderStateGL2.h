@@ -1,13 +1,13 @@
-#ifndef INITIALS_RENDER_STATE_GL1_H
-#define INITIALS_RENDER_STATE_GL1_H
+#ifndef INITIALS_RENDER_STATE_GL2_H
+#define INITIALS_RENDER_STATE_GL2_H
 
 #include <QList>
 #include "RenderState.h"
 
-class RenderStateGL1 : public RenderState
+class RenderStateGL2 : public RenderState
 {
 public:
-    RenderStateGL1(QObject *parent = 0);
+    RenderStateGL2(QObject *parent = 0);
 
     virtual void drawMesh(Mesh *m);
 
@@ -37,12 +37,16 @@ public:
 private:
     void beginApplyMaterial(const Material &m);
     void endApplyMaterial();
+    void compareMatrix(RenderState::MatrixMode mode) const;
 
     vec4 m_ambient0;
     vec4 m_diffuse0;
     vec4 m_specular0;
     vec4 m_light0_pos;
     QList<Material> m_materialStack;
+    RenderState::MatrixMode m_matrixMode;
+    matrix4 m_matrix[3];
+    QList<matrix4> m_matrixStack[3];
 };
 
 #endif

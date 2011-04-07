@@ -1,5 +1,11 @@
 #include <cmath>
+#include <QDebug>
 #include "Vertex.h"
+
+bool fequal(double a, double b)
+{
+    return fabs(a - b) < 1e-16;
+}
 
 vec3 vec3::normal(const vec3 &a, const vec3 &b, const vec3 &c)
 {
@@ -15,11 +21,6 @@ vec3 vec3::normal(const vec3 &a, const vec3 &b, const vec3 &c)
     n.y = (n.y / w);
     n.z = (n.z / w);
     return n;
-}
-
-vec3::operator QVector3D() const
-{
-    return QVector3D(x, y, z);
 }
 
 vec3 operator+(const vec3 &a, const vec3 &b)
@@ -44,11 +45,10 @@ vec3 operator-(const vec3 &a, const vec3 &b)
 
 matrix4::matrix4()
 {
-    for(int i = 0; i < 16; i++)
-        d[i] = 0.0;
+    clear();
 }
 
-vec3 matrix4::map(const vec3 &v)
+vec3 matrix4::map(const vec3 &v) const
 {
     float v_w = 1.0;
     float x = d[0] * v.x + d[1] * v.y + d[2] * v.z + d[3] * v_w;
@@ -58,7 +58,7 @@ vec3 matrix4::map(const vec3 &v)
     return vec3(x / w, y / w, z / w);
 }
 
-vec3 matrix4::mapNormal(const vec3 &v)
+vec3 matrix4::mapNormal(const vec3 &v) const
 {
     float v_w = 1.0;
     float x = d[0] * v.x + d[1] * v.y + d[2] * v.z;
@@ -66,4 +66,95 @@ vec3 matrix4::mapNormal(const vec3 &v)
     float z = d[8] * v.x + d[9] * v.y + d[10] * v.z;
     float w = d[12] * v.x + d[13] * v.y + d[14] * v.z + v_w;
     return vec3(x / w, y / w, z / w);
+}
+
+void matrix4::clear()
+{
+    for(int i = 0; i < 16; i++)
+        d[i] = 0.0;
+}
+
+void matrix4::setIdentity()
+{
+    clear();
+    d[0] = d[5] = d[10] = d[15] = 1.0;
+}
+
+matrix4 matrix4::translate(float dx, float dy, float dz)
+{
+    matrix4 m;
+    m.setIdentity();
+    m.d[12] = dx;
+    m.d[13] = dy;
+    m.d[14] = dz;
+    return m;
+}
+
+matrix4 matrix4::rotate(float angle, float x, float y, float z)
+{
+    float theta = angle / 180.0 * M_PI;
+    float c = cos(theta);
+    float s = sin(theta);
+    float t = 1 - c;
+    matrix4 m;
+    m.d[0] = t * x * x + c;
+    m.d[4] = t * x * y - s * z;
+    m.d[8] = t * x * z + s * y;
+    m.d[12] = 0.0;
+
+    m.d[1] = t * x * y + s * z;
+    m.d[5] = t * y * y + c;
+    m.d[9] = t * y * z - s * x;
+    m.d[13] = 0.0;
+
+    m.d[2] = t * x * z - s * y;
+    m.d[6] = t * y * z + s * x;
+    m.d[10] = t * z * z + c;
+    m.d[14] = 0.0;
+
+    m.d[3] = 0.0;
+    m.d[7] = 0.0;
+    m.d[11] = 0.0;
+    m.d[15] = 1.0;
+    return m;
+}
+
+matrix4 matrix4::scale(float sx, float sy, float sz)
+{
+    matrix4 m;
+    m.d[0] = sx;
+    m.d[5] = sy;
+    m.d[10] = sz;
+    m.d[15] = 1.0;
+    return m;
+}
+
+void matrix4::dump() const
+{
+    qDebug("%f %f %f %f", d[0], d[1], d[2], d[3]);
+    qDebug("%f %f %f %f", d[4], d[5], d[6], d[7]);
+    qDebug("%f %f %f %f", d[8], d[9], d[10], d[11]);
+    qDebug("%f %f %f %f", d[12], d[13], d[14], d[15]);
+}
+
+matrix4 operator*(const matrix4 &a, const matrix4 &b)
+{
+    matrix4 m;
+    m.d[0] = a.d[0] * b.d[0] + a.d[4] * b.d[1] + a.d[8] * b.d[2] + a.d[12] * b.d[3];
+    m.d[1] = a.d[1] * b.d[0] + a.d[5] * b.d[1] + a.d[9] * b.d[2] + a.d[13] * b.d[3];
+    m.d[2] = a.d[2] * b.d[0] + a.d[6] * b.d[1] + a.d[10] * b.d[2] + a.d[14] * b.d[3];
+    m.d[3] = a.d[3] * b.d[0] + a.d[7] * b.d[1] + a.d[11] * b.d[2] + a.d[15] * b.d[3];
+    m.d[4] = a.d[0] * b.d[4] + a.d[4] * b.d[5] + a.d[8] * b.d[6] + a.d[12] * b.d[7];
+    m.d[5] = a.d[1] * b.d[4] + a.d[5] * b.d[5] + a.d[9] * b.d[6] + a.d[13] * b.d[7];
+    m.d[6] = a.d[2] * b.d[4] + a.d[6] * b.d[5] + a.d[10] * b.d[6] + a.d[14] * b.d[7];
+    m.d[7] = a.d[3] * b.d[4] + a.d[7] * b.d[5] + a.d[11] * b.d[6] + a.d[15] * b.d[7];
+    m.d[8] = a.d[0] * b.d[8] + a.d[4] * b.d[9] + a.d[8] * b.d[10] + a.d[12] * b.d[11];
+    m.d[9] = a.d[1] * b.d[8] + a.d[5] * b.d[9] + a.d[9] * b.d[10] + a.d[13] * b.d[11];
+    m.d[10] = a.d[2] * b.d[8] + a.d[6] * b.d[9] + a.d[10] * b.d[10] + a.d[14] * b.d[11];
+    m.d[11] = a.d[3] * b.d[8] + a.d[7] * b.d[9] + a.d[11] * b.d[10] + a.d[15] * b.d[11];
+    m.d[12] = a.d[0] * b.d[12] + a.d[4] * b.d[13] + a.d[8] * b.d[14] + a.d[12] * b.d[15];
+    m.d[13] = a.d[1] * b.d[12] + a.d[5] * b.d[13] + a.d[9] * b.d[14] + a.d[13] * b.d[15];
+    m.d[14] = a.d[2] * b.d[12] + a.d[6] * b.d[13] + a.d[10] * b.d[14] + a.d[14] * b.d[15];
+    m.d[15] = a.d[3] * b.d[12] + a.d[7] * b.d[13] + a.d[11] * b.d[14] + a.d[15] * b.d[15];
+    return m;
 }

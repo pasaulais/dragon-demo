@@ -45,6 +45,7 @@ public:
     virtual void setMatrixMode(MatrixMode newMode) = 0;
 
     virtual void loadIdentity() = 0;
+    virtual void multiplyMatrix(const matrix4 &m) = 0;
     virtual void pushMatrix() = 0;
     virtual void popMatrix() = 0;
 
@@ -53,7 +54,6 @@ public:
     virtual void scale(float sx, float sy, float sz) = 0;
 
     virtual matrix4 currentMatrix() const = 0;
-    virtual matrix4 currentMatrixForNormals() const = 0;
 
     // general state operations
     virtual void beginFrame(int width, int heigth) = 0;

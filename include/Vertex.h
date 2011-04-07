@@ -1,7 +1,7 @@
 #ifndef INITIALS_VERTEX_H
 #define INITIALS_VERTEX_H
 
-#include <QVector3D>
+bool fequal(double a, double b);
 
 class vec2
 {
@@ -38,15 +38,6 @@ public:
         this->z = z;
     }
 
-    inline vec3(const QVector3D &v)
-    {
-        this->x = v.x();
-        this->y = v.y();
-        this->z = v.z();
-    }
-
-    operator QVector3D() const;
-
     static vec3 normal(const vec3 &a, const vec3 &b, const vec3 &c);
 };
 
@@ -81,8 +72,19 @@ public:
 
     matrix4();
 
-    vec3 map(const vec3 &v);
-    vec3 mapNormal(const vec3 &v);
+    vec3 map(const vec3 &v) const;
+    vec3 mapNormal(const vec3 &v) const;
+
+    void clear();
+    void setIdentity();
+
+    void dump() const;
+
+    static matrix4 translate(float dx, float dy, float dz);
+    static matrix4 rotate(float angle, float rx, float ry, float rz);
+    static matrix4 scale(float sx, float sy, float sz);
 };
+
+matrix4 operator*(const matrix4 &a, const matrix4 &b);
 
 #endif

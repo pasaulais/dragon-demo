@@ -40,6 +40,11 @@ void RenderStateGL1::loadIdentity()
     glLoadIdentity();
 }
 
+void RenderStateGL1::multiplyMatrix(const matrix4 &m)
+{
+    glMultMatrixf((const GLfloat *)m.d);
+}
+
 void RenderStateGL1::pushMatrix()
 {
     glPushMatrix();
@@ -69,17 +74,6 @@ matrix4 RenderStateGL1::currentMatrix() const
 {
     matrix4 m;
     glGetFloatv(GL_MODELVIEW_MATRIX, (float *)m.d);
-    return m;
-}
-
-matrix4 RenderStateGL1::currentMatrixForNormals() const
-{
-    matrix4 m;
-    glGetFloatv(GL_MODELVIEW_MATRIX, (float *)m.d);
-    for(int i = 0; i < 16; i++)
-        if((i % 4) == 3)
-            m.d[i] = 0;
-    m.d[15] = 1.0;
     return m;
 }
 

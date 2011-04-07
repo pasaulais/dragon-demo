@@ -6,8 +6,6 @@
 #include "Vertex.h"
 #include <cstdio>
 
-bool fequal(double a, double b);
-
 class RenderState;
 
 typedef struct
