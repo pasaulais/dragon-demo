@@ -214,19 +214,7 @@ QString Scene::itemText(Scene::Item item)
 
 void Scene::drawScene()
 {
-    // tile the texture 16 times in both directions
-    m_state->setMatrixMode(RenderState::Texture);
-    pushMatrix();
-        scale(16.0, 16.0, 1.0);
-        m_state->setMatrixMode(RenderState::ModelView);
-        pushMatrix();
-            translate(0.0, -2.0, 0.0);
-            scale(100.0, 1.0, 100.0);
-            drawFloor();
-        popMatrix();
-        m_state->setMatrixMode(RenderState::Texture);
-    popMatrix();
-    m_state->setMatrixMode(RenderState::ModelView);
+    drawFloor();
 
     Dragon *da = m_dragons[0];
     pushMatrix();
@@ -262,10 +250,7 @@ void Scene::drawScene()
 void Scene::drawFloor()
 {
     pushMaterial(floor_material);
-    pushMatrix();
-        scale(1.0, 0.001, 1.0);
-        drawMesh("floor");
-    popMatrix();
+    drawMesh("floor");
     popMaterial();
 }
 

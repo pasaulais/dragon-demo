@@ -61,7 +61,6 @@ private:
     uint m_program;
     int m_modelViewMatrixLoc;
     int m_projMatrixLoc;
-    int m_texMatrixLoc;
 };
 
 #endif

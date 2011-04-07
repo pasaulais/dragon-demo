@@ -19,7 +19,6 @@ RenderStateGL2::RenderStateGL2(QObject *parent) : RenderState(parent)
     m_program = 0;
     m_modelViewMatrixLoc = -1;
     m_projMatrixLoc = -1;
-    m_texMatrixLoc = -1;
 }
 
 RenderStateGL2::~RenderStateGL2()
@@ -40,8 +39,6 @@ void RenderStateGL2::drawMesh(Mesh *m)
                        (const GLfloat *)m_matrix[(int)ModelView].d);
     glUniformMatrix4fv(m_projMatrixLoc, 1, GL_FALSE,
                        (const GLfloat *)m_matrix[(int)Projection].d);
-    glUniformMatrix4fv(m_texMatrixLoc, 1, GL_FALSE,
-                       (const GLfloat *)m_matrix[(int)Texture].d);
     m->draw(m_output, this, m_meshOutput);
     if(m_drawNormals)
         m->drawNormals(this);
@@ -288,7 +285,6 @@ bool RenderStateGL2::loadShaders()
     m_pixelShader = pixelShader;
     m_modelViewMatrixLoc = glGetUniformLocation(program, "u_modelViewMatrix");
     m_projMatrixLoc = glGetUniformLocation(program, "u_projectionMatrix");
-    m_texMatrixLoc = glGetUniformLocation(program, "u_textureMatrix");
     return true;
 }
 
