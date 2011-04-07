@@ -249,27 +249,14 @@ void RenderStateGL2::endFrame()
 void RenderStateGL2::setupViewport(int w, int h)
 {
     glViewport(0, 0, w, h);
-    glMatrixMode(GL_PROJECTION);
     setMatrixMode(Projection);
-    glLoadIdentity();
     loadIdentity();
+    float r = (float)w / (float)h;
     if(m_projection)
-    {
-        gluPerspective(45.0f, (GLfloat)w / (GLfloat)h, 0.1f, 100.0f);
-    }
+        multiplyMatrix(matrix4::perspective(45.0f, r, 0.1f, 100.0f));
+    else if (w <= h)
+        multiplyMatrix(matrix4::ortho(-1.0, 1.0, -1.0 / r, 1.0 / r, -10.0, 10.0));
     else
-    {
-        if (w <= h)
-            glOrtho(-1.0, 1.0, -1.0 * (GLfloat) h / (GLfloat) w,
-                1.0 * (GLfloat) h / (GLfloat) w, -10.0, 10.0);
-        else
-            glOrtho(-1.0 * (GLfloat) w / (GLfloat) h,
-                1.0 * (GLfloat) w / (GLfloat) h, -1.0, 1.0, -10.0, 10.0);
-    }
-    matrix4 m;
-    glGetFloatv(GL_PROJECTION_MATRIX, (float *)m.d);
-    multiplyMatrix(m);
-    glLoadIdentity();
-    glMatrixMode(GL_MODELVIEW);
+        multiplyMatrix(matrix4::ortho(-1.0 * r, 1.0 * r, -1.0, 1.0, -10.0, 10.0));
     setMatrixMode(ModelView);
 }

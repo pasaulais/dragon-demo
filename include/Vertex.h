@@ -83,6 +83,8 @@ public:
     static matrix4 translate(float dx, float dy, float dz);
     static matrix4 rotate(float angle, float rx, float ry, float rz);
     static matrix4 scale(float sx, float sy, float sz);
+    static matrix4 perspective(float angle, float aspect, float nearPlane, float farPlane);
+    static matrix4 ortho(float left, float right, float bottom, float top, float nearPlane, float farPlane);
 };
 
 matrix4 operator*(const matrix4 &a, const matrix4 &b);

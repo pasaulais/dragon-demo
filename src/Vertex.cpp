@@ -129,12 +129,65 @@ matrix4 matrix4::scale(float sx, float sy, float sz)
     return m;
 }
 
-void matrix4::dump() const
+// The following three functions have been adapted from Qt:
+// http://qt.gitorious.org/qt/qt/blobs/raw/4.7/src/gui/math3d/qmatrix4x4.h
+// http://qt.gitorious.org/qt/qt/blobs/raw/4.7/src/gui/math3d/qmatrix4x4.cpp
+
+matrix4 matrix4::perspective(float angle, float aspect, float nearPlane, float farPlane)
 {
-    qDebug("%f %f %f %f", d[0], d[1], d[2], d[3]);
-    qDebug("%f %f %f %f", d[4], d[5], d[6], d[7]);
-    qDebug("%f %f %f %f", d[8], d[9], d[10], d[11]);
-    qDebug("%f %f %f %f", d[12], d[13], d[14], d[15]);
+    matrix4 m;
+    if (nearPlane == farPlane || aspect == 0.0)
+        return m;
+    float radians = (angle / 2.0) * M_PI / 180.0;
+    float sine = sin(radians);
+    if(fequal(sine, 0.0))
+        return m;
+    float cotan = cos(radians) / sine;
+    float clip = farPlane - nearPlane;
+    m.d[0] = cotan / aspect;
+    m.d[4] = 0.0;
+    m.d[8] = 0.0;
+    m.d[12] = 0.0;
+    m.d[1] = 0.0;
+    m.d[5] = cotan;
+    m.d[9] = 0.0;
+    m.d[13] = 0.0;
+    m.d[2] = 0.0;
+    m.d[6] = 0.0;
+    m.d[10] = -(nearPlane + farPlane) / clip;
+    m.d[14] = -(2.0 * nearPlane * farPlane) / clip;
+    m.d[3] = 0.0;
+    m.d[7] = 0.0;
+    m.d[11] = -1.0;
+    m.d[15] = 0.0;
+    return m;
+}
+
+matrix4 matrix4::ortho(float left, float right, float bottom, float top, float nearPlane, float farPlane)
+{
+    matrix4 m;
+    if (left == right || bottom == top || nearPlane == farPlane)
+        return m;
+    qreal width = right - left;
+    qreal invheight = top - bottom;
+    qreal clip = farPlane - nearPlane;
+    m.d[0] = 2.0f / width;
+    m.d[4] = 0.0f;
+    m.d[8] = 0.0f;
+    m.d[12] = -(left + right) / width;
+    m.d[1] = 0.0f;
+    m.d[5] = 2.0f / invheight;
+    m.d[9] = 0.0f;
+    m.d[13] = -(top + bottom) / invheight;
+    m.d[2] = 0.0f;
+    m.d[6] = 0.0f;
+    m.d[10] = -2.0f / clip;
+    m.d[14] = -(nearPlane + farPlane) / clip;
+    m.d[3] = 0.0f;
+    m.d[7] = 0.0f;
+    m.d[11] = 0.0f;
+    m.d[15] = 1.0f;
+    return m;
 }
 
 matrix4 operator*(const matrix4 &a, const matrix4 &b)
@@ -157,4 +210,12 @@ matrix4 operator*(const matrix4 &a, const matrix4 &b)
     m.d[14] = a.d[2] * b.d[12] + a.d[6] * b.d[13] + a.d[10] * b.d[14] + a.d[14] * b.d[15];
     m.d[15] = a.d[3] * b.d[12] + a.d[7] * b.d[13] + a.d[11] * b.d[14] + a.d[15] * b.d[15];
     return m;
+}
+
+void matrix4::dump() const
+{
+    qDebug("%f %f %f %f", d[0], d[1], d[2], d[3]);
+    qDebug("%f %f %f %f", d[4], d[5], d[6], d[7]);
+    qDebug("%f %f %f %f", d[8], d[9], d[10], d[11]);
+    qDebug("%f %f %f %f", d[12], d[13], d[14], d[15]);
 }
