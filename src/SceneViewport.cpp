@@ -150,7 +150,8 @@ void SceneViewport::paintGL()
     QVector3D rot = m_theta;
     if(m_scene)
         rot += m_scene->orientation();
-    glPushMatrix();
+    m_state->setMatrixMode(RenderState::ModelView);
+    m_state->pushMatrix();
         glLoadIdentity();
         glTranslatef(m_delta.x(), m_delta.y(), m_delta.z());
         glRotatef(rot.x(), 1.0, 0.0, 0.0);
@@ -163,7 +164,7 @@ void SceneViewport::paintGL()
             draw_axes();
         if(m_draw_grids)
             draw_axis_grids(true, true, true);
-    glPopMatrix();
+    m_state->popMatrix();
     glFlush();
     restoreGLState();
 }

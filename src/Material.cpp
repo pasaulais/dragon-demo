@@ -51,7 +51,7 @@ void Material::beginApply()
     glBindTexture(GL_TEXTURE_2D, m_texture);
 }
 
-void Material::setTextureParams(GLenum target, bool mipmaps)
+void Material::setTextureParams(uint target, bool mipmaps)
 {
     if(mipmaps)
         glTexParameterf(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);

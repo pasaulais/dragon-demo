@@ -3,11 +3,11 @@
 
 #include <QObject>
 #include "Material.h"
+#include "RenderState.h"
 
-class RenderState;
 class Scene;
 
-class Dragon : public QObject
+class Dragon : public StateObject
 {
 public:
     enum Kind
@@ -58,7 +58,6 @@ public:
     void animate(float t);
 
 private:
-    RenderState *m_state;
     Kind m_kind;
     uint m_jointParts;
     uint m_chestParts;

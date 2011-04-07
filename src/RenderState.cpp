@@ -91,6 +91,47 @@ void RenderState::endExportMesh()
     m_exporting = false;
 }
 
+void RenderState::setMatrixMode(RenderState::MatrixMode newMode)
+{
+    switch(newMode)
+    {
+    case ModelView:
+        glMatrixMode(GL_MODELVIEW);
+        break;
+    case Projection:
+        glMatrixMode(GL_PROJECTION);
+        break;
+    case Texture:
+        glMatrixMode(GL_TEXTURE);
+        break;
+    }
+}
+
+void RenderState::pushMatrix()
+{
+    glPushMatrix();
+}
+
+void RenderState::popMatrix()
+{
+    glPopMatrix();
+}
+
+void RenderState::translate(float dx, float dy, float dz)
+{
+    glTranslatef(dx, dy, dz);
+}
+
+void RenderState::rotate(float angle, float rx, float ry, float rz)
+{
+    glRotatef(angle, rx, ry, rz);
+}
+
+void RenderState::scale(float sx, float sy, float sz)
+{
+    glScalef(sx, sy, sz);
+}
+
 QMatrix4x4 RenderState::currentGLMatrix() const
 {
     float m[4][4];
@@ -109,4 +150,46 @@ QMatrix4x4 RenderState::currentGLMatrixForNormals() const
                      m[0][1], m[1][1], m[2][1], 0.0,
                      m[0][2], m[1][2], m[2][2], 0.0,
                      m[0][3], m[1][3], m[2][3], 1.0);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+StateObject::StateObject(RenderState *s, QObject *parent) : QObject(parent)
+{
+    m_state = s;
+}
+
+void StateObject::pushMatrix()
+{
+    m_state->pushMatrix();
+}
+
+void StateObject::popMatrix()
+{
+    m_state->popMatrix();
+}
+
+void StateObject::translate(float dx, float dy, float dz)
+{
+    m_state->translate(dx, dy, dz);
+}
+
+void StateObject::rotate(float angle, float rx, float ry, float rz)
+{
+    m_state->rotate(angle, rx, ry, rz);
+}
+
+void StateObject::scale(float sx, float sy, float sz)
+{
+    m_state->scale(sx, sy, sz);
+}
+
+void StateObject::drawMesh(Mesh *m)
+{
+    m_state->drawMesh(m);
+}
+
+void StateObject::drawMesh(QString name)
+{
+    m_state->drawMesh(name);
 }

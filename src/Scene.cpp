@@ -1,4 +1,3 @@
-#include <GL/gl.h>
 #include <ctime>
 #include <cmath>
 #include <iostream>
@@ -9,7 +8,6 @@
 #include "Dragon.h"
 #include "Mesh.h"
 #include "Material.h"
-#include "RenderState.h"
 
 using namespace std;
 
@@ -19,9 +17,8 @@ static Material debug_material(QVector4D(0.2, 0.2, 0.2, 1.0),
 static Material floor_material(QVector4D(0.5, 0.5, 0.5, 1.0),
     QVector4D(1.0, 1.0, 1.0, 1.0), QVector4D(1.0, 1.0, 1.0, 1.0), 00.0);
 
-Scene::Scene(RenderState *state, QObject *parent) : QObject(parent)
+Scene::Scene(RenderState *state, QObject *parent) : StateObject(state, parent)
 {
-    m_state = state;
     m_camera = Camera_Static;
     m_exportQueued = false;
 
@@ -97,8 +94,7 @@ void Scene::draw()
 
 void Scene::drawItem(Scene::Item item)
 {
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
+    pushMatrix();
     if(item == SCENE)
     {
         drawScene();
@@ -109,13 +105,13 @@ void Scene::drawItem(Scene::Item item)
         switch(item)
         {
         case LETTER_P:
-            m_state->drawMesh("letter_p");
+            drawMesh("letter_p");
             break;
         case LETTER_A:
-            m_state->drawMesh("letter_a");
+            drawMesh("letter_a");
             break;
         case LETTER_S:
-            m_state->drawMesh("letter_s");
+            drawMesh("letter_s");
             break;
         case DRAGON:
             m_debugDragon->draw();
@@ -166,7 +162,7 @@ void Scene::drawItem(Scene::Item item)
         debug_material.endApply();
 
     }
-    glPopMatrix();
+    popMatrix();
 }
 
 void Scene::exportItem(Item item, QString path)
@@ -225,111 +221,111 @@ QString Scene::itemText(Scene::Item item)
 void Scene::drawScene()
 {
     // tile the texture 16 times in both directions
-    glMatrixMode(GL_TEXTURE);
-    glPushMatrix();
-        glScalef(16.0, 16.0, 1.0);
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-            glTranslatef(0.0, -2.0, 0.0);
-            glScalef(100.0, 1.0, 100.0);
+    m_state->setMatrixMode(RenderState::Texture);
+    pushMatrix();
+        scale(16.0, 16.0, 1.0);
+        m_state->setMatrixMode(RenderState::ModelView);
+        pushMatrix();
+            translate(0.0, -2.0, 0.0);
+            scale(100.0, 1.0, 100.0);
             drawFloor();
-        glPopMatrix();
-        glMatrixMode(GL_TEXTURE);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
+        popMatrix();
+        m_state->setMatrixMode(RenderState::Texture);
+    popMatrix();
+    m_state->setMatrixMode(RenderState::ModelView);
 
     Dragon *da = m_dragons[0];
-    glPushMatrix();
-        glTranslatef(0.0, 2.0 + 0.6 * da->alpha(), 0.0);
-        glScalef(3.0, 3.0, 3.0);
+    pushMatrix();
+        translate(0.0, 2.0 + 0.6 * da->alpha(), 0.0);
+        scale(3.0, 3.0, 3.0);
         da->setDetailLevel(m_detailLevel);
         drawDragonHoldingA(da);
-    glPopMatrix();
+    popMatrix();
 
     Dragon *dp = m_dragons[1];
-    glPushMatrix();
-        glTranslatef(-dp->beta(), dp->beta(), dp->beta());
-        glRotatef(dp->alpha(), 0.0, 1.0, 0.0);
-        glTranslatef(4.0, 0.0, 4.0);
-        glRotatef(60.0, 0.0, 1.0, 0.0);
-        glScalef(1.5, 1.5, 1.5);
+    pushMatrix();
+        translate(-dp->beta(), dp->beta(), dp->beta());
+        rotate(dp->alpha(), 0.0, 1.0, 0.0);
+        translate(4.0, 0.0, 4.0);
+        rotate(60.0, 0.0, 1.0, 0.0);
+        scale(1.5, 1.5, 1.5);
         dp->setDetailLevel(m_detailLevel);
         drawDragonHoldingP(dp);
-    glPopMatrix();
+    popMatrix();
 
     Dragon *ds = m_dragons[2];
-    glPushMatrix();
-        glTranslatef(0.0, ds->beta(), 0.0);
-        glRotatef(-ds->alpha(), 0.0, 1.0, 0.0);
-        glTranslatef(3.0, 0.0, 3.0);
-        glRotatef(-120.0, 0.0, 1.0, 0.0);
-        glScalef(1.5, 1.5, 1.5);
+    pushMatrix();
+        translate(0.0, ds->beta(), 0.0);
+        rotate(-ds->alpha(), 0.0, 1.0, 0.0);
+        translate(3.0, 0.0, 3.0);
+        rotate(-120.0, 0.0, 1.0, 0.0);
+        scale(1.5, 1.5, 1.5);
         ds->setDetailLevel(m_detailLevel);
         drawDragonHoldingS(ds);
-    glPopMatrix();
+    popMatrix();
 }
 
 void Scene::drawFloor()
 {
     floor_material.beginApply();
-    glPushMatrix();
-        glScalef(1.0, 0.001, 1.0);
-        m_state->drawMesh("floor");
-    glPopMatrix();
+    pushMatrix();
+        scale(1.0, 0.001, 1.0);
+        drawMesh("floor");
+    popMatrix();
     floor_material.endApply();
 }
 
 void Scene::drawDragonHoldingA(Dragon *d)
 {
-    glPushMatrix();
-        glPushMatrix();
-            glRotatef(45.0, 0.0, 0.0, 1.0);
+    pushMatrix();
+        pushMatrix();
+            rotate(45.0, 0.0, 0.0, 1.0);
             d->draw();
-        glPopMatrix();
-        glPushMatrix();
-            glTranslatef(1.0/3.0, 0.2/3.0, 0.0);
-            glRotatef(15.0, 0.0, 1.0, 0.0);
-            glRotatef(-d->frontLegsAngle(), 0.0, 0.0, 1.0);
-            glScalef(2.0/3.0, 2.0/3.0, 1.0/3.0);
+        popMatrix();
+        pushMatrix();
+            translate(1.0/3.0, 0.2/3.0, 0.0);
+            rotate(15.0, 0.0, 1.0, 0.0);
+            rotate(-d->frontLegsAngle(), 0.0, 0.0, 1.0);
+            scale(2.0/3.0, 2.0/3.0, 1.0/3.0);
             d->tongueMaterial().beginApply();
-            m_state->drawMesh("letter_a");
+            drawMesh("letter_a");
             d->tongueMaterial().endApply();
-        glPopMatrix();
-    glPopMatrix();
+        popMatrix();
+    popMatrix();
 }
 
 void Scene::drawDragonHoldingP(Dragon *d)
 {
-    glPushMatrix();
+    pushMatrix();
         d->draw();
-        glPushMatrix();
-            glTranslatef(0.08, -0.13, 0.0);
-            glRotatef(-d->frontLegsAngle() + 90.0, 0.0, 0.0, 1.0);
-            glTranslatef(0.2, -0.1, 0.0);
-            glRotatef(-170, 0.0, 0.0, 1.0);
-            glScalef(1.0, 1.0, 0.5);
+        pushMatrix();
+            translate(0.08, -0.13, 0.0);
+            rotate(-d->frontLegsAngle() + 90.0, 0.0, 0.0, 1.0);
+            translate(0.2, -0.1, 0.0);
+            rotate(-170, 0.0, 0.0, 1.0);
+            scale(1.0, 1.0, 0.5);
             d->tongueMaterial().beginApply();
-            m_state->drawMesh("letter_p");
+            drawMesh("letter_p");
             d->tongueMaterial().endApply();
-        glPopMatrix();
-    glPopMatrix();
+        popMatrix();
+    popMatrix();
 }
 
 void Scene::drawDragonHoldingS(Dragon *d)
 {
-    glPushMatrix();
+    pushMatrix();
         d->draw();
-        glPushMatrix();
-            glTranslatef(0.26, -0.25, 0.0);
-            glRotatef(180.0 - d->frontLegsAngle(), 0.0, 0.0, 1.0);
+        pushMatrix();
+            translate(0.26, -0.25, 0.0);
+            rotate(180.0 - d->frontLegsAngle(), 0.0, 0.0, 1.0);
             // need to change the center of the rotation
-            glTranslatef(-0.4, 0.1, 0.0);
-            glScalef(1.0, 1.0, 0.5);
+            translate(-0.4, 0.1, 0.0);
+            scale(1.0, 1.0, 0.5);
             d->tongueMaterial().beginApply();
-            m_state->drawMesh("letter_s");
+            drawMesh("letter_s");
             d->tongueMaterial().endApply();
-        glPopMatrix();
-    glPopMatrix();
+        popMatrix();
+    popMatrix();
 }
 
 void Scene::select_next()

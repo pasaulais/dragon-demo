@@ -4,12 +4,12 @@
 #include <QObject>
 #include <QVector3D>
 #include <QList>
+#include "RenderState.h"
 
 class QKeyEvent;
-class RenderState;
 class Dragon;
 
-class Scene : public QObject
+class Scene : public StateObject
 {
     Q_OBJECT
 
@@ -84,7 +84,6 @@ private:
     void drawDragonHoldingS(Dragon *d);
     static QString itemText(Item item);
 
-    RenderState *m_state;
     int m_selected;
     int m_detailLevel;
     Camera m_camera;

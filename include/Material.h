@@ -21,7 +21,7 @@ public:
 private:
     // Create a texture from a TIFF file using libtiff
     static uint textureFromTIFFImage(QString path, bool mipmaps);
-    static void setTextureParams(GLenum target, bool mipmaps);
+    static void setTextureParams(uint target, bool mipmaps);
 
     QVector4D m_ambient;
     QVector4D m_diffuse;

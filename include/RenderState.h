@@ -28,6 +28,22 @@ public:
     Mesh * loadMeshObj(QString name, QString path);
     Mesh * loadMeshStl(QString name, QString path);
 
+    enum MatrixMode
+    {
+        ModelView,
+        Projection,
+        Texture
+    };
+
+    void setMatrixMode(MatrixMode newMode);
+
+    void pushMatrix();
+    void popMatrix();
+
+    void translate(float dx, float dy, float dz);
+    void rotate(float angle, float rx, float ry, float rz);
+    void scale(float sx, float sy, float sz);
+
     QMatrix4x4 currentGLMatrix() const;
     QMatrix4x4 currentGLMatrixForNormals() const;
 
@@ -41,6 +57,25 @@ private:
     QString m_exportPath;
     Mesh::OutputMode m_oldOutput;
     // material stack?
+};
+
+class StateObject : public QObject
+{
+public:
+    StateObject(RenderState *s, QObject *parent = 0);
+
+    void pushMatrix();
+    void popMatrix();
+
+    void translate(float dx, float dy, float dz);
+    void rotate(float angle, float rx, float ry, float rz);
+    void scale(float sx, float sy, float sz);
+
+    void drawMesh(Mesh *m);
+    void drawMesh(QString name);
+
+protected:
+    RenderState *m_state;
 };
 
 #endif
