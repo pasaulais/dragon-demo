@@ -175,19 +175,15 @@ void RenderStateGL2::endApplyMaterial()
 
 void RenderStateGL2::beginFrame(int w, int h)
 {
-    //glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT);
     glPushAttrib(GL_ENABLE_BIT);
     glUseProgram(m_program);
+    initShaders();
     glEnable(GL_DEPTH_TEST);
-    // we do non-uniform scaling and not all normals are one-unit-length
-    /*glEnable(GL_NORMALIZE);
-    glShadeModel(GL_SMOOTH);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glLightfv(GL_LIGHT0, GL_POSITION, (GLfloat *)&m_light0_pos);
-    glLightfv(GL_LIGHT0, GL_AMBIENT, (GLfloat *)&m_ambient0);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, (GLfloat *)&m_diffuse0);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, (GLfloat *)&m_specular0);*/
+    //TODO smooth shading
+    setUniformValue("u_light_ambient", m_ambient0);
+    setUniformValue("u_light_diffuse", m_diffuse0);
+    setUniformValue("u_light_specular", m_specular0);
+    setUniformValue("u_light_pos", m_light0_pos);
     setupViewport(w, h);
     setMatrixMode(ModelView);
     pushMatrix();
@@ -222,7 +218,7 @@ void RenderStateGL2::setupViewport(int w, int h)
 
 void RenderStateGL2::init()
 {
-    bool ok = loadShaders();
+    loadShaders();
 }
 
 char * RenderStateGL2::loadShaderSource(const char *path) const
@@ -331,4 +327,14 @@ bool RenderStateGL2::loadShaders()
     m_modelViewMatrixLoc = glGetUniformLocation(program, "u_modelViewMatrix");
     m_projMatrixLoc = glGetUniformLocation(program, "u_projectionMatrix");
     return true;
+}
+
+void RenderStateGL2::initShaders()
+{
+}
+
+void RenderStateGL2::setUniformValue(const char *name, const vec4 &v)
+{
+    int location = glGetUniformLocation(m_program, name);
+    glUniform4fv(location, 1, (GLfloat *)&v);
 }

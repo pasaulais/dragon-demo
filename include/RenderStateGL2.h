@@ -44,6 +44,8 @@ private:
     char * loadShaderSource(const char *path) const;
     uint loadShader(const char *path, uint type) const;
     bool loadShaders();
+    void initShaders();
+    void setUniformValue(const char *name, const vec4 &v);
 
     vec4 m_ambient0;
     vec4 m_diffuse0;

@@ -1,9 +1,9 @@
 uniform mat4 u_modelViewMatrix;
 uniform mat4 u_projectionMatrix;
-const vec4 ambient0 = vec4(1.0, 1.0, 1.0, 1.0);
-const vec4 diffuse0 = vec4(1.0, 1.0, 1.0, 1.0);
-const vec4 specular0 = vec4(1.0, 1.0, 1.0, 1.0);
-const vec4 light0_Pos = vec4(0.0, 1.0, 1.0, 0.0);
+uniform vec4 u_light_ambient;
+uniform vec4 u_light_diffuse;
+uniform vec4 u_light_specular;
+uniform vec4 u_light_pos;
 
 void main()
 {
@@ -15,13 +15,13 @@ void main()
     normalMatrix[2] = vec3(u_modelViewMatrix[2]);
 
     normal = normalize(normalMatrix * gl_Normal);
-    lightDir = normalize(light0_Pos.xyz);
+    lightDir = normalize(u_light_pos.xyz);
     halfVector = normalize(lightDir + vec3(0, 0, 1));
 
-    ambient = gl_FrontMaterial.ambient * ambient0;
-    diffuse = max(dot(normal, lightDir), 0.0) * gl_FrontMaterial.diffuse * diffuse0;
+    ambient = gl_FrontMaterial.ambient * u_light_ambient;
+    diffuse = max(dot(normal, lightDir), 0.0) * gl_FrontMaterial.diffuse * u_light_diffuse;
     specular = pow(max(dot(normal, halfVector), 0.0), gl_FrontMaterial.shininess)
-        * gl_FrontMaterial.specular * specular0;
+        * gl_FrontMaterial.specular * u_light_specular;
 
     gl_FrontColor = ambient + diffuse + specular;
     gl_Position = u_projectionMatrix * u_modelViewMatrix * gl_Vertex;
