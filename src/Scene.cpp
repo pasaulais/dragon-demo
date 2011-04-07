@@ -388,13 +388,13 @@ void Scene::animate()
     {
     default:
     case Camera_Static:
-        m_theta.setY(0.0);			// static camera
+        m_theta.y = 0.0;			// static camera
         break;
     case Camera_Jumping:
-        m_theta.setY(angle);		// following jumping dragon
+        m_theta.y = angle;		// following jumping dragon
         break;
     case Camera_Flying:
-        m_theta.setY(-angle);       // following drunk dragon
+        m_theta.y = -angle;       // following drunk dragon
         break;
     }
 

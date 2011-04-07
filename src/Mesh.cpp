@@ -125,8 +125,8 @@ void Mesh::generateTextureCoords()
         {
             GLuint ind = m_indices[f.offset + j];
             vec2 *tc = &m_texCoords[ind];
-            tc->setX(((j == 0) || (j == 3)) ? 0.0 : 1.0);
-            tc->setY(((j == 0) || (j == 1)) ? 0.0 : 1.0);
+            tc->x = (((j == 0) || (j == 3)) ? 0.0 : 1.0);
+            tc->y = (((j == 0) || (j == 1)) ? 0.0 : 1.0);
         }
     }
 }
@@ -147,7 +147,7 @@ void Mesh::computeNormals()
         GLuint ind1 = m_indices[f.offset + 0];
         GLuint ind2 = m_indices[f.offset + 1];
         GLuint ind3 = m_indices[f.offset + 2];
-        u = normalVector(m_vertices[ind1], m_vertices[ind2], m_vertices[ind3]);
+        u = vec3::normal(m_vertices[ind1], m_vertices[ind2], m_vertices[ind3]);
 
         // assign it to every vertex in the face
         for(int i = 0; i < f.count; i++)
@@ -348,7 +348,7 @@ Mesh * Mesh::loadStl(const char *path, QObject *parent, bool compute_normals)
             return 0;
         }
         if(compute_normals)
-            points[0] = normalVector(points[1], points[2], points[3]);
+            points[0] = vec3::normal(points[1], points[2], points[3]);
         for(uint32_t v = 0; v < 3; v++)
         {
             uint32_t pos = (i * 3) + v;
@@ -527,7 +527,7 @@ Mesh * Mesh::loadObj(const char *path, QObject *parent)
                 vec3 v1 = vertices.value(points[0].vertexIndex - 1);
                 vec3 v2 = vertices.value(points[1].vertexIndex - 1);
                 vec3 v3 = vertices.value(points[2].vertexIndex - 1);
-                normal = normalVector(v1, v2, v3);
+                normal = vec3::normal(v1, v2, v3);
             }
             for(int i = 0; i < pointCount; i++, indiceCount++)
             {
@@ -561,11 +561,11 @@ void Mesh::saveObj(QString path)
         return;
     }
     foreach(vec3 vertex, m_vertices)
-        fprintf(f, "v %f %f %f\n", vertex.x(), vertex.y(), vertex.z());
+        fprintf(f, "v %f %f %f\n", vertex.x, vertex.y, vertex.z);
     foreach(vec3 normal, m_normals)
-        fprintf(f, "vn %f %f %f\n", normal.x(), normal.y(), normal.z());
+        fprintf(f, "vn %f %f %f\n", normal.x, normal.y, normal.z);
     foreach(vec2 texCoords, m_texCoords)
-        fprintf(f, "vt %f %f\n", texCoords.x(), texCoords.y());
+        fprintf(f, "vt %f %f\n", texCoords.x, texCoords.y);
     foreach(Face face, m_faces)
     {
         switch(face.mode)

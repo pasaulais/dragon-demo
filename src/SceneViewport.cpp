@@ -92,11 +92,11 @@ void SceneViewport::paintGL()
     m_state->beginFrame(width(), height());
     vec3 rot = m_theta;
     if(m_scene)
-        rot += m_scene->orientation();
-    m_state->translate((float)m_delta.x(), (float)m_delta.y(), (float)m_delta.z());
-    m_state->rotate((float)rot.x(), 1.0, 0.0, 0.0);
-    m_state->rotate((float)rot.y(), 0.0, 1.0, 0.0);
-    m_state->rotate((float)rot.z(), 0.0, 0.0, 1.0);
+        rot = rot + m_scene->orientation();
+    m_state->translate(m_delta.x, m_delta.y, m_delta.z);
+    m_state->rotate(rot.x, 1.0, 0.0, 0.0);
+    m_state->rotate(rot.y, 0.0, 1.0, 0.0);
+    m_state->rotate(rot.z, 0.0, 0.0, 1.0);
     m_state->scale(m_sigma, m_sigma, m_sigma);
     if(m_scene)
         m_scene->draw();
@@ -186,17 +186,17 @@ void SceneViewport::keyReleaseEvent(QKeyEvent *e)
 {
     int key = e->key();
     if(key == Qt::Key_Q)
-        m_theta.setY(m_theta.y() + 5.0);
+        m_theta.y = (m_theta.y + 5.0);
     else if(key == Qt::Key_D)
-        m_theta.setY(m_theta.y() - 5.0);
+        m_theta.y = (m_theta.y - 5.0);
     else if(key == Qt::Key_2)
-        m_theta.setX(m_theta.x() + 5.0);
+        m_theta.x = (m_theta.x + 5.0);
     else if(key == Qt::Key_8)
-        m_theta.setX(m_theta.x() - 5.0);
+        m_theta.x = (m_theta.x - 5.0);
     else if(key == Qt::Key_4)
-        m_theta.setZ(m_theta.z() + 5.0);
+        m_theta.z = (m_theta.z + 5.0);
     else if(key == Qt::Key_6)
-        m_theta.setZ(m_theta.z() - 5.0);
+        m_theta.z = (m_theta.z - 5.0);
     else if(key == Qt::Key_R)
         resetCamera();
     else if(key == Qt::Key_Z)
@@ -226,8 +226,8 @@ void SceneViewport::mouseMoveEvent(QMouseEvent *e)
     {
         int dx = m_transState.x0 - x;
         int dy = m_transState.y0 - y;
-        m_delta.setX(m_transState.last.x() - (dx / 100.0));
-        m_delta.setY(m_transState.last.y() + (dy / 100.0));
+        m_delta.x = (m_transState.last.x - (dx / 100.0));
+        m_delta.y = (m_transState.last.y + (dy / 100.0));
         update();
     }
     
@@ -235,8 +235,8 @@ void SceneViewport::mouseMoveEvent(QMouseEvent *e)
     {
         int dx = m_rotState.x0 - x;
         int dy = m_rotState.y0 - y;
-        m_theta.setX(m_rotState.last.x() + (dy * 2.0));
-        m_theta.setY(m_rotState.last.y() + (dx * 2.0));
+        m_theta.x = (m_rotState.last.x + (dy * 2.0));
+        m_theta.y = (m_rotState.last.y + (dx * 2.0));
         update();
     }
 }
