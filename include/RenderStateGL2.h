@@ -39,13 +39,14 @@ public:
 
 private:
     void beginApplyMaterial(const Material &m);
-    void endApplyMaterial();
-    void compareMatrix(RenderState::MatrixMode mode) const;
+    void endApplyMaterial(const Material &m);
     char * loadShaderSource(const char *path) const;
     uint loadShader(const char *path, uint type) const;
     bool loadShaders();
     void initShaders();
     void setUniformValue(const char *name, const vec4 &v);
+    void setUniformValue(const char *name, float f);
+    void setUniformValue(const char *name, int i);
 
     vec4 m_ambient0;
     vec4 m_diffuse0;
@@ -60,6 +61,7 @@ private:
     uint m_program;
     int m_modelViewMatrixLoc;
     int m_projMatrixLoc;
+    int m_texMatrixLoc;
 };
 
 #endif

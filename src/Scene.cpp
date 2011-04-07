@@ -264,7 +264,7 @@ void Scene::drawFloor()
     pushMaterial(floor_material);
     pushMatrix();
         scale(1.0, 0.001, 1.0);
-        //drawMesh("floor");
+        drawMesh("floor");
     popMatrix();
     popMaterial();
 }

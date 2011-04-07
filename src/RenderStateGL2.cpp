@@ -19,6 +19,7 @@ RenderStateGL2::RenderStateGL2(QObject *parent) : RenderState(parent)
     m_program = 0;
     m_modelViewMatrixLoc = -1;
     m_projMatrixLoc = -1;
+    m_texMatrixLoc = -1;
 }
 
 RenderStateGL2::~RenderStateGL2()
@@ -35,13 +36,12 @@ void RenderStateGL2::drawMesh(Mesh *m)
 {
     if(!m)
         return;
-    /*glMatrixMode(GL_TEXTURE);
-    glLoadIdentity();
-    glMultMatrixf((const GLfloat *)m_matrix[(int)Texture].d);*/
     glUniformMatrix4fv(m_modelViewMatrixLoc, 1, GL_FALSE,
                        (const GLfloat *)m_matrix[(int)ModelView].d);
     glUniformMatrix4fv(m_projMatrixLoc, 1, GL_FALSE,
                        (const GLfloat *)m_matrix[(int)Projection].d);
+    glUniformMatrix4fv(m_texMatrixLoc, 1, GL_FALSE,
+                       (const GLfloat *)m_matrix[(int)Texture].d);
     m->draw(m_output, this, m_meshOutput);
     if(m_drawNormals)
         m->drawNormals(this);
@@ -96,53 +96,6 @@ matrix4 RenderStateGL2::currentMatrix() const
     return m_matrix[(int)m_matrixMode];
 }
 
-void RenderStateGL2::compareMatrix(RenderState::MatrixMode mode) const
-{
-    GLenum glMode;
-    switch(mode)
-    {
-    case ModelView:
-        glMode = GL_MODELVIEW_MATRIX;
-        break;
-    case Projection:
-        glMode = GL_PROJECTION_MATRIX;
-        break;
-    case Texture:
-        glMode = GL_TEXTURE_MATRIX;
-        break;
-    }
-
-    bool equal = true;
-    matrix4 ourMat = m_matrix[(int)mode];
-    matrix4 glMat;
-    glGetFloatv(glMode, (float *)glMat.d);
-    for(int j = 0; j < 4; j++)
-    {
-        for(int i = 0; i < 4; i++)
-        {
-            int pos = j * 4 + i;
-            float expected = glMat.d[pos];
-            float actual = ourMat.d[pos];
-            if(!fequal(expected, actual))
-            {
-                equal = false;
-                break;
-            }
-        }
-        if(!equal)
-            break;
-    }
-    if(!equal)
-    {
-        qDebug("Matrix mismatch");
-        qDebug("Expected:");
-        glMat.dump();
-        qDebug("Actual:");
-        ourMat.dump();
-        return;
-    }
-}
-
 void RenderStateGL2::pushMaterial(const Material &m)
 {
     m_materialStack.append(m);
@@ -151,26 +104,35 @@ void RenderStateGL2::pushMaterial(const Material &m)
 
 void RenderStateGL2::popMaterial()
 {
-    m_materialStack.removeLast();
-    endApplyMaterial();
+    Material m = m_materialStack.takeLast();
+    endApplyMaterial(m);
     if(m_materialStack.count() > 0)
         beginApplyMaterial(m_materialStack.last());
 }
 
 void RenderStateGL2::beginApplyMaterial(const Material &m)
 {
-    glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT | GL_LIGHTING_BIT);
-    glMaterialfv(GL_FRONT, GL_AMBIENT, (GLfloat *)&m.ambient());
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, (GLfloat *)&m.diffuse());
-    glMaterialfv(GL_FRONT, GL_SPECULAR, (GLfloat *)&m.specular());
-    glMaterialf(GL_FRONT, GL_SHININESS, m.shine());
-    /*glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, m.texture());*/
+    setUniformValue("u_material_ambient", m.ambient());
+    setUniformValue("u_material_diffuse", m.diffuse());
+    setUniformValue("u_material_specular", m.specular());
+    setUniformValue("u_material_shine", m.shine());
+    if(m.texture() != 0)
+    {
+        glActiveTexture(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, m.texture());
+        setUniformValue("u_material_texture", 0);
+        setUniformValue("u_has_texture", 1);
+    }
+    else
+    {
+        setUniformValue("u_has_texture", 0);
+    }
 }
 
-void RenderStateGL2::endApplyMaterial()
+void RenderStateGL2::endApplyMaterial(const Material &m)
 {
-    glPopAttrib();
+    if(m.texture() != 0)
+        glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void RenderStateGL2::beginFrame(int w, int h)
@@ -179,7 +141,7 @@ void RenderStateGL2::beginFrame(int w, int h)
     glUseProgram(m_program);
     initShaders();
     glEnable(GL_DEPTH_TEST);
-    //TODO smooth shading
+    //TODO smooth shading, VertexAttrib
     setUniformValue("u_light_ambient", m_ambient0);
     setUniformValue("u_light_diffuse", m_diffuse0);
     setUniformValue("u_light_specular", m_specular0);
@@ -326,6 +288,7 @@ bool RenderStateGL2::loadShaders()
     m_pixelShader = pixelShader;
     m_modelViewMatrixLoc = glGetUniformLocation(program, "u_modelViewMatrix");
     m_projMatrixLoc = glGetUniformLocation(program, "u_projectionMatrix");
+    m_texMatrixLoc = glGetUniformLocation(program, "u_textureMatrix");
     return true;
 }
 
@@ -337,4 +300,16 @@ void RenderStateGL2::setUniformValue(const char *name, const vec4 &v)
 {
     int location = glGetUniformLocation(m_program, name);
     glUniform4fv(location, 1, (GLfloat *)&v);
+}
+
+void RenderStateGL2::setUniformValue(const char *name, float f)
+{
+    int location = glGetUniformLocation(m_program, name);
+    glUniform1f(location, f);
+}
+
+void RenderStateGL2::setUniformValue(const char *name, int i)
+{
+    int location = glGetUniformLocation(m_program, name);
+    glUniform1i(location, i);
 }
