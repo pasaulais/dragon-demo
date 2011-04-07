@@ -34,25 +34,21 @@ public:
 
     const QVector<FaceGL1> & faces() const;
 
-    virtual void addVertices(VertexGroup *vg);
+    virtual int groupCount() const;
+    virtual uint groupMode(int index) const;
+    virtual uint groupSize(int index) const;
+    virtual void addGroup(VertexGroup *vg);
+    virtual bool copyGroupTo(int index, VertexGroup *vg) const;
     void addFace(uint mode, int vertexCount, int offset, bool draw = true);
 
     virtual void draw(OutputMode mode, RenderState *s, Mesh *output = 0);
     // Show normal vectors for every vertex in the mesh, for debugging purposes
     virtual void drawNormals(RenderState *s);
 
-    virtual void saveStl(QString path);
-    virtual void saveObj(QString path);
-
 private:
     void drawVertexList();
     void drawToMesh(Mesh *m, RenderState *s);
     VertexGroup * drawFaceToMeshCopy(RenderState *s, FaceGL1 f);
-    void saveObjIndicesTri(FILE *f, FaceGL1 face);
-    void saveObjIndicesQuad(FILE *f, FaceGL1 face);
-    void saveObjIndicesTriStrip(FILE *f, FaceGL1 face);
-    void saveObjFace(FILE *f, uint ind1, uint ind2, uint ind3, bool normals, bool texCoords);
-    void saveObjIndice(FILE *f, uint indice, bool normals, bool texCoords);
 
     QVector<vec3> m_vertices;
     QVector<vec3> m_normals;

@@ -9,7 +9,7 @@ class RenderStateGL1 : public RenderState
 public:
     RenderStateGL1(QObject *parent = 0);
 
-    virtual Mesh * createMesh(VertexGroup *vg, QObject *parent = 0) const;
+    virtual Mesh * createMesh(QObject *parent = 0) const;
     virtual void drawMesh(Mesh *m);
 
     // matrix operations

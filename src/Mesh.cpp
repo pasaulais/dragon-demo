@@ -204,3 +204,179 @@ VertexGroup * Mesh::loadObj(const char *path)
     fclose(f);
     return vg;
 }
+
+void Mesh::saveStl(QString path) const
+{
+    int groups = groupCount();
+    VertexGroup **vg = (VertexGroup **)new VertexGroup*[groups];
+    for(int i = 0; i < groups; i++)
+    {
+        uint32_t mode = groupMode(i);
+        uint32_t count = groupSize(i);
+        vg[i] = new VertexGroup(mode, count);
+        copyGroupTo(i, vg[i]);
+    }
+    saveStl(path, vg, groups);
+    for(int i = 0; i < groups; i++)
+    {
+        delete vg[i];
+    }
+    delete [] vg;
+}
+
+void Mesh::saveObj(QString path) const
+{
+
+}
+
+void Mesh::saveStl(QString path, VertexGroup **vg, int groups)
+{
+    if(!vg)
+        return;
+    FILE *f = fopen(path.toUtf8().data(), "wb");
+    char header[80];
+    uint32_t triangles = 0;
+    uint16_t attributes = 0;
+
+    // count triangles
+    for(int i = 0; i < groups; i++)
+    {
+        VertexGroup *g = vg[i];
+        if(g->mode == GL_TRIANGLES)
+            triangles += (g->count / 3);
+    }
+
+    // write file header
+    if(f == 0)
+    {
+        fprintf(stderr, "Could not open file '%s' for writing.\n", path.toUtf8().data());
+        return;
+    }
+    memset(header, 0, sizeof(header));
+    fwrite(header, sizeof(header), 1, f);
+    fwrite(&triangles, sizeof(uint32_t), 1, f);
+
+    // write vertex data
+    for(int i = 0; i < groups; i++)
+    {
+        VertexGroup *g = vg[i];
+        if(g->mode != GL_TRIANGLES)
+            continue;
+        VertexData *v = g->data;
+        for(uint32_t j = 0; (g->count - j) >= 3; j += 3)
+        {
+            fwrite(&v->normal, sizeof(vec3), 1, f);
+            for(uint32_t k = 0; j < 3; k++)
+                fwrite(&((v + k)->position), sizeof(vec3), 1, f);
+            fwrite(&attributes, sizeof(attributes), 1, f);
+        }
+    }
+    fclose(f);
+}
+
+void Mesh::saveObj(QString path, VertexGroup **vg, int groups)
+{
+    if(!vg)
+        return;
+    FILE *f = fopen(path.toUtf8().data(), "w");
+    if(f == 0)
+    {
+        fprintf(stderr, "Could not open file '%s' for writing.\n", path.toUtf8().data());
+        return;
+    }
+    for(int i = 0; i < groups; i++)
+    {
+        VertexGroup *g = vg[i];
+        for(uint j = 0; j < g->count; j++)
+        {
+            vec3 vertex = g->data[j].position;
+            fprintf(f, "v %f %f %f\n", vertex.x, vertex.y, vertex.z);
+        }
+    }
+    for(int i = 0; i < groups; i++)
+    {
+        VertexGroup *g = vg[i];
+        for(uint j = 0; j < g->count; j++)
+        {
+            vec2 texCoords = g->data[j].texCoords;
+            fprintf(f, "vt %f %f\n", texCoords.x, texCoords.y);
+        }
+    }
+    for(int i = 0; i < groups; i++)
+    {
+        VertexGroup *g = vg[i];
+        for(uint j = 0; j < g->count; j++)
+        {
+            vec3 normal = g->data[j].normal;
+            fprintf(f, "vn %f %f %f\n", normal.x, normal.y, normal.z);
+        }
+    }
+    uint offset = 0;
+    for(int i = 0; i < groups; i++)
+    {
+        VertexGroup *g = vg[i];
+        switch(g->mode)
+        {
+        case GL_TRIANGLES:
+            saveObjIndicesTri(f, g, offset);
+            break;
+        case GL_QUADS:
+            saveObjIndicesQuad(f, g, offset);
+            break;
+        case GL_TRIANGLE_STRIP:
+            saveObjIndicesTriStrip(f, g, offset);
+            break;
+        }
+    }
+    fclose(f);
+}
+
+void Mesh::saveObjIndicesTri(FILE *f, VertexGroup *vg, uint &offset)
+{
+    uint endOffset = offset + vg->count - 2;
+    for(uint i = offset; i < endOffset; i += 3)
+        saveObjFace(f, i, i + 1, i + 2);
+    offset += vg->count;
+}
+
+void Mesh::saveObjIndicesQuad(FILE *f, VertexGroup *vg, uint &offset)
+{
+    uint endOffset = offset + vg->count - 3;
+    for(uint i = offset; i < endOffset; i += 4)
+    {
+        saveObjFace(f, i, i + 1, i + 2);
+        saveObjFace(f, i, i + 2, i + 3);
+    }
+    offset += (vg->count * 6) / 4;
+}
+
+void Mesh::saveObjIndicesTriStrip(FILE *f, VertexGroup *vg, uint &offset)
+{
+    uint endOffset = offset + vg->count - 2;
+    for(uint i = offset; i < endOffset; i++)
+        saveObjFace(f, i, i + 1, i + 2);
+    offset += (vg->count - 2) * 3;
+}
+
+void Mesh::saveObjFace(FILE *f, uint ind1, uint ind2, uint ind3)
+{
+    fprintf(f, "f ");
+    saveObjIndice(f, ind1 + 1);
+    fprintf(f, " ");
+    saveObjIndice(f, ind2 + 1);
+    fprintf(f, " ");
+    saveObjIndice(f, ind3 + 1);
+    fprintf(f, "\n");
+}
+
+void Mesh::saveObjIndice(FILE *f, uint ind)
+{
+    //if(texCoords && normals)
+        fprintf(f, "%d/%d/%d", ind, ind, ind);
+    //else if(normals)
+    //    fprintf(f, "%d//%d", ind, ind);
+    //else if(texCoords)
+    //    fprintf(f, "%d/%d", ind, ind);
+    //else
+    //    fprintf(f, "%d", ind);
+}
