@@ -1,5 +1,5 @@
-#include <ctime>
 #include <cmath>
+#include <QDateTime>
 #include <QKeyEvent>
 #include "Scene.h"
 #include "Dragon.h"
@@ -55,6 +55,7 @@ void Scene::reset()
     m_theta = vec3(0, 0, 0);
     m_detailLevel = 4;
     m_camera = Camera_Static;
+    m_started = QDateTime::currentDateTime();
     emit invalidated();
 }
 
@@ -346,8 +347,8 @@ void Scene::keyReleaseEvent(QKeyEvent *e)
 
 void Scene::animate()
 {
-    clock_t ticks = clock();
-    float t = ((float)ticks / (float)CLOCKS_PER_SEC) * 2.0;
+    qint64 elapsedMillis = m_started.msecsTo(QDateTime::currentDateTime());
+    float t = ((float)elapsedMillis / 1000.0f);
 
     double angle = fmod(t * 45.0, 360.0);
 

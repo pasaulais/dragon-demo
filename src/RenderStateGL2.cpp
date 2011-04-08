@@ -1,9 +1,9 @@
-#define GL_GLEXT_PROTOTYPES 1
-#include <GL/gl.h>
-#include <GL/glu.h>
 #include <cstdio>
 #include "RenderStateGL2.h"
 #include "MeshGL2.h"
+#define GL_GLEXT_PROTOTYPES 1
+#include <GL/gl.h>
+#include <GL/glu.h>
 
 RenderStateGL2::RenderStateGL2(QObject *parent) : RenderState(parent)
 {
@@ -147,7 +147,6 @@ void RenderStateGL2::beginFrame(int w, int h)
     glUseProgram(m_program);
     initShaders();
     glEnable(GL_DEPTH_TEST);
-    //TODO VertexAttrib, fallback to GL1 when in a pinch
     setUniformValue("u_light_ambient", m_ambient0);
     setUniformValue("u_light_diffuse", m_diffuse0);
     setUniformValue("u_light_specular", m_specular0);
@@ -156,7 +155,7 @@ void RenderStateGL2::beginFrame(int w, int h)
     setMatrixMode(ModelView);
     pushMatrix();
     loadIdentity();
-    glClearColor(m_bgColor.redF(), m_bgColor.greenF(), m_bgColor.blueF(), 1.0);
+    glClearColor(m_bgColor.x, m_bgColor.y, m_bgColor.z, m_bgColor.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -263,6 +262,7 @@ uint RenderStateGL2::loadShader(const char *path, uint type) const
 
 bool RenderStateGL2::loadShaders()
 {
+    //TODO fallback to GL1 when in a pinch
     uint vertexShader = loadShader("vertex.glsl", GL_VERTEX_SHADER);
     if(vertexShader == 0)
         return false;

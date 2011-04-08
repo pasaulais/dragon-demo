@@ -1,8 +1,8 @@
 #ifndef INITIALS_SCENE_VIEWPORT_H
 #define INITIALS_SCENE_VIEWPORT_H
 
-#include <ctime>
 #include <QGLWidget>
+#include <QDateTime>
 #include "Vertex.h"
 
 class QTimer;
@@ -70,7 +70,7 @@ private:
 
     // FPS settings
     QTimer *m_fpsTimer;
-    clock_t m_start;
+    QDateTime m_start;
     uint m_frames;
     float m_lastFPS;
 };

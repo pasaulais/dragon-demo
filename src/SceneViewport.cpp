@@ -18,12 +18,11 @@ SceneViewport::SceneViewport(const QGLFormat &format, QWidget *parent) : QGLWidg
     m_scene = 0;
     m_state = new RenderStateGL2(this);
     m_renderTimer = new QTimer(this);
-    m_renderTimer->setInterval(1000 / 60);
-    m_start = 0;
+    m_renderTimer->setInterval(0);
     m_frames = 0;
     m_lastFPS = 0;
     m_fpsTimer = new QTimer(this);
-    m_fpsTimer->setInterval(1000 / 6);
+    m_fpsTimer->setInterval(1000 / 10);
     setAutoFillBackground(false);
     connect(m_fpsTimer, SIGNAL(timeout()), this, SLOT(updateFPS()));
 }
@@ -147,15 +146,15 @@ void SceneViewport::frontView()
 
 void SceneViewport::startFPS()
 {
-    m_start = clock();
+    m_start = QDateTime::currentDateTime();
 }
 
 void SceneViewport::updateFPS()
 {
-    clock_t elapsed = clock() - m_start;
-    m_lastFPS = m_frames / ((float)elapsed / CLOCKS_PER_SEC);
+    qint64 elapsedMillis = m_start.msecsTo(QDateTime::currentDateTime());
+    m_lastFPS = m_frames / ((float)elapsedMillis / 1000.0);
     m_frames = 0;
-    m_start = clock();
+    m_start = QDateTime::currentDateTime();
 }
 
 void SceneViewport::paintFPS(QPainter *p, float fps)
@@ -164,7 +163,7 @@ void SceneViewport::paintFPS(QPainter *p, float fps)
     f.setPointSizeF(16.0);
     f.setWeight(QFont::Bold);
     p->setFont(f);
-    QString text = QString("%1 FPS").arg(fps, 0, 'g', 3);
+    QString text = QString("%1 FPS").arg(fps, 0, 'g', 4);
     p->setPen(QPen(Qt::white));
     p->drawText(QRectF(QPointF(10, 5), QSizeF(100, 100)), text);
 }

@@ -13,6 +13,7 @@ int main(int argc, char **argv)
     QGLFormat f;
     f.setAlpha(true);
     f.setSampleBuffers(true);
+    f.setSwapInterval(0);
 
     // create viewport for rendering the scene and the scene
     SceneViewport w(f);

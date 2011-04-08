@@ -5,7 +5,7 @@ RenderState::RenderState(QObject *parent) : QObject(parent)
     m_meshOutput = 0;
     m_exporting = false;
     m_oldOutput = m_output;
-    m_bgColor = QColor::fromRgbF(0.6, 0.6, 1.0, 1.0);
+    m_bgColor = vec4(0.6, 0.6, 1.0, 1.0);
     reset();
 }
 

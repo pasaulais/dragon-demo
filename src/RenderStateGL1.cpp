@@ -133,7 +133,7 @@ void RenderStateGL1::beginFrame(int w, int h)
     setMatrixMode(RenderStateGL1::ModelView);
     pushMatrix();
     loadIdentity();
-    glClearColor(m_bgColor.redF(), m_bgColor.greenF(), m_bgColor.blueF(), 1.0);
+    glClearColor(m_bgColor.x, m_bgColor.y, m_bgColor.z, m_bgColor.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 

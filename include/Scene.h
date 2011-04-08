@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QList>
+#include <QDateTime>
 #include "RenderState.h"
 #include "Vertex.h"
 
@@ -84,6 +85,7 @@ private:
     void drawDragonHoldingS(Dragon *d);
     static QString itemText(Item item);
 
+    QDateTime m_started;
     int m_selected;
     int m_detailLevel;
     Camera m_camera;

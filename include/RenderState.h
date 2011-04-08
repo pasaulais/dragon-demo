@@ -2,7 +2,6 @@
 #define INITIALS_RENDER_STATE_H
 
 #include <QObject>
-#include <QColor>
 #include <QMap>
 #include "Mesh.h"
 #include "Material.h"
@@ -73,7 +72,7 @@ protected:
     bool m_drawNormals;
     bool m_projection;
     bool m_wireframe;
-    QColor m_bgColor;
+    vec4 m_bgColor;
     Mesh *m_meshOutput;
     QMap<QString, Mesh *> m_meshes;
 

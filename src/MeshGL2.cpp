@@ -19,7 +19,7 @@ MeshGL2::~MeshGL2()
     foreach(VertexGroup *vg, m_groups)
     {
         if(vg->id != 0)
-            glDeleteBuffersARB(1, &vg->id);
+            glDeleteBuffers(1, &vg->id);
         delete vg;
     }
     m_groups.clear();
