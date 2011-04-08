@@ -23,8 +23,9 @@ public:
     virtual void draw(OutputMode mode, RenderState *s, Mesh *output = 0);
 
 private:
-    void allocVBO(VertexGroup *vg);
-    void drawVBO();
+    void drawToScreen();
+    void drawArray(VertexGroup *vg, int position, int normal, int texCoords);
+    void drawVBO(VertexGroup *vg, int position, int normal, int texCoords);
 
     const RenderStateGL2 *m_state;
     QList<VertexGroup *> m_groups;
