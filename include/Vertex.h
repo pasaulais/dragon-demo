@@ -108,6 +108,7 @@ public:
     uint32_t mode;
     uint32_t count;
     VertexData *data;
+    uint32_t id;
 };
 
 #endif

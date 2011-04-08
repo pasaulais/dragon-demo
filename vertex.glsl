@@ -1,3 +1,7 @@
+attribute vec3 a_position;
+attribute vec3 a_normal;
+attribute vec2 a_texCoords;
+
 uniform mat4 u_modelViewMatrix;
 uniform mat4 u_projectionMatrix;
 
@@ -11,6 +15,9 @@ uniform vec4 u_material_diffuse;
 uniform vec4 u_material_specular;
 uniform float u_material_shine;
 
+//varying vec4 v_color;
+//varying vec2 v_texCoords;
+
 void main()
 {
     vec3 normal, lightDir, halfVector;
@@ -20,7 +27,7 @@ void main()
     normalMatrix[1] = vec3(u_modelViewMatrix[1]);
     normalMatrix[2] = vec3(u_modelViewMatrix[2]);
 
-    normal = normalize(normalMatrix * gl_Normal);
+    normal = normalize(normalMatrix * a_normal);
     lightDir = normalize(u_light_pos.xyz);
     halfVector = normalize(lightDir + vec3(0, 0, 1));
 
@@ -30,6 +37,6 @@ void main()
         * u_material_specular * u_light_specular;
 
     gl_FrontColor = ambient + diffuse + specular;
-    gl_Position = u_projectionMatrix * u_modelViewMatrix * gl_Vertex;
-    gl_TexCoord[0] = gl_MultiTexCoord0;
+    gl_Position = u_projectionMatrix * u_modelViewMatrix * vec4(a_position, 1.0);
+    gl_TexCoord[0] = vec4(a_texCoords, 0.0, 0.0);
 }

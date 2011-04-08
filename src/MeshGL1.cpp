@@ -1,6 +1,5 @@
 #include <GL/gl.h>
 #include <cmath>
-#include <cstdio>
 #include "MeshGL1.h"
 #include "Material.h"
 #include "RenderState.h"

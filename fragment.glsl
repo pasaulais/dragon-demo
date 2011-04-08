@@ -1,6 +1,9 @@
 uniform int u_has_texture;
 uniform sampler2D u_material_texture;
 
+//varying vec4 v_color;
+//varying vec2 v_texCoords;
+
 void main()
 {
     gl_FragColor = gl_Color;

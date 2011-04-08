@@ -227,6 +227,7 @@ VertexGroup::VertexGroup(uint32_t mode, uint32_t count)
     this->mode = mode;
     this->count = count;
     this->data = new VertexData[count];
+    this->id = 0;
     memset(this->data, 0, sizeof(VertexData) * count);
 }
 

@@ -38,6 +38,10 @@ public:
     virtual void pushMaterial(const Material &m);
     virtual void popMaterial();
 
+    int positionAttr() const;
+    int normalAttr() const;
+    int texCoordsAttr() const;
+
 private:
     void beginApplyMaterial(const Material &m);
     void endApplyMaterial(const Material &m);
@@ -62,6 +66,9 @@ private:
     uint m_program;
     int m_modelViewMatrixLoc;
     int m_projMatrixLoc;
+    int m_positionAttr;
+    int m_normalAttr;
+    int m_texCoordsAttr;
 };
 
 #endif

@@ -3,6 +3,7 @@
 #include <GL/glu.h>
 #include <cstdio>
 #include "RenderStateGL2.h"
+#include "MeshGL2.h"
 
 RenderStateGL2::RenderStateGL2(QObject *parent) : RenderState(parent)
 {
@@ -19,6 +20,9 @@ RenderStateGL2::RenderStateGL2(QObject *parent) : RenderState(parent)
     m_program = 0;
     m_modelViewMatrixLoc = -1;
     m_projMatrixLoc = -1;
+    m_positionAttr = -1;
+    m_normalAttr = -1;
+    m_texCoordsAttr = -1;
 }
 
 RenderStateGL2::~RenderStateGL2()
@@ -33,7 +37,7 @@ RenderStateGL2::~RenderStateGL2()
 
 Mesh * RenderStateGL2::createMesh(QObject *parent) const
 {
-    return 0;//new MeshGL2(parent);
+    return new MeshGL2(this, parent);
 }
 
 void RenderStateGL2::drawMesh(Mesh *m)
@@ -185,6 +189,21 @@ void RenderStateGL2::init()
     loadShaders();
 }
 
+int RenderStateGL2::positionAttr() const
+{
+    return m_positionAttr;
+}
+
+int RenderStateGL2::normalAttr() const
+{
+    return m_normalAttr;
+}
+
+int RenderStateGL2::texCoordsAttr() const
+{
+    return m_texCoordsAttr;
+}
+
 char * RenderStateGL2::loadShaderSource(const char *path) const
 {
     FILE *f = fopen(path, "r");
@@ -290,6 +309,9 @@ bool RenderStateGL2::loadShaders()
     m_pixelShader = pixelShader;
     m_modelViewMatrixLoc = glGetUniformLocation(program, "u_modelViewMatrix");
     m_projMatrixLoc = glGetUniformLocation(program, "u_projectionMatrix");
+    m_positionAttr = glGetAttribLocation(program, "a_position");
+    m_normalAttr = glGetAttribLocation(program, "a_normal");
+    m_texCoordsAttr = glGetAttribLocation(program, "a_texCoords");
     return true;
 }
 

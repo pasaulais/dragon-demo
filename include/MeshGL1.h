@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <QVector>
-#include <cstdio>
 #include "Mesh.h"
 
 typedef struct
