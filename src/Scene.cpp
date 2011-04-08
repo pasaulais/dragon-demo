@@ -6,11 +6,11 @@
 #include "Mesh.h"
 #include "Material.h"
 
-static Material debug_material(vec4(0.2, 0.2, 0.2, 1.0),
+static Material debugMaterial(vec4(0.2, 0.2, 0.2, 1.0),
     vec4(1.0, 4.0/6.0, 0.0, 1.0), vec4(0.2, 0.2, 0.2, 1.0), 20.0);
 
-static Material floor_material(vec4(0.5, 0.5, 0.5, 1.0),
-    vec4(1.0, 1.0, 1.0, 1.0), vec4(1.0, 1.0, 1.0, 1.0), 00.0);
+static Material floorMaterial(vec4(0.5, 0.5, 0.5, 1.0),
+    vec4(1.0, 1.0, 1.0, 1.0), vec4(0.0, 0.0, 0.0, 1.0), 00.0);
 
 Scene::Scene(RenderState *state, QObject *parent) : StateObject(state, parent)
 {
@@ -18,8 +18,8 @@ Scene::Scene(RenderState *state, QObject *parent) : StateObject(state, parent)
     m_exportQueued = false;
 
     m_debugDragon = new Dragon(Dragon::Floating, m_state, this);
-    m_debugDragon->scalesMaterial() = debug_material;
-    m_debugDragon->wingMaterial() = debug_material;
+    m_debugDragon->scalesMaterial() = debugMaterial;
+    m_debugDragon->wingMaterial() = debugMaterial;
     m_dragons.append(new Dragon(Dragon::Floating, m_state, this));
     m_dragons.append(new Dragon(Dragon::Flying, m_state, this));
     m_dragons.append(new Dragon(Dragon::Jumping, m_state, this));
@@ -36,7 +36,7 @@ void Scene::loadTextures()
     m_dragons.value(1)->wingMaterial().loadTextureTIFF("scale_black.tiff");
     m_dragons.value(2)->scalesMaterial().loadTextureTIFF("scale_bronze.tiff");
     m_dragons.value(2)->wingMaterial().loadTextureTIFF("scale_bronze.tiff");
-    floor_material.loadTextureTIFF("lava_green.tiff", true);
+    floorMaterial.loadTextureTIFF("lava_green.tiff", true);
 }
 
 void Scene::freeTextures()
@@ -46,7 +46,7 @@ void Scene::freeTextures()
         d->scalesMaterial().freeTexture();
         d->wingMaterial().freeTexture();
     }
-    floor_material.freeTexture();
+    floorMaterial.freeTexture();
 }
 
 void Scene::reset()
@@ -96,7 +96,7 @@ void Scene::drawItem(Scene::Item item)
     }
     else
     {
-        pushMaterial(debug_material);
+        pushMaterial(debugMaterial);
         switch(item)
         {
         case LETTER_P:
@@ -249,7 +249,7 @@ void Scene::drawScene()
 
 void Scene::drawFloor()
 {
-    pushMaterial(floor_material);
+    pushMaterial(floorMaterial);
     drawMesh("floor");
     popMaterial();
 }

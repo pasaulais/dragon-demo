@@ -15,11 +15,14 @@ uniform vec4 u_material_diffuse;
 uniform vec4 u_material_specular;
 uniform float u_material_shine;
 
-//varying vec4 v_color;
-//varying vec2 v_texCoords;
+varying vec4 v_color;
+varying vec2 v_texCoords;
 
 void main()
 {
+    gl_Position = u_projectionMatrix * u_modelViewMatrix * vec4(a_position, 1.0);
+    v_texCoords = a_texCoords;
+
     vec3 normal, lightDir, halfVector;
     vec4 diffuse, ambient, specular;
     mat3 normalMatrix;
@@ -36,7 +39,5 @@ void main()
     specular = pow(max(dot(normal, halfVector), 0.0), u_material_shine)
         * u_material_specular * u_light_specular;
 
-    gl_FrontColor = ambient + diffuse + specular;
-    gl_Position = u_projectionMatrix * u_modelViewMatrix * vec4(a_position, 1.0);
-    gl_TexCoord[0] = vec4(a_texCoords, 0.0, 0.0);
+    v_color = ambient + diffuse + specular;
 }
