@@ -1,6 +1,5 @@
 #include <cmath>
 #include <sstream>
-#include <QDateTime>
 #include "Scene.h"
 #include "Dragon.h"
 #include "Mesh.h"
@@ -12,6 +11,8 @@ static Material debugMaterial(vec4(0.2, 0.2, 0.2, 1.0),
 static Material floorMaterial(vec4(0.5, 0.5, 0.5, 1.0),
     vec4(1.0, 1.0, 1.0, 1.0), vec4(0.0, 0.0, 0.0, 1.0), 00.0);
 
+static double currentTime();
+
 Scene::Scene(RenderState *state) : StateObject(state)
 {
     m_camera = Camera_Static;
@@ -21,29 +22,32 @@ Scene::Scene(RenderState *state) : StateObject(state)
     m_debugDragon = new Dragon(Dragon::Floating, m_state);
     m_debugDragon->scalesMaterial() = debugMaterial;
     m_debugDragon->wingMaterial() = debugMaterial;
-    m_dragons.append(new Dragon(Dragon::Floating, m_state));
-    m_dragons.append(new Dragon(Dragon::Flying, m_state));
-    m_dragons.append(new Dragon(Dragon::Jumping, m_state));
+    m_dragons.push_back(new Dragon(Dragon::Floating, m_state));
+    m_dragons.push_back(new Dragon(Dragon::Flying, m_state));
+    m_dragons.push_back(new Dragon(Dragon::Jumping, m_state));
+    reset();
     animate();
 }
 
 Scene::~Scene()
 {
     delete m_debugDragon;
-    while(m_dragons.count() > 0)
-        delete m_dragons.takeLast();
+    vector<Dragon *>::iterator it;
+    for(it = m_dragons.begin(); it != m_dragons.end(); it++)
+        delete *it;
+    m_dragons.clear();
 }
 
 void Scene::loadTextures()
 {
-    if(m_dragons.count() < 3)
+    if(m_dragons.size() < 3)
         return;
-    m_dragons.value(0)->scalesMaterial().loadTextureTIFF("scale_gold.tiff");
-    m_dragons.value(0)->wingMaterial().loadTextureTIFF("scale_gold.tiff");
-    m_dragons.value(1)->scalesMaterial().loadTextureTIFF("scale_black.tiff");
-    m_dragons.value(1)->wingMaterial().loadTextureTIFF("scale_black.tiff");
-    m_dragons.value(2)->scalesMaterial().loadTextureTIFF("scale_bronze.tiff");
-    m_dragons.value(2)->wingMaterial().loadTextureTIFF("scale_bronze.tiff");
+    m_dragons[0]->scalesMaterial().loadTextureTIFF("scale_gold.tiff");
+    m_dragons[0]->wingMaterial().loadTextureTIFF("scale_gold.tiff");
+    m_dragons[1]->scalesMaterial().loadTextureTIFF("scale_black.tiff");
+    m_dragons[1]->wingMaterial().loadTextureTIFF("scale_black.tiff");
+    m_dragons[2]->scalesMaterial().loadTextureTIFF("scale_bronze.tiff");
+    m_dragons[2]->wingMaterial().loadTextureTIFF("scale_bronze.tiff");
     floorMaterial.loadTextureTIFF("lava_green.tiff", true);
 }
 
@@ -66,7 +70,7 @@ void Scene::reset()
     m_thetaCamera = vec3(0, 0, 0);
     m_detailLevel = 4;
     m_camera = Camera_Static;
-    m_started = QDateTime::currentDateTime();
+    m_started = currentTime();
 }
 
 vec3 & Scene::theta()
@@ -380,9 +384,7 @@ void Scene::setCamera(Scene::Camera c)
 
 void Scene::animate()
 {
-    qint64 elapsedMillis = m_started.msecsTo(QDateTime::currentDateTime());
-    float t = ((float)elapsedMillis / 1000.0f);
-
+    double t = currentTime() - m_started;
     double angle = fmod(t * 45.0, 360.0);
 
     // hovering dragon
@@ -437,3 +439,19 @@ float Scene::spaced_cos(float x, float w, float a)
 {
     return cos(2.0 * M_PI * spaced_sawtooth(x, w, a) + M_PI / 2.0);
 }
+
+#ifdef WIN32
+#include <windows.h>
+double currentTime()
+{
+    return (double)GetTickCount() * 10e-3;
+}
+#else
+#include <sys/time.h>
+double currentTime()
+{
+    timeval tv;
+    gettimeofday(&tv, 0);
+    return (double)tv.tv_sec + ((double)tv.tv_usec * 10e-7);
+}
+#endif

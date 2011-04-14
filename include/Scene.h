@@ -1,8 +1,7 @@
 #ifndef INITIALS_SCENE_H
 #define INITIALS_SCENE_H
 
-#include <QList>
-#include <QDateTime>
+#include <vector>
 #include "RenderState.h"
 #include "Vertex.h"
 
@@ -85,7 +84,7 @@ private:
     void drawDragonHoldingS(Dragon *d);
     static string itemText(Item item);
 
-    QDateTime m_started;
+    double m_started;
     int m_selected;
     int m_detailLevel;
     vec3 m_delta;
@@ -94,7 +93,7 @@ private:
     Camera m_camera;
     vec3 m_thetaCamera;
     Dragon *m_debugDragon;
-    QList<Dragon *> m_dragons;
+    std::vector<Dragon *> m_dragons;
     bool m_exportQueued;
 };
 
