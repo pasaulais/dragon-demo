@@ -9,7 +9,7 @@
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
-MeshGL2::MeshGL2(const RenderStateGL2 *state, QObject *parent) : Mesh(parent)
+MeshGL2::MeshGL2(const RenderStateGL2 *state) : Mesh()
 {
     m_state = state;
 }
@@ -30,13 +30,13 @@ int MeshGL2::groupCount() const
     return m_groups.count();
 }
 
-uint MeshGL2::groupMode(int index) const
+uint32_t MeshGL2::groupMode(int index) const
 {
     VertexGroup *vg = m_groups.value(index);
     return vg ? vg->mode : 0;
 }
 
-uint MeshGL2::groupSize(int index) const
+uint32_t MeshGL2::groupSize(int index) const
 {
     VertexGroup *vg = m_groups.value(index);
     return vg ? vg->count : 0;

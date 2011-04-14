@@ -3,7 +3,7 @@
 #include "RenderState.h"
 #include "Scene.h"
 
-Dragon::Dragon(Kind kind, RenderState *state, QObject *parent) : StateObject(state, parent)
+Dragon::Dragon(Kind kind, RenderState *state) : StateObject(state)
 {
     m_kind = kind;
     theta_jaw = 0.0;

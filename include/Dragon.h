@@ -1,7 +1,6 @@
 #ifndef INITIALS_DRAGON_H
 #define INITIALS_DRAGON_H
 
-#include <QObject>
 #include "Material.h"
 #include "RenderState.h"
 
@@ -17,7 +16,7 @@ public:
         Jumping
     };
 
-    Dragon(Kind kind, RenderState *state,  QObject *parent = 0);
+    Dragon(Kind kind, RenderState *state);
 
     static void loadMeshes(RenderState *scene);
 

@@ -19,34 +19,34 @@ const QMap<QString, Mesh *> & RenderState::meshes() const
     return m_meshes;
 }
 
-Mesh * RenderState::loadMeshStl(QString name, QString path)
+Mesh * RenderState::loadMeshStl(string name, string path)
 {
     Mesh *m;
-    VertexGroup *vg = Mesh::loadStl(path.toUtf8().constData());
+    VertexGroup *vg = Mesh::loadStl(path);
     if(vg)
     {
-        m = createMesh(this);
+        m = createMesh();
         if(m)
         {
             m->addGroup(vg);
-            m_meshes.insert(name, m);
+            m_meshes.insert(QString::fromStdString(name), m);
         }
         delete vg;
     }
     return m;
 }
 
-Mesh * RenderState::loadMeshObj(QString name, QString path)
+Mesh * RenderState::loadMeshObj(string name, string path)
 {
     Mesh *m;
-    VertexGroup *vg = Mesh::loadObj(path.toUtf8().constData());
+    VertexGroup *vg = Mesh::loadObj(path);
     if(vg)
     {
-        m = createMesh(this);
+        m = createMesh();
         if(m)
         {
             m->addGroup(vg);
-            m_meshes.insert(name, m);
+            m_meshes.insert(QString::fromStdString(name), m);
         }
         delete vg;
     }
@@ -81,22 +81,22 @@ void RenderState::reset()
     m_wireframe = false;
 }
 
-void RenderState::drawMesh(QString name)
+void RenderState::drawMesh(string name)
 {
-    drawMesh(m_meshes.value(name));
+    drawMesh(m_meshes.value(QString::fromStdString(name)));
 }
 
-void RenderState::beginExportMesh(QString path)
+void RenderState::beginExportMesh(string path)
 {
     if(m_exporting)
         return;
     m_exporting = true;
-    m_exportPath = path;
+    m_exportPath = QString::fromStdString(path);
     m_oldOutput = m_output;
     pushMatrix();
     loadIdentity();
     m_output = Mesh::RenderToMesh;
-    m_meshOutput = createMesh(this);
+    m_meshOutput = createMesh();
 }
 
 void RenderState::endExportMesh()
@@ -105,7 +105,7 @@ void RenderState::endExportMesh()
         return;
     popMatrix();
     m_output = m_oldOutput;
-    m_meshOutput->saveObj(m_exportPath);
+    m_meshOutput->saveObj(m_exportPath.toStdString());
     delete m_meshOutput;
     m_meshOutput = 0;
     m_exportPath = QString::null;
@@ -118,7 +118,7 @@ void RenderState::init()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-StateObject::StateObject(RenderState *s, QObject *parent) : QObject(parent)
+StateObject::StateObject(RenderState *s)
 {
     m_state = s;
 }
@@ -158,7 +158,7 @@ void StateObject::drawMesh(Mesh *m)
     m_state->drawMesh(m);
 }
 
-void StateObject::drawMesh(QString name)
+void StateObject::drawMesh(string name)
 {
     m_state->drawMesh(name);
 }

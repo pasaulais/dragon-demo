@@ -3,9 +3,12 @@
 
 #include <QObject>
 #include <QMap>
+#include <string>
 #include "Mesh.h"
 #include "Material.h"
 #include "Vertex.h"
+
+using namespace std;
 
 class RenderState : public QObject
 {
@@ -23,17 +26,17 @@ public:
 
     // mesh operations
     virtual void drawMesh(Mesh *m) = 0;
-    virtual void drawMesh(QString name);
+    virtual void drawMesh(string name);
 
-    virtual void beginExportMesh(QString path);
+    virtual void beginExportMesh(string path);
     virtual void endExportMesh();
 
     virtual QMap<QString, Mesh *> & meshes();
     virtual const QMap<QString, Mesh *> & meshes() const;
 
-    virtual Mesh * createMesh(QObject *parent = 0) const = 0;
-    virtual Mesh * loadMeshObj(QString name, QString path);
-    virtual Mesh * loadMeshStl(QString name, QString path);
+    virtual Mesh * createMesh() const = 0;
+    virtual Mesh * loadMeshObj(string name, string path);
+    virtual Mesh * loadMeshStl(string name, string path);
 
     // matrix operations
 
@@ -82,10 +85,10 @@ protected:
     Mesh::OutputMode m_oldOutput;
 };
 
-class StateObject : public QObject
+class StateObject
 {
 public:
-    StateObject(RenderState *s, QObject *parent = 0);
+    StateObject(RenderState *s);
 
     void loadIdentity();
     void pushMatrix();
@@ -96,7 +99,7 @@ public:
     void scale(float sx, float sy, float sz);
 
     void drawMesh(Mesh *m);
-    void drawMesh(QString name);
+    void drawMesh(string name);
 
     void pushMaterial(const Material &m);
     void popMaterial();

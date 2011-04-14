@@ -4,7 +4,7 @@
 #include "Material.h"
 #include "RenderState.h"
 
-MeshGL1::MeshGL1(QObject *parent) : Mesh(parent)
+MeshGL1::MeshGL1() : Mesh()
 {
 }
 
@@ -79,26 +79,26 @@ int MeshGL1::groupCount() const
     return m_faces.count();
 }
 
-uint MeshGL1::groupMode(int index) const
+uint32_t MeshGL1::groupMode(int index) const
 {
     return m_faces.value(index).mode;
 }
 
-uint MeshGL1::groupSize(int index) const
+uint32_t MeshGL1::groupSize(int index) const
 {
     return m_faces.value(index).count;
 }
 
 void MeshGL1::addGroup(VertexGroup *vg)
 {
-    uint destOffset = m_vertices.count();
-    uint newSize = destOffset + vg->count;
+    uint32_t destOffset = m_vertices.count();
+    uint32_t newSize = destOffset + vg->count;
     m_vertices.resize(newSize);
     m_normals.resize(newSize);
     m_texCoords.resize(newSize);
 
     VertexData *v = vg->data;
-    for(uint i = destOffset; i < newSize; i++, v++)
+    for(uint32_t i = destOffset; i < newSize; i++, v++)
     {
         m_vertices[i] = v->position;
         m_normals[i] = v->normal;
@@ -112,7 +112,7 @@ bool MeshGL1::copyGroupTo(int index, VertexGroup *vg) const
     if((index < 0) || (index >= groupCount()))
         return false;
     FaceGL1 face = m_faces[index];
-    if((uint)face.count > vg->count)
+    if((uint32_t)face.count > vg->count)
         return false;
     VertexData *d = vg->data;
     int endOffset = face.offset + face.count;
@@ -125,7 +125,7 @@ bool MeshGL1::copyGroupTo(int index, VertexGroup *vg) const
     return true;
 }
 
-void MeshGL1::addFace(uint mode, int vertexCount, int offset, bool draw)
+void MeshGL1::addFace(uint32_t mode, int vertexCount, int offset, bool draw)
 {
     FaceGL1 f;
     f.mode = mode;
@@ -220,7 +220,7 @@ void MeshGL1::drawNormals(RenderState *s)
             continue;
         for(int p = 0; p < face.count; p++)
         {
-            uint ind = face.offset + p;
+            uint32_t ind = face.offset + p;
             vec3 v = m_vertices[ind];
             vec3 v2 = m_normals[ind] + v;
             glVertex3fv((GLfloat *)&v);

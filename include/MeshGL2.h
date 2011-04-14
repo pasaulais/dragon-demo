@@ -1,8 +1,8 @@
 #ifndef INITIALS_MESH_GL2_H
 #define INITIALS_MESH_GL2_H
 
-#include <QObject>
 #include <QList>
+#include <inttypes.h>
 #include "Mesh.h"
 #include "Vertex.h"
 
@@ -12,12 +12,12 @@ class RenderStateGL2;
 class MeshGL2 : public Mesh
 {
 public:
-    MeshGL2(const RenderStateGL2 *state, QObject *parent = 0);
+    MeshGL2(const RenderStateGL2 *state);
     virtual ~MeshGL2();
 
     virtual int groupCount() const;
-    virtual uint groupMode(int index) const;
-    virtual uint groupSize(int index) const;
+    virtual uint32_t groupMode(int index) const;
+    virtual uint32_t groupSize(int index) const;
     virtual void addGroup(VertexGroup *vg);
     virtual bool copyGroupTo(int index, VertexGroup *vg) const;
     virtual void draw(OutputMode mode, RenderState *s, Mesh *output = 0);

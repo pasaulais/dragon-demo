@@ -45,6 +45,7 @@ protected:
 
 private slots:
     void updateFPS();
+    void animateScene();
 
 private:
     void paintFPS(QPainter *p, float fps);

@@ -25,6 +25,7 @@ SceneViewport::SceneViewport(const QGLFormat &format, QWidget *parent) : QGLWidg
     m_fpsTimer->setInterval(1000 / 10);
     setAutoFillBackground(false);
     connect(m_fpsTimer, SIGNAL(timeout()), this, SLOT(updateFPS()));
+    connect(m_renderTimer, SIGNAL(timeout()), this, SLOT(animateScene()));
 }
 
 SceneViewport::~SceneViewport()
@@ -46,21 +47,12 @@ Scene* SceneViewport::scene() const
 void SceneViewport::setScene(Scene *newScene)
 {
     if(m_scene)
-    {
         m_scene->freeTextures();
-        disconnect(m_scene, SIGNAL(invalidated()), this, SLOT(update()));
-        disconnect(m_renderTimer, SIGNAL(timeout()), m_scene, SLOT(animate()));
-    }
     m_scene = newScene;
-    if(newScene)
+    if(newScene && context())
     {
-        if(context())
-        {
-            makeCurrent();
-            newScene->loadTextures();
-        }
-        connect(newScene, SIGNAL(invalidated()), this, SLOT(update()));
-        connect(m_renderTimer, SIGNAL(timeout()), newScene, SLOT(animate()));
+        makeCurrent();
+        newScene->loadTextures();
     }
     update();
 }
@@ -180,6 +172,15 @@ void SceneViewport::updateAnimationState()
     {
         m_renderTimer->stop();
         m_fpsTimer->stop();
+    }
+}
+
+void SceneViewport::animateScene()
+{
+    if(m_scene)
+    {
+        m_scene->animate();
+        update();
     }
 }
 

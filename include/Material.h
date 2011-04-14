@@ -1,8 +1,11 @@
 #ifndef INITIALS_MATERIAL_H
 #define INITIALS_MATERIAL_H
 
-#include <QString>
+#include <string>
+#include <inttypes.h>
 #include "Vertex.h"
+
+using namespace std;
 
 class Material
 {
@@ -19,22 +22,22 @@ public:
     void setSpecular(const vec4 &specular);
     void setShine(float shine);
 
-    uint texture() const;
-    void setTexture(uint texture);
+    uint32_t texture() const;
+    void setTexture(uint32_t texture);
     void freeTexture();
 
-    void loadTextureTIFF(QString path, bool mipmaps = false);
+    void loadTextureTIFF(string path, bool mipmaps = false);
 
 private:
     // Create a texture from a TIFF file using libtiff
-    static uint textureFromTIFFImage(QString path, bool mipmaps);
-    static void setTextureParams(uint target, bool mipmaps);
+    static uint32_t textureFromTIFFImage(string path, bool mipmaps);
+    static void setTextureParams(uint32_t target, bool mipmaps);
 
     vec4 m_ambient;
     vec4 m_diffuse;
     vec4 m_specular;
     float m_shine;
-    uint m_texture;
+    uint32_t m_texture;
 };
 
 #endif

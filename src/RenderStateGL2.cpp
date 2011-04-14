@@ -35,9 +35,9 @@ RenderStateGL2::~RenderStateGL2()
         glDeleteProgram(m_program);
 }
 
-Mesh * RenderStateGL2::createMesh(QObject *parent) const
+Mesh * RenderStateGL2::createMesh() const
 {
-    return new MeshGL2(this, parent);
+    return new MeshGL2(this);
 }
 
 void RenderStateGL2::drawMesh(Mesh *m)

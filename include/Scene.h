@@ -1,7 +1,6 @@
 #ifndef INITIALS_SCENE_H
 #define INITIALS_SCENE_H
 
-#include <QObject>
 #include <QList>
 #include <QDateTime>
 #include "RenderState.h"
@@ -12,10 +11,9 @@ class Dragon;
 
 class Scene : public StateObject
 {
-    Q_OBJECT
-
 public:
-    Scene(RenderState *state, QObject *parent = 0);
+    Scene(RenderState *state);
+    virtual ~Scene();
 
     bool load();
     void loadTextures();

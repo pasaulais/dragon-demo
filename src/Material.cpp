@@ -61,12 +61,12 @@ void Material::setShine(float shine)
     m_shine = shine;
 }
 
-uint Material::texture() const
+uint32_t Material::texture() const
 {
     return m_texture;
 }
 
-void Material::setTexture(uint texture)
+void Material::setTexture(uint32_t texture)
 {
     m_texture = texture;
 }
@@ -80,7 +80,7 @@ void Material::freeTexture()
     }
 }
 
-void Material::setTextureParams(uint target, bool mipmaps)
+void Material::setTextureParams(uint32_t target, bool mipmaps)
 {
     if(mipmaps)
         glTexParameterf(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -91,24 +91,24 @@ void Material::setTextureParams(uint target, bool mipmaps)
     glTexParameterf(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
 
-void Material::loadTextureTIFF(QString path, bool mipmaps)
+void Material::loadTextureTIFF(string path, bool mipmaps)
 {
     m_texture = textureFromTIFFImage(path, mipmaps);
 }
 
 // Create a texture from a TIFF file using libtiff
-uint Material::textureFromTIFFImage(QString path, bool mipmaps)
+uint32_t Material::textureFromTIFFImage(string path, bool mipmaps)
 {
     // load the image
-    TIFF *tiff = TIFFOpen(path.toLatin1().data(), "r");
+    TIFF *tiff = TIFFOpen(path.c_str(), "r");
     if(!tiff)
         return 0;
 
-    uint width, height;
+    uint32_t width, height;
     TIFFGetField(tiff, TIFFTAG_IMAGEWIDTH, &width);
     TIFFGetField(tiff, TIFFTAG_IMAGELENGTH, &height);
 
-    uint *data = (uint *) _TIFFmalloc(width * height * sizeof(uint));
+    uint32_t *data = (uint32_t *) _TIFFmalloc(width * height * sizeof(uint32_t));
     if(!data)
     {
         TIFFClose(tiff);
@@ -123,7 +123,7 @@ uint Material::textureFromTIFFImage(QString path, bool mipmaps)
     }
 
     // create a texture
-    GLuint texID = 0;
+    uint32_t texID = 0;
     glGenTextures(1, &texID);
     glBindTexture(GL_TEXTURE_2D, texID);
     if(mipmaps)

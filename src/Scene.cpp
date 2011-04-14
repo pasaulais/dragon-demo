@@ -12,18 +12,25 @@ static Material debugMaterial(vec4(0.2, 0.2, 0.2, 1.0),
 static Material floorMaterial(vec4(0.5, 0.5, 0.5, 1.0),
     vec4(1.0, 1.0, 1.0, 1.0), vec4(0.0, 0.0, 0.0, 1.0), 00.0);
 
-Scene::Scene(RenderState *state, QObject *parent) : StateObject(state, parent)
+Scene::Scene(RenderState *state) : StateObject(state)
 {
     m_camera = Camera_Static;
     m_exportQueued = false;
 
-    m_debugDragon = new Dragon(Dragon::Floating, m_state, this);
+    m_debugDragon = new Dragon(Dragon::Floating, m_state);
     m_debugDragon->scalesMaterial() = debugMaterial;
     m_debugDragon->wingMaterial() = debugMaterial;
-    m_dragons.append(new Dragon(Dragon::Floating, m_state, this));
-    m_dragons.append(new Dragon(Dragon::Flying, m_state, this));
-    m_dragons.append(new Dragon(Dragon::Jumping, m_state, this));
+    m_dragons.append(new Dragon(Dragon::Floating, m_state));
+    m_dragons.append(new Dragon(Dragon::Flying, m_state));
+    m_dragons.append(new Dragon(Dragon::Jumping, m_state));
     animate();
+}
+
+Scene::~Scene()
+{
+    delete m_debugDragon;
+    while(m_dragons.count() > 0)
+        delete m_dragons.takeLast();
 }
 
 void Scene::loadTextures()
@@ -56,7 +63,6 @@ void Scene::reset()
     m_detailLevel = 4;
     m_camera = Camera_Static;
     m_started = QDateTime::currentDateTime();
-    emit invalidated();
 }
 
 vec3 Scene::orientation() const
@@ -162,7 +168,7 @@ void Scene::drawItem(Scene::Item item)
 
 void Scene::exportItem(Item item, QString path)
 {
-    m_state->beginExportMesh(path);
+    m_state->beginExportMesh(path.toStdString());
     drawItem(item);
     m_state->endExportMesh();
 }
@@ -311,19 +317,13 @@ void Scene::drawDragonHoldingS(Dragon *d)
 void Scene::select_next()
 {
     if(m_selected < LAST)
-    {
         m_selected++;
-        emit invalidated();
-    }
 }
 
 void Scene::select_previous()
 {
     if(m_selected > SCENE)
-    {
         m_selected--;
-        emit invalidated();
-    }
 }
 
 void Scene::keyReleaseEvent(QKeyEvent *e)
@@ -379,8 +379,6 @@ void Scene::animate()
         m_theta.y = -angle;       // following drunk dragon
         break;
     }
-
-    emit invalidated();
 }
 
 // Periodic function linearly going from 0 to 1

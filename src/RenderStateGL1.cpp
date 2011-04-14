@@ -11,9 +11,9 @@ RenderStateGL1::RenderStateGL1(QObject *parent) : RenderState(parent)
     m_light0_pos = vec4(0.0, 1.0, 1.0, 0.0);
 }
 
-Mesh * RenderStateGL1::createMesh(QObject *parent) const
+Mesh * RenderStateGL1::createMesh() const
 {
-    return new MeshGL1(parent);
+    return new MeshGL1();
 }
 
 void RenderStateGL1::drawMesh(Mesh *m)
