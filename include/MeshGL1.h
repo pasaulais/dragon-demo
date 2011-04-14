@@ -1,7 +1,7 @@
 #ifndef INITIALS_MESH_GL1_H
 #define INITIALS_MESH_GL1_H
 
-#include <QVector>
+#include <vector>
 #include <inttypes.h>
 #include "Mesh.h"
 
@@ -11,27 +11,13 @@ typedef struct
     int count;
     int offset;   // location of the face vertices in the mesh's indices array
     bool draw;
-} FaceGL1;
+} Face;
 
 class MeshGL1 : public Mesh
 {
 public:
     MeshGL1();
     virtual ~MeshGL1();
-
-    QVector<vec3> & vertices();
-    const QVector<vec3> & vertices() const;
-    void setVertices(float *vertices, int n);
-
-    QVector<vec3> & normals();
-    const QVector<vec3> & normals() const;
-    void setNormals(float *normals, int n);
-
-    QVector<vec2> & texCoords();
-    const QVector<vec2> & texCoords() const;
-    void setTexCoords(float *texCoords, int n);
-
-    const QVector<FaceGL1> & faces() const;
 
     virtual int groupCount() const;
     virtual uint32_t groupMode(int index) const;
@@ -47,12 +33,12 @@ public:
 private:
     void drawVertexList();
     void drawToMesh(Mesh *m, RenderState *s);
-    VertexGroup * drawFaceToMeshCopy(RenderState *s, FaceGL1 f);
+    VertexGroup * drawFaceToMeshCopy(RenderState *s, Face f);
 
-    QVector<vec3> m_vertices;
-    QVector<vec3> m_normals;
-    QVector<vec2> m_texCoords;
-    QVector<FaceGL1> m_faces;
+    std::vector<vec3> m_vertices;
+    std::vector<vec3> m_normals;
+    std::vector<vec2> m_texCoords;
+    std::vector<Face> m_faces;
 };
 
 #endif

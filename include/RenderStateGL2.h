@@ -6,8 +6,6 @@
 #include <inttypes.h>
 #include "RenderState.h"
 
-using namespace std;
-
 class RenderStateGL2 : public RenderState
 {
 public:

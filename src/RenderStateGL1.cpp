@@ -85,16 +85,17 @@ matrix4 RenderStateGL1::currentMatrix() const
 
 void RenderStateGL1::pushMaterial(const Material &m)
 {
-    m_materialStack.append(m);
+    m_materialStack.push_back(m);
     beginApplyMaterial(m);
 }
 
 void RenderStateGL1::popMaterial()
 {
-    Material m = m_materialStack.takeLast();
+    Material m = m_materialStack.back();
+    m_materialStack.pop_back();
     endApplyMaterial(m);
-    if(m_materialStack.count() > 0)
-        beginApplyMaterial(m_materialStack.last());
+    if(m_materialStack.size() > 0)
+        beginApplyMaterial(m_materialStack.back());
 }
 
 void RenderStateGL1::beginApplyMaterial(const Material &m)

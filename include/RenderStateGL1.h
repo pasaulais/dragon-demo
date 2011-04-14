@@ -1,7 +1,7 @@
 #ifndef INITIALS_RENDER_STATE_GL1_H
 #define INITIALS_RENDER_STATE_GL1_H
 
-#include <QList>
+#include <vector>
 #include "RenderState.h"
 
 class RenderStateGL1 : public RenderState
@@ -43,7 +43,7 @@ private:
     vec4 m_diffuse0;
     vec4 m_specular0;
     vec4 m_light0_pos;
-    QList<Material> m_materialStack;
+    std::vector<Material> m_materialStack;
 };
 
 #endif
