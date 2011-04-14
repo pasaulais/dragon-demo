@@ -1,7 +1,6 @@
 #include <cmath>
 #include <sstream>
 #include <QDateTime>
-#include <QKeyEvent>
 #include "Scene.h"
 #include "Dragon.h"
 #include "Mesh.h"
@@ -196,6 +195,11 @@ void Scene::exportItem(Item item, string path)
     m_state->endExportMesh();
 }
 
+void Scene::exportCurrentItem()
+{
+    m_exportQueued = true;
+}
+
 string Scene::itemText(Scene::Item item)
 {
     switch(item)
@@ -364,41 +368,14 @@ void Scene::frontView()
     m_theta = vec3(-90.0, 0.0, 0.0);
 }
 
-void Scene::keyReleaseEvent(QKeyEvent *e)
+Scene::Camera Scene::camera() const
 {
-    int key = e->key();
-    if((key == Qt::Key_Plus) || (key == Qt::Key_Right))
-        selectNext();
-    else if((key == Qt::Key_Minus)  || (key == Qt::Key_Left))
-        selectPrevious();
-    else if(key == Qt::Key_Q)
-        m_theta.y += 5.0;
-    else if(key == Qt::Key_D)
-        m_theta.y -= 5.0;
-    else if(key == Qt::Key_2)
-        m_theta.x += 5.0;
-    else if(key == Qt::Key_8)
-        m_theta.x -= 5.0;
-    else if(key == Qt::Key_4)
-        m_theta.z += 5.0;
-    else if(key == Qt::Key_6)
-        m_theta.z -= 5.0;
-    else if(key == Qt::Key_7)
-        topView();
-    else if(key == Qt::Key_3)
-        sideView();
-    else if(key == Qt::Key_1)
-        frontView();
-    else if(key == Qt::Key_N)
-        m_state->toggleNormals();
-    else if(key == Qt::Key_F1)
-        m_camera = Camera_Static;
-    else if(key == Qt::Key_F2)
-        m_camera = Camera_Flying;
-    else if(key == Qt::Key_F3)
-        m_camera = Camera_Jumping;
-    else if(key == Qt::Key_S)
-        m_exportQueued = true;
+    return m_camera;
+}
+
+void Scene::setCamera(Scene::Camera c)
+{
+    m_camera = c;
 }
 
 void Scene::animate()

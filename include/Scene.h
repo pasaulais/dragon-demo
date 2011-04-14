@@ -6,7 +6,6 @@
 #include "RenderState.h"
 #include "Vertex.h"
 
-class QKeyEvent;
 class Dragon;
 
 class Scene : public StateObject
@@ -32,8 +31,6 @@ public:
     void sideView();
     void frontView();
 
-    virtual void keyReleaseEvent(QKeyEvent *e);
-
     void reset();
 
     static float sawtooth(float t);
@@ -47,6 +44,9 @@ public:
         Camera_Jumping,
         Camera_Flying
     };
+
+    Camera camera() const;
+    void setCamera(Camera c);
 
     enum Item
     {
@@ -72,12 +72,8 @@ public:
         LAST = DRAGON_TAIL_END
     };
 
+    void exportCurrentItem();
     void exportItem(Item item, string path);
-
-signals:
-    void invalidated();
-
-public slots:
     void animate();
 
 private:

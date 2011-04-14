@@ -9,14 +9,12 @@
 #include "Scene.h"
 #include "Material.h"
 #include "RenderState.h"
-#include "RenderStateGL1.h"
-#include "RenderStateGL2.h"
 
-SceneViewport::SceneViewport(const QGLFormat &format, QWidget *parent) : QGLWidget(format, parent)
+SceneViewport::SceneViewport(Scene *scene, RenderState *state, const QGLFormat &format, QWidget *parent) : QGLWidget(format, parent)
 {
     setMinimumSize(640, 480);
-    m_scene = 0;
-    m_state = new RenderStateGL2();
+    m_scene = scene;
+    m_state = state;
     m_renderTimer = new QTimer(this);
     m_renderTimer->setInterval(0);
     m_frames = 0;
@@ -30,39 +28,13 @@ SceneViewport::SceneViewport(const QGLFormat &format, QWidget *parent) : QGLWidg
 
 SceneViewport::~SceneViewport()
 {
-    if(m_scene)
-        m_scene->freeTextures();
-    delete m_state;
-}
-
-RenderState *SceneViewport::state() const
-{
-    return m_state;
-}
-
-Scene* SceneViewport::scene() const
-{
-    return m_scene;
-}
-
-void SceneViewport::setScene(Scene *newScene)
-{
-    if(m_scene)
-        m_scene->freeTextures();
-    m_scene = newScene;
-    if(newScene && context())
-    {
-        makeCurrent();
-        newScene->loadTextures();
-    }
-    update();
+    m_scene->freeTextures();
 }
 
 void SceneViewport::initializeGL()
 {
     m_state->init();
-    if(m_scene)
-        m_scene->loadTextures();
+    m_scene->loadTextures();
     resetCamera();
 }
 
@@ -84,8 +56,7 @@ void SceneViewport::paintEvent(QPaintEvent *)
 void SceneViewport::paintGL()
 {
     m_state->beginFrame(width(), height());
-    if(m_scene)
-        m_scene->draw();
+    m_scene->draw();
     m_state->endFrame();
 }
 
@@ -97,8 +68,7 @@ void SceneViewport::resetCamera()
     m_rotState.active = false;
     m_animate = true;
     m_state->reset();
-    if(m_scene)
-        m_scene->reset();
+    m_scene->reset();
     updateAnimationState();
 }
 
@@ -152,11 +122,8 @@ void SceneViewport::updateAnimationState()
 
 void SceneViewport::animateScene()
 {
-    if(m_scene)
-    {
-        m_scene->animate();
-        update();
-    }
+    m_scene->animate();
+    update();
 }
 
 void SceneViewport::keyReleaseEvent(QKeyEvent *e)
@@ -164,14 +131,44 @@ void SceneViewport::keyReleaseEvent(QKeyEvent *e)
     int key = e->key();
     if(key == Qt::Key_R)
         resetCamera();
+    if((key == Qt::Key_Plus) || (key == Qt::Key_Right))
+        m_scene->selectNext();
+    else if((key == Qt::Key_Minus)  || (key == Qt::Key_Left))
+        m_scene->selectPrevious();
+    else if(key == Qt::Key_Q)
+        m_scene->theta().y += 5.0;
+    else if(key == Qt::Key_D)
+        m_scene->theta().y -= 5.0;
+    else if(key == Qt::Key_2)
+        m_scene->theta().x += 5.0;
+    else if(key == Qt::Key_8)
+        m_scene->theta().x -= 5.0;
+    else if(key == Qt::Key_4)
+        m_scene->theta().z += 5.0;
+    else if(key == Qt::Key_6)
+        m_scene->theta().z -= 5.0;
+    else if(key == Qt::Key_7)
+        m_scene->topView();
+    else if(key == Qt::Key_3)
+        m_scene->sideView();
+    else if(key == Qt::Key_1)
+        m_scene->frontView();
+    else if(key == Qt::Key_N)
+        m_state->toggleNormals();
+    else if(key == Qt::Key_F1)
+        m_scene->setCamera(Scene::Camera_Static);
+    else if(key == Qt::Key_F2)
+        m_scene->setCamera(Scene::Camera_Flying);
+    else if(key == Qt::Key_F3)
+        m_scene->setCamera(Scene::Camera_Jumping);
+    else if(key == Qt::Key_S)
+        m_scene->exportCurrentItem();
     else if(key == Qt::Key_Z)
         m_state->toggleWireframe();
     else if(key == Qt::Key_P)
         m_state->toggleProjection();
     else if(key == Qt::Key_Space)
         toggleAnimation();
-    else if(m_scene)
-        m_scene->keyReleaseEvent(e);
     QGLWidget::keyReleaseEvent(e);
     update();
 }
@@ -181,7 +178,7 @@ void SceneViewport::mouseMoveEvent(QMouseEvent *e)
     int x = e->x();
     int y = e->y();
     
-    if(m_transState.active && m_scene)
+    if(m_transState.active)
     {
         int dx = m_transState.x0 - x;
         int dy = m_transState.y0 - y;
@@ -190,7 +187,7 @@ void SceneViewport::mouseMoveEvent(QMouseEvent *e)
         update();
     }
     
-    if(m_rotState.active && m_scene)
+    if(m_rotState.active)
     {
         int dx = m_rotState.x0 - x;
         int dy = m_rotState.y0 - y;
@@ -209,14 +206,14 @@ void SceneViewport::mousePressEvent(QMouseEvent *e)
         m_transState.active = true;
         m_transState.x0 = x;
         m_transState.y0 = y;
-        m_transState.last = m_scene ? m_scene->delta() : vec3();
+        m_transState.last = m_scene->delta();
     }
     else if(e->button() & Qt::LeftButton)   // left button rotates the scene
     {
         m_rotState.active = true;
         m_rotState.x0 = x;
         m_rotState.y0 = y;
-        m_rotState.last = m_scene ? m_scene->theta() : vec3();
+        m_rotState.last = m_scene->theta();
 		setFocus();
     }
     else
@@ -247,9 +244,6 @@ void SceneViewport::wheelEvent(QWheelEvent *e)
 {
     // mouse wheel up zooms towards the scene
     // mouse wheel down zooms away from scene
-    if(m_scene)
-    {
-        m_scene->sigma() *= pow(1.01, e->delta() / 8);
-        update();
-    }
+    m_scene->sigma() *= pow(1.01, e->delta() / 8);
+    update();
 }

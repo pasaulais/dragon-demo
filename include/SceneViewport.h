@@ -24,13 +24,8 @@ class SceneViewport : public QGLWidget
     Q_OBJECT
 
 public:
-    SceneViewport(const QGLFormat &format, QWidget *parent = 0);
+    SceneViewport(Scene *scene, RenderState *state, const QGLFormat &format, QWidget *parent = 0);
     virtual ~SceneViewport();
-
-    RenderState *state() const;
-
-    Scene* scene() const;
-    void setScene(Scene *newScene);
 
 protected:
     virtual void initializeGL();
