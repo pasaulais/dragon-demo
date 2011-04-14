@@ -19,12 +19,18 @@ public:
     void loadTextures();
     void freeTextures();
 
-    vec3 orientation() const;
+    vec3 & theta();
+    float & sigma();
+    vec3 & delta();
 
     void draw();
 
-    void select_next();
-    void select_previous();
+    void selectNext();
+    void selectPrevious();
+
+    void topView();
+    void sideView();
+    void frontView();
 
     virtual void keyReleaseEvent(QKeyEvent *e);
 
@@ -66,7 +72,7 @@ public:
         LAST = DRAGON_TAIL_END
     };
 
-    void exportItem(Item item, QString path);
+    void exportItem(Item item, string path);
 
 signals:
     void invalidated();
@@ -81,13 +87,16 @@ private:
     void drawDragonHoldingA(Dragon *d);
     void drawDragonHoldingP(Dragon *d);
     void drawDragonHoldingS(Dragon *d);
-    static QString itemText(Item item);
+    static string itemText(Item item);
 
     QDateTime m_started;
     int m_selected;
     int m_detailLevel;
-    Camera m_camera;
+    vec3 m_delta;
     vec3 m_theta;
+    float m_sigma;
+    Camera m_camera;
+    vec3 m_thetaCamera;
     Dragon *m_debugDragon;
     QList<Dragon *> m_dragons;
     bool m_exportQueued;

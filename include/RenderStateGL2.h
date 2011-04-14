@@ -7,7 +7,7 @@
 class RenderStateGL2 : public RenderState
 {
 public:
-    RenderStateGL2(QObject *parent = 0);
+    RenderStateGL2();
     virtual ~RenderStateGL2();
 
     virtual void init();

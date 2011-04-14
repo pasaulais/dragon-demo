@@ -53,18 +53,12 @@ private:
     void updateAnimationState();
     void toggleAnimation();
     void resetCamera();
-    void topView();
-    void sideView();
-    void frontView();
 
     Scene *m_scene;
     RenderState *m_state;
     QTimer *m_renderTimer;
 
     // viewer settings
-    vec3 m_delta;
-    vec3 m_theta;
-    float m_sigma;
     MouseState m_transState;
     MouseState m_rotState;
     bool m_animate;

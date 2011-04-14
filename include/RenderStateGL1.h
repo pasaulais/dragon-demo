@@ -7,7 +7,7 @@
 class RenderStateGL1 : public RenderState
 {
 public:
-    RenderStateGL1(QObject *parent = 0);
+    RenderStateGL1();
 
     virtual Mesh * createMesh() const;
     virtual void drawMesh(Mesh *m);

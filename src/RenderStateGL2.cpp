@@ -5,7 +5,7 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
-RenderStateGL2::RenderStateGL2(QObject *parent) : RenderState(parent)
+RenderStateGL2::RenderStateGL2() : RenderState()
 {
     m_matrixMode = ModelView;
     m_matrix[(int)ModelView].setIdentity();

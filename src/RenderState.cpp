@@ -1,6 +1,6 @@
 #include "RenderState.h"
 
-RenderState::RenderState(QObject *parent) : QObject(parent)
+RenderState::RenderState()
 {
     m_meshOutput = 0;
     m_exporting = false;
@@ -9,12 +9,19 @@ RenderState::RenderState(QObject *parent) : QObject(parent)
     reset();
 }
 
-QMap<QString, Mesh *> & RenderState::meshes()
+RenderState::~RenderState()
+{
+    foreach(Mesh *m, m_meshes)
+        delete m;
+    m_meshes.clear();
+}
+
+QMap<string, Mesh *> & RenderState::meshes()
 {
     return m_meshes;
 }
 
-const QMap<QString, Mesh *> & RenderState::meshes() const
+const QMap<string, Mesh *> & RenderState::meshes() const
 {
     return m_meshes;
 }
@@ -29,7 +36,7 @@ Mesh * RenderState::loadMeshStl(string name, string path)
         if(m)
         {
             m->addGroup(vg);
-            m_meshes.insert(QString::fromStdString(name), m);
+            m_meshes.insert(name, m);
         }
         delete vg;
     }
@@ -46,7 +53,7 @@ Mesh * RenderState::loadMeshObj(string name, string path)
         if(m)
         {
             m->addGroup(vg);
-            m_meshes.insert(QString::fromStdString(name), m);
+            m_meshes.insert(name, m);
         }
         delete vg;
     }
@@ -83,7 +90,7 @@ void RenderState::reset()
 
 void RenderState::drawMesh(string name)
 {
-    drawMesh(m_meshes.value(QString::fromStdString(name)));
+    drawMesh(m_meshes.value(name));
 }
 
 void RenderState::beginExportMesh(string path)
@@ -91,7 +98,7 @@ void RenderState::beginExportMesh(string path)
     if(m_exporting)
         return;
     m_exporting = true;
-    m_exportPath = QString::fromStdString(path);
+    m_exportPath = path;
     m_oldOutput = m_output;
     pushMatrix();
     loadIdentity();
@@ -105,10 +112,10 @@ void RenderState::endExportMesh()
         return;
     popMatrix();
     m_output = m_oldOutput;
-    m_meshOutput->saveObj(m_exportPath.toStdString());
+    m_meshOutput->saveObj(m_exportPath);
     delete m_meshOutput;
     m_meshOutput = 0;
-    m_exportPath = QString::null;
+    m_exportPath = string();
     m_exporting = false;
 }
 

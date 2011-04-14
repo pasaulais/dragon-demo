@@ -1,7 +1,6 @@
 #ifndef INITIALS_RENDER_STATE_H
 #define INITIALS_RENDER_STATE_H
 
-#include <QObject>
 #include <QMap>
 #include <string>
 #include "Mesh.h"
@@ -10,10 +9,11 @@
 
 using namespace std;
 
-class RenderState : public QObject
+class RenderState
 {
 public:
-    RenderState(QObject *parent = 0);
+    RenderState();
+    virtual ~RenderState();
 
     virtual void init();
 
@@ -31,8 +31,8 @@ public:
     virtual void beginExportMesh(string path);
     virtual void endExportMesh();
 
-    virtual QMap<QString, Mesh *> & meshes();
-    virtual const QMap<QString, Mesh *> & meshes() const;
+    virtual QMap<string, Mesh *> & meshes();
+    virtual const QMap<string, Mesh *> & meshes() const;
 
     virtual Mesh * createMesh() const = 0;
     virtual Mesh * loadMeshObj(string name, string path);
@@ -77,11 +77,11 @@ protected:
     bool m_wireframe;
     vec4 m_bgColor;
     Mesh *m_meshOutput;
-    QMap<QString, Mesh *> m_meshes;
+    QMap<string, Mesh *> m_meshes;
 
     // exporting
     bool m_exporting;
-    QString m_exportPath;
+    string m_exportPath;
     Mesh::OutputMode m_oldOutput;
 };
 

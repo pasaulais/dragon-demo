@@ -3,7 +3,7 @@
 #include "RenderStateGL1.h"
 #include "MeshGL1.h"
 
-RenderStateGL1::RenderStateGL1(QObject *parent) : RenderState(parent)
+RenderStateGL1::RenderStateGL1() : RenderState()
 {
     m_ambient0 = vec4(1.0, 1.0, 1.0, 1.0);
     m_diffuse0 = vec4(1.0, 1.0, 1.0, 1.0);

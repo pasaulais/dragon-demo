@@ -1,4 +1,5 @@
 #include <cmath>
+#include <sstream>
 #include <QDateTime>
 #include <QKeyEvent>
 #include "Scene.h"
@@ -16,6 +17,7 @@ Scene::Scene(RenderState *state) : StateObject(state)
 {
     m_camera = Camera_Static;
     m_exportQueued = false;
+    m_sigma = 1.0;
 
     m_debugDragon = new Dragon(Dragon::Floating, m_state);
     m_debugDragon->scalesMaterial() = debugMaterial;
@@ -58,19 +60,29 @@ void Scene::freeTextures()
 
 void Scene::reset()
 {
+    m_delta = vec3(-0.0, -0.5, -5.0);
+    m_theta = vec3(21.0, -37.0, 0.0);
+    m_sigma = 0.40;
     m_selected = SCENE;
-    m_theta = vec3(0, 0, 0);
+    m_thetaCamera = vec3(0, 0, 0);
     m_detailLevel = 4;
     m_camera = Camera_Static;
     m_started = QDateTime::currentDateTime();
 }
 
-vec3 Scene::orientation() const
+vec3 & Scene::theta()
 {
-    if(m_selected == SCENE)
-        return m_theta;
-    else
-        return vec3();
+    return m_theta;
+}
+
+float & Scene::sigma()
+{
+    return m_sigma;
+}
+
+vec3 & Scene::delta()
+{
+    return m_delta;
 }
 
 bool Scene::load()
@@ -86,10 +98,21 @@ bool Scene::load()
 void Scene::draw()
 {
     Item i = (Item)m_selected;
+    vec3 rot = m_theta;
+    if(i == SCENE)
+        rot = rot + m_thetaCamera;
+    m_state->translate(m_delta.x, m_delta.y, m_delta.z);
+    m_state->rotate(rot.x, 1.0, 0.0, 0.0);
+    m_state->rotate(rot.y, 0.0, 1.0, 0.0);
+    m_state->rotate(rot.z, 0.0, 0.0, 1.0);
+    m_state->scale(m_sigma, m_sigma, m_sigma);
+
     drawItem(i);
     if(m_exportQueued)
     {
-        exportItem(i, QString("meshes/%1.obj").arg(itemText(i)));
+        stringstream ss;
+        ss << "meshes/" << itemText(i) << ".obj";
+        exportItem(i, ss.str());
         m_exportQueued = false;
     }
 }
@@ -166,14 +189,14 @@ void Scene::drawItem(Scene::Item item)
     popMatrix();
 }
 
-void Scene::exportItem(Item item, QString path)
+void Scene::exportItem(Item item, string path)
 {
-    m_state->beginExportMesh(path.toStdString());
+    m_state->beginExportMesh(path);
     drawItem(item);
     m_state->endExportMesh();
 }
 
-QString Scene::itemText(Scene::Item item)
+string Scene::itemText(Scene::Item item)
 {
     switch(item)
     {
@@ -314,25 +337,58 @@ void Scene::drawDragonHoldingS(Dragon *d)
     popMatrix();
 }
 
-void Scene::select_next()
+void Scene::selectNext()
 {
     if(m_selected < LAST)
         m_selected++;
 }
 
-void Scene::select_previous()
+void Scene::selectPrevious()
 {
     if(m_selected > SCENE)
         m_selected--;
+}
+
+void Scene::topView()
+{
+    m_theta = vec3(0.0, 0.0, 0.0);
+}
+
+void Scene::sideView()
+{
+    m_theta = vec3(-90.0, 0.0, -90.0);
+}
+
+void Scene::frontView()
+{
+    m_theta = vec3(-90.0, 0.0, 0.0);
 }
 
 void Scene::keyReleaseEvent(QKeyEvent *e)
 {
     int key = e->key();
     if((key == Qt::Key_Plus) || (key == Qt::Key_Right))
-        select_next();
+        selectNext();
     else if((key == Qt::Key_Minus)  || (key == Qt::Key_Left))
-        select_previous();
+        selectPrevious();
+    else if(key == Qt::Key_Q)
+        m_theta.y += 5.0;
+    else if(key == Qt::Key_D)
+        m_theta.y -= 5.0;
+    else if(key == Qt::Key_2)
+        m_theta.x += 5.0;
+    else if(key == Qt::Key_8)
+        m_theta.x -= 5.0;
+    else if(key == Qt::Key_4)
+        m_theta.z += 5.0;
+    else if(key == Qt::Key_6)
+        m_theta.z -= 5.0;
+    else if(key == Qt::Key_7)
+        topView();
+    else if(key == Qt::Key_3)
+        sideView();
+    else if(key == Qt::Key_1)
+        frontView();
     else if(key == Qt::Key_N)
         m_state->toggleNormals();
     else if(key == Qt::Key_F1)
@@ -370,13 +426,13 @@ void Scene::animate()
     {
     default:
     case Camera_Static:
-        m_theta.y = 0.0;			// static camera
+        m_thetaCamera.y = 0.0;			// static camera
         break;
     case Camera_Jumping:
-        m_theta.y = angle;		// following jumping dragon
+        m_thetaCamera.y = angle;		// following jumping dragon
         break;
     case Camera_Flying:
-        m_theta.y = -angle;       // following drunk dragon
+        m_thetaCamera.y = -angle;       // following drunk dragon
         break;
     }
 }
