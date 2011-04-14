@@ -16,8 +16,9 @@ MeshGL2::MeshGL2(const RenderStateGL2 *state) : Mesh()
 
 MeshGL2::~MeshGL2()
 {
-    foreach(VertexGroup *vg, m_groups)
+    for(uint32_t i = 0; i < m_groups.size(); i++)
     {
+        VertexGroup *vg = m_groups[i];
         if(vg->id != 0)
             glDeleteBuffers(1, &vg->id);
         delete vg;
@@ -27,19 +28,23 @@ MeshGL2::~MeshGL2()
 
 int MeshGL2::groupCount() const
 {
-    return m_groups.count();
+    return m_groups.size();
 }
 
 uint32_t MeshGL2::groupMode(int index) const
 {
-    VertexGroup *vg = m_groups.value(index);
-    return vg ? vg->mode : 0;
+    if((index < 0) || ((uint32_t)index > groupCount()))
+        return 0;
+    else
+        return m_groups[index]->mode;
 }
 
 uint32_t MeshGL2::groupSize(int index) const
 {
-    VertexGroup *vg = m_groups.value(index);
-    return vg ? vg->count : 0;
+    if((index < 0) || ((uint32_t)index > groupCount()))
+        return 0;
+    else
+        return m_groups[index]->count;
 }
 
 void MeshGL2::addGroup(VertexGroup *vg)
@@ -47,7 +52,7 @@ void MeshGL2::addGroup(VertexGroup *vg)
     VertexGroup *copy = new VertexGroup(vg->mode, vg->count);
     uint32_t size = vg->count * sizeof(VertexData);
     memcpy(copy->data, vg->data, size);
-    m_groups.append(copy);
+    m_groups.push_back(copy);
 }
 
 bool MeshGL2::copyGroupTo(int index, VertexGroup *vg) const
@@ -63,6 +68,9 @@ bool MeshGL2::copyGroupTo(int index, VertexGroup *vg) const
 
 void MeshGL2::draw(Mesh::OutputMode mode, RenderState *s, Mesh *output)
 {
+    (void)mode;
+    (void)s;
+    (void)output;
     drawToScreen();
 }
 
@@ -74,8 +82,9 @@ void MeshGL2::drawToScreen()
     glEnableVertexAttribArray(position);
     glEnableVertexAttribArray(normal);
     glEnableVertexAttribArray(texCoords);
-    foreach(VertexGroup *vg, m_groups)
+    for(uint32_t i = 0; i < m_groups.size(); i++)
     {
+        VertexGroup *vg = m_groups[i];
         if(vg->count > 100)
             drawVBO(vg, position, normal, texCoords);
         else

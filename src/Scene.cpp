@@ -53,8 +53,9 @@ void Scene::loadTextures()
 
 void Scene::freeTextures()
 {
-    foreach(Dragon *d, m_dragons)
+    for(uint32_t i = 0; i < m_dragons.size(); i++)
     {
+        Dragon *d = m_dragons[i];
         d->scalesMaterial().freeTexture();
         d->wingMaterial().freeTexture();
     }
@@ -95,7 +96,7 @@ bool Scene::load()
     m_state->loadMeshObj("letter_a", "meshes/LETTER_A.obj");
     m_state->loadMeshObj("letter_s", "meshes/LETTER_S.obj");
     Dragon::loadMeshes(m_state);
-    return m_state->meshes().count() > 0;
+    return m_state->meshes().size() > 0;
 }
 
 void Scene::draw()

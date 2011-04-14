@@ -1,6 +1,9 @@
 #include <cmath>
-#include <QDebug>
+#include <iostream>
+#include <cstring>
 #include "Vertex.h"
+
+using namespace std;
 
 bool fequal(double a, double b)
 {
@@ -168,9 +171,9 @@ matrix4 matrix4::ortho(float left, float right, float bottom, float top, float n
     matrix4 m;
     if (left == right || bottom == top || nearPlane == farPlane)
         return m;
-    qreal width = right - left;
-    qreal invheight = top - bottom;
-    qreal clip = farPlane - nearPlane;
+    float width = right - left;
+    float invheight = top - bottom;
+    float clip = farPlane - nearPlane;
     m.d[0] = 2.0f / width;
     m.d[4] = 0.0f;
     m.d[8] = 0.0f;
@@ -214,10 +217,10 @@ matrix4 operator*(const matrix4 &a, const matrix4 &b)
 
 void matrix4::dump() const
 {
-    qDebug("%f %f %f %f", d[0], d[1], d[2], d[3]);
-    qDebug("%f %f %f %f", d[4], d[5], d[6], d[7]);
-    qDebug("%f %f %f %f", d[8], d[9], d[10], d[11]);
-    qDebug("%f %f %f %f", d[12], d[13], d[14], d[15]);
+    cout << d[0] << d[1] << d[2] << d[3] << endl;
+    cout << d[4] << d[5] << d[6] << d[7] << endl;
+    cout << d[8] << d[9] << d[10] << d[11] << endl;
+    cout << d[12] << d[13] << d[14] << d[15] << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -1,7 +1,7 @@
 #ifndef INITIALS_RENDER_STATE_H
 #define INITIALS_RENDER_STATE_H
 
-#include <QMap>
+#include <map>
 #include <string>
 #include "Mesh.h"
 #include "Material.h"
@@ -31,8 +31,8 @@ public:
     virtual void beginExportMesh(string path);
     virtual void endExportMesh();
 
-    virtual QMap<string, Mesh *> & meshes();
-    virtual const QMap<string, Mesh *> & meshes() const;
+    virtual map<string, Mesh *> & meshes();
+    virtual const map<string, Mesh *> & meshes() const;
 
     virtual Mesh * createMesh() const = 0;
     virtual Mesh * loadMeshObj(string name, string path);
@@ -77,7 +77,7 @@ protected:
     bool m_wireframe;
     vec4 m_bgColor;
     Mesh *m_meshOutput;
-    QMap<string, Mesh *> m_meshes;
+    map<string, Mesh *> m_meshes;
 
     // exporting
     bool m_exporting;

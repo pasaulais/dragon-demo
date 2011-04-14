@@ -1,6 +1,7 @@
 #ifndef INITIALS_DRAGON_H
 #define INITIALS_DRAGON_H
 
+#include <inttypes.h>
 #include "Material.h"
 #include "RenderState.h"
 
@@ -58,9 +59,9 @@ public:
 
 private:
     Kind m_kind;
-    uint m_jointParts;
-    uint m_chestParts;
-    uint m_tailEndParts;
+    uint32_t m_jointParts;
+    uint32_t m_chestParts;
+    uint32_t m_tailEndParts;
     Material m_tongueMaterial;
     Material m_scalesMaterial;
     Material m_wingMaterial;

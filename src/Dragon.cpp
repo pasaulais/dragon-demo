@@ -354,7 +354,7 @@ void Dragon::drawPaw()
 
 void Dragon::drawTail()
 {
-    uint n = 10;
+    uint32_t n = 10;
     float k = theta_tail / 20.0;
     static float sizes[10] =
     {
@@ -379,7 +379,7 @@ void Dragon::drawTail()
         pushMatrix();
             translate(-0.40, 0.0, 0.0);
             scale(0.52, 1.0, 1.0);
-            for(uint i = 0; i < n; i++)
+            for(uint32_t i = 0; i < n; i++)
             {
                 float f = sizes[i];
                 translate(0.80, 0.0, 0.0);

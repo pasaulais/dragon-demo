@@ -1,7 +1,7 @@
 #ifndef INITIALS_MESH_GL2_H
 #define INITIALS_MESH_GL2_H
 
-#include <QList>
+#include <vector>
 #include <inttypes.h>
 #include "Mesh.h"
 #include "Vertex.h"
@@ -28,7 +28,7 @@ private:
     void drawVBO(VertexGroup *vg, int position, int normal, int texCoords);
 
     const RenderStateGL2 *m_state;
-    QList<VertexGroup *> m_groups;
+    std::vector<VertexGroup *> m_groups;
 };
 
 #endif

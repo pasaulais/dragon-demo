@@ -1,8 +1,12 @@
 #ifndef INITIALS_RENDER_STATE_GL2_H
 #define INITIALS_RENDER_STATE_GL2_H
 
-#include <QList>
+#include <vector>
+#include <string>
+#include <inttypes.h>
 #include "RenderState.h"
+
+using namespace std;
 
 class RenderStateGL2 : public RenderState
 {
@@ -45,25 +49,25 @@ public:
 private:
     void beginApplyMaterial(const Material &m);
     void endApplyMaterial(const Material &m);
-    char * loadShaderSource(const char *path) const;
-    uint loadShader(const char *path, uint type) const;
+    char * loadShaderSource(string path) const;
+    uint32_t loadShader(string path, uint32_t type) const;
     bool loadShaders();
     void initShaders();
-    void setUniformValue(const char *name, const vec4 &v);
-    void setUniformValue(const char *name, float f);
-    void setUniformValue(const char *name, int i);
+    void setUniformValue(string name, const vec4 &v);
+    void setUniformValue(string name, float f);
+    void setUniformValue(string name, int i);
 
     vec4 m_ambient0;
     vec4 m_diffuse0;
     vec4 m_specular0;
     vec4 m_light0_pos;
-    QList<Material> m_materialStack;
+    std::vector<Material> m_materialStack;
     RenderState::MatrixMode m_matrixMode;
     matrix4 m_matrix[3];
-    QList<matrix4> m_matrixStack[3];
-    uint m_vertexShader;
-    uint m_pixelShader;
-    uint m_program;
+    std::vector<matrix4> m_matrixStack[3];
+    uint32_t m_vertexShader;
+    uint32_t m_pixelShader;
+    uint32_t m_program;
     int m_modelViewMatrixLoc;
     int m_projMatrixLoc;
     int m_positionAttr;

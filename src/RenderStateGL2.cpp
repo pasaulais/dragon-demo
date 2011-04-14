@@ -1,9 +1,9 @@
 #include <cstdio>
-#include "RenderStateGL2.h"
-#include "MeshGL2.h"
-#define GL_GLEXT_PROTOTYPES 1
+#define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include "RenderStateGL2.h"
+#include "MeshGL2.h"
 
 RenderStateGL2::RenderStateGL2() : RenderState()
 {
@@ -73,13 +73,14 @@ void RenderStateGL2::multiplyMatrix(const matrix4 &m)
 void RenderStateGL2::pushMatrix()
 {
     int i = (int)m_matrixMode;
-    m_matrixStack[i].append(m_matrix[i]);
+    m_matrixStack[i].push_back(m_matrix[i]);
 }
 
 void RenderStateGL2::popMatrix()
 {
     int i = (int)m_matrixMode;
-    m_matrix[i] = m_matrixStack[i].takeLast();
+    m_matrix[i] = m_matrixStack[i].back();
+    m_matrixStack[i].pop_back();
 }
 
 void RenderStateGL2::translate(float dx, float dy, float dz)
@@ -104,16 +105,17 @@ matrix4 RenderStateGL2::currentMatrix() const
 
 void RenderStateGL2::pushMaterial(const Material &m)
 {
-    m_materialStack.append(m);
+    m_materialStack.push_back(m);
     beginApplyMaterial(m);
 }
 
 void RenderStateGL2::popMaterial()
 {
-    Material m = m_materialStack.takeLast();
+    Material m = m_materialStack.back();
+    m_materialStack.pop_back();
     endApplyMaterial(m);
-    if(m_materialStack.count() > 0)
-        beginApplyMaterial(m_materialStack.last());
+    if(m_materialStack.size() > 0)
+        beginApplyMaterial(m_materialStack.back());
 }
 
 void RenderStateGL2::beginApplyMaterial(const Material &m)
@@ -203,9 +205,9 @@ int RenderStateGL2::texCoordsAttr() const
     return m_texCoordsAttr;
 }
 
-char * RenderStateGL2::loadShaderSource(const char *path) const
+char * RenderStateGL2::loadShaderSource(string path) const
 {
-    FILE *f = fopen(path, "r");
+    FILE *f = fopen(path.c_str(), "r");
     if(!f)
         return 0;
     fseek(f, 0, SEEK_END);
@@ -229,12 +231,12 @@ char * RenderStateGL2::loadShaderSource(const char *path) const
     return code;
 }
 
-uint RenderStateGL2::loadShader(const char *path, uint type) const
+uint32_t RenderStateGL2::loadShader(string path, uint32_t type) const
 {
-    char *code = loadShaderSource(path);
+    char *code = loadShaderSource(path.c_str());
     if(!code)
         return 0;
-    uint shader = glCreateShader(type);
+    uint32_t shader = glCreateShader(type);
     glShaderSource(shader, 1, (const GLchar **)&code, 0);
     delete [] code;
     glCompileShader(shader);
@@ -263,16 +265,16 @@ uint RenderStateGL2::loadShader(const char *path, uint type) const
 bool RenderStateGL2::loadShaders()
 {
     //TODO fallback to GL1 when in a pinch
-    uint vertexShader = loadShader("vertex.glsl", GL_VERTEX_SHADER);
+    uint32_t vertexShader = loadShader("vertex.glsl", GL_VERTEX_SHADER);
     if(vertexShader == 0)
         return false;
-    uint pixelShader = loadShader("fragment.glsl", GL_FRAGMENT_SHADER);
+    uint32_t pixelShader = loadShader("fragment.glsl", GL_FRAGMENT_SHADER);
     if(pixelShader == 0)
     {
         glDeleteShader(vertexShader);
         return false;
     }
-    uint program = glCreateProgram();
+    uint32_t program = glCreateProgram();
     if(program == 0)
     {
         glDeleteShader(vertexShader);
@@ -319,20 +321,20 @@ void RenderStateGL2::initShaders()
 {
 }
 
-void RenderStateGL2::setUniformValue(const char *name, const vec4 &v)
+void RenderStateGL2::setUniformValue(string name, const vec4 &v)
 {
-    int location = glGetUniformLocation(m_program, name);
+    int location = glGetUniformLocation(m_program, name.c_str());
     glUniform4fv(location, 1, (GLfloat *)&v);
 }
 
-void RenderStateGL2::setUniformValue(const char *name, float f)
+void RenderStateGL2::setUniformValue(string name, float f)
 {
-    int location = glGetUniformLocation(m_program, name);
+    int location = glGetUniformLocation(m_program, name.c_str());
     glUniform1f(location, f);
 }
 
-void RenderStateGL2::setUniformValue(const char *name, int i)
+void RenderStateGL2::setUniformValue(string name, int i)
 {
-    int location = glGetUniformLocation(m_program, name);
+    int location = glGetUniformLocation(m_program, name.c_str());
     glUniform1i(location, i);
 }

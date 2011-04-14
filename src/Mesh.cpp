@@ -1,6 +1,7 @@
 #include <GL/gl.h>
 #include <cmath>
 #include <cstdio>
+#include <cstring>
 #include "Mesh.h"
 #include "Material.h"
 #include "RenderState.h"
@@ -16,6 +17,7 @@ Mesh::~Mesh()
 /* Show the normal for every vertex in the mesh, for debugging purposes. */
 void Mesh::drawNormals(RenderState *s)
 {
+    (void)s;
 }
 
 VertexGroup * Mesh::loadStl(string path, bool computeNormals)
@@ -301,7 +303,7 @@ void Mesh::saveObj(string path, VertexGroup **vg, int groups)
     for(int i = 0; i < groups; i++)
     {
         VertexGroup *g = vg[i];
-        for(uint j = 0; j < g->count; j++)
+        for(uint32_t j = 0; j < g->count; j++)
         {
             vec3 vertex = g->data[j].position;
             fprintf(f, "v %f %f %f\n", vertex.x, vertex.y, vertex.z);
@@ -310,7 +312,7 @@ void Mesh::saveObj(string path, VertexGroup **vg, int groups)
     for(int i = 0; i < groups; i++)
     {
         VertexGroup *g = vg[i];
-        for(uint j = 0; j < g->count; j++)
+        for(uint32_t j = 0; j < g->count; j++)
         {
             vec2 texCoords = g->data[j].texCoords;
             fprintf(f, "vt %f %f\n", texCoords.x, texCoords.y);
@@ -319,13 +321,13 @@ void Mesh::saveObj(string path, VertexGroup **vg, int groups)
     for(int i = 0; i < groups; i++)
     {
         VertexGroup *g = vg[i];
-        for(uint j = 0; j < g->count; j++)
+        for(uint32_t j = 0; j < g->count; j++)
         {
             vec3 normal = g->data[j].normal;
             fprintf(f, "vn %f %f %f\n", normal.x, normal.y, normal.z);
         }
     }
-    uint offset = 0;
+    uint32_t offset = 0;
     for(int i = 0; i < groups; i++)
     {
         VertexGroup *g = vg[i];

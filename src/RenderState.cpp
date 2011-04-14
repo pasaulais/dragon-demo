@@ -11,17 +11,18 @@ RenderState::RenderState()
 
 RenderState::~RenderState()
 {
-    foreach(Mesh *m, m_meshes)
-        delete m;
+    map<string, Mesh *>::iterator it;
+    for(it = m_meshes.begin(); it != m_meshes.end(); it++)
+        delete it->second;
     m_meshes.clear();
 }
 
-QMap<string, Mesh *> & RenderState::meshes()
+map<string, Mesh *> & RenderState::meshes()
 {
     return m_meshes;
 }
 
-const QMap<string, Mesh *> & RenderState::meshes() const
+const map<string, Mesh *> & RenderState::meshes() const
 {
     return m_meshes;
 }
@@ -36,7 +37,7 @@ Mesh * RenderState::loadMeshStl(string name, string path)
         if(m)
         {
             m->addGroup(vg);
-            m_meshes.insert(name, m);
+            m_meshes.insert(pair<string, Mesh *>(name, m));
         }
         delete vg;
     }
@@ -53,7 +54,7 @@ Mesh * RenderState::loadMeshObj(string name, string path)
         if(m)
         {
             m->addGroup(vg);
-            m_meshes.insert(name, m);
+            m_meshes.insert(pair<string, Mesh *>(name, m));
         }
         delete vg;
     }
@@ -90,7 +91,9 @@ void RenderState::reset()
 
 void RenderState::drawMesh(string name)
 {
-    drawMesh(m_meshes.value(name));
+    map<string, Mesh *>::iterator it = m_meshes.find(name);
+    if(it != m_meshes.end())
+        drawMesh(it->second);
 }
 
 void RenderState::beginExportMesh(string path)
