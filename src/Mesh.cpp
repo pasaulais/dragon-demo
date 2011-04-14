@@ -121,6 +121,15 @@ static bool parseObjPoint(char *data, ObjPoint *p)
     return false;
 }
 
+template<class T>
+static T safe_value(T *data, size_t count, int index)
+{
+    if((index < 0) || ((size_t)index >= count))
+        return T();
+    else
+        return data[index];
+}
+
 VertexGroup * Mesh::loadObj(string path)
 {
     FILE *f = fopen(path.c_str(), "r");
@@ -183,19 +192,19 @@ VertexGroup * Mesh::loadObj(string path)
                 computeNormals = (fileNormalCount == 0);
                 if(computeNormals)
                 {
-                    vec3 v1 = vertices[points[0].vertexIndex - 1];
-                    vec3 v2 = vertices[points[1].vertexIndex - 1];
-                    vec3 v3 = vertices[points[2].vertexIndex - 1];
+                    vec3 v1 = safe_value(vertices, fileVertexCount, points[0].vertexIndex - 1);
+                    vec3 v2 = safe_value(vertices, fileVertexCount, points[1].vertexIndex - 1);
+                    vec3 v3 = safe_value(vertices, fileVertexCount, points[2].vertexIndex - 1);
                     normal = vec3::normal(v1, v2, v3);
                 }
                 for(int i = 0; i < 3; i++, pd++)
                 {
-                    pd->position = vertices[points[i].vertexIndex - 1];
+                    pd->position = safe_value(vertices, fileVertexCount, points[i].vertexIndex - 1);
                     if(computeNormals)
                         pd->normal = normal;
                     else
-                        pd->normal = normals[points[i].normalIndex - 1];
-                    pd->texCoords = texCoords[points[i].texCoordsIndex - 1];
+                        pd->normal = safe_value(normals, fileNormalCount, points[i].normalIndex - 1);
+                    pd->texCoords = safe_value(texCoords, fileTexCoordsCount, points[i].texCoordsIndex - 1);
                 }
             }
         }
