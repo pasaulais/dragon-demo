@@ -3,6 +3,7 @@
 
 #include <cstdio>
 #include <string>
+#include <iostream>
 #include <inttypes.h>
 #include "Vertex.h"
 
@@ -36,6 +37,7 @@ public:
 
     static VertexGroup * loadStl(string path, bool computeNormals = false);
     static VertexGroup * loadObj(string path);
+    static VertexGroup * loadObj(istream &s);
     static void saveStl(string path, VertexGroup **vg, int groups);
     static void saveObj(string path, VertexGroup **vg, int groups);
 

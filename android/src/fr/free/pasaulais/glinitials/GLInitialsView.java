@@ -1,5 +1,7 @@
 package fr.free.pasaulais.glinitials;
 
+import java.io.UnsupportedEncodingException;
+
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
@@ -9,16 +11,13 @@ import javax.microedition.khronos.opengles.*;
 
 class GLInitialsView extends GLSurfaceView
 {
-    public GLInitialsView(Context context)
+	GLInitialsActivity activity;
+	
+    public GLInitialsView(Context context, GLInitialsActivity activity)
     {
         super(context);
+        this.activity = activity;
         init(false, 0, 0);
-    }
-
-    public GLInitialsView(Context context, boolean translucent, int depth, int stencil)
-    {
-        super(context);
-        init(translucent, depth, stencil);
     }
 
     private void init(boolean translucent, int depth, int stencil)
@@ -28,7 +27,7 @@ class GLInitialsView extends GLSurfaceView
         setEGLConfigChooser(translucent ?
                             new ConfigChooser(8, 8, 8, 8, depth, stencil) :
                             new ConfigChooser(5, 6, 5, 0, depth, stencil));
-        setRenderer(new Renderer());
+        setRenderer(activity);
     }
 
     private static class ConfigChooser implements GLSurfaceView.EGLConfigChooser
@@ -106,23 +105,5 @@ class GLInitialsView extends GLSurfaceView
         protected int mDepthSize;
         protected int mStencilSize;
         private int[] mValue = new int[1];
-    }
-
-    private static class Renderer implements GLSurfaceView.Renderer
-    {
-        public void onDrawFrame(GL10 gl)
-        {
-            GLInitialsLib.render();
-        }
-
-        public void onSurfaceChanged(GL10 gl, int width, int height)
-        {
-            GLInitialsLib.init(width, height);
-        }
-
-        public void onSurfaceCreated(GL10 gl, EGLConfig config)
-        {
-            // Do nothing.
-        }
     }
 }

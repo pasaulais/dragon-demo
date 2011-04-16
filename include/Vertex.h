@@ -2,6 +2,7 @@
 #define INITIALS_VERTEX_H
 
 #include <inttypes.h>
+#include <vector>
 
 bool fequal(double a, double b);
 
@@ -103,6 +104,7 @@ class VertexGroup
 {
 public:
     VertexGroup(uint32_t mode, uint32_t count);
+    VertexGroup(uint32_t mode, const std::vector<VertexData> &data);
     virtual ~VertexGroup();
 
     uint32_t mode;

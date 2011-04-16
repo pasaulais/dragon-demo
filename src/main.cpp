@@ -9,15 +9,15 @@
 
 bool loadMeshes(RenderState *state)
 {
-    state->loadMeshObj("floor", "meshes/floor.obj");
-    state->loadMeshObj("letter_p", "meshes/LETTER_P.obj");
-    state->loadMeshObj("letter_a", "meshes/LETTER_A.obj");
-    state->loadMeshObj("letter_s", "meshes/LETTER_S.obj");
-    state->loadMeshObj("wing_membrane", "meshes/dragon_wing_membrane.obj");
-    state->loadMeshObj("joint", "meshes/dragon_joint_spin.obj");
-    state->loadMeshObj("dragon_chest", "meshes/dragon_chest.obj");
-    state->loadMeshObj("dragon_head", "meshes/dragon_head.obj");
-    state->loadMeshObj("dragon_tail_end", "meshes/dragon_tail_end.obj");
+    state->loadMeshFromFile("floor", "meshes/floor.obj");
+    state->loadMeshFromFile("letter_p", "meshes/LETTER_P.obj");
+    state->loadMeshFromFile("letter_a", "meshes/LETTER_A.obj");
+    state->loadMeshFromFile("letter_s", "meshes/LETTER_S.obj");
+    state->loadMeshFromFile("wing_membrane", "meshes/dragon_wing_membrane.obj");
+    state->loadMeshFromFile("joint", "meshes/dragon_joint_spin.obj");
+    state->loadMeshFromFile("dragon_chest", "meshes/dragon_chest.obj");
+    state->loadMeshFromFile("dragon_head", "meshes/dragon_head.obj");
+    state->loadMeshFromFile("dragon_tail_end", "meshes/dragon_tail_end.obj");
     return state->meshes().size() > 0;
 }
 

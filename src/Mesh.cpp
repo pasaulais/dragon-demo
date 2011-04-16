@@ -149,17 +149,21 @@ static T safe_value(vector<T> &data, int index)
 VertexGroup * Mesh::loadObj(string path)
 {
     ifstream s;
-    char line[512];
-    char point1[32];
-    char point2[32];
-    char point3[32];
     s.open(path.c_str(), ifstream::in);
     if(!s.is_open())
     {
         cerr << "Could not open file '" << path << "'." << endl;
         return 0;
     }
+    return loadObj(s);
+}
 
+VertexGroup * Mesh::loadObj(istream &s)
+{
+    char line[512];
+    char point1[32];
+    char point2[32];
+    char point3[32];
     vector<vec3> vertices;
     vector<vec3> normals;
     vector<vec2> texCoords;
@@ -205,12 +209,7 @@ VertexGroup * Mesh::loadObj(string path)
         }
         s.getline(line, sizeof(line));
     }
-
-    VertexGroup *vg = new VertexGroup(GL_TRIANGLES, meshVertices.size());
-    VertexData *pd = vg->data;
-    for(uint32_t i = 0; i < meshVertices.size(); i++, pd++)
-        *pd = meshVertices[i];
-    return vg;
+    return new VertexGroup(GL_TRIANGLES, meshVertices);
 }
 
 void Mesh::saveStl(string path) const

@@ -1,3 +1,4 @@
+#include <sstream>
 #include "RenderState.h"
 
 RenderState::RenderState()
@@ -27,27 +28,21 @@ const map<string, Mesh *> & RenderState::meshes() const
     return m_meshes;
 }
 
-Mesh * RenderState::loadMeshStl(string name, string path)
+Mesh * RenderState::loadMeshFromFile(string name, string path)
 {
-    Mesh *m;
-    VertexGroup *vg = Mesh::loadStl(path);
-    if(vg)
-    {
-        m = createMesh();
-        if(m)
-        {
-            m->addGroup(vg);
-            m_meshes.insert(pair<string, Mesh *>(name, m));
-        }
-        delete vg;
-    }
-    return m;
+    return loadMeshFromGroup(name, Mesh::loadObj(path));
 }
 
-Mesh * RenderState::loadMeshObj(string name, string path)
+Mesh * RenderState::loadMeshFromData(string name, const char *data, size_t size)
 {
-    Mesh *m;
-    VertexGroup *vg = Mesh::loadObj(path);
+    string contents(data, size);
+    std::stringstream s(contents, ios_base::in);
+    return loadMeshFromGroup(name, Mesh::loadObj(s));
+}
+
+Mesh * RenderState::loadMeshFromGroup(string name, VertexGroup *vg)
+{
+    Mesh *m = 0;
     if(vg)
     {
         m = createMesh();

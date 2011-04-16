@@ -35,8 +35,9 @@ public:
     virtual const map<string, Mesh *> & meshes() const;
 
     virtual Mesh * createMesh() const = 0;
-    virtual Mesh * loadMeshObj(string name, string path);
-    virtual Mesh * loadMeshStl(string name, string path);
+    virtual Mesh * loadMeshFromFile(string name, string path);
+    virtual Mesh * loadMeshFromData(string name, const char *data, size_t size);
+    virtual Mesh * loadMeshFromGroup(string name, VertexGroup *vg);
 
     // matrix operations
 
