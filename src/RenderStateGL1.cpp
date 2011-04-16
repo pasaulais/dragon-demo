@@ -107,10 +107,10 @@ void RenderStateGL1::popMaterial()
 
 void RenderStateGL1::beginApplyMaterial(const Material &m)
 {
-    glMaterialfv(GL_FRONT, GL_AMBIENT, (GLfloat *)&m.ambient());
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, (GLfloat *)&m.diffuse());
-    glMaterialfv(GL_FRONT, GL_SPECULAR, (GLfloat *)&m.specular());
-    glMaterialf(GL_FRONT, GL_SHININESS, m.shine());
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, (GLfloat *)&m.ambient());
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, (GLfloat *)&m.diffuse());
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, (GLfloat *)&m.specular());
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, m.shine());
     if(m.texture() != 0)
     {
         glEnable(GL_TEXTURE_2D);
