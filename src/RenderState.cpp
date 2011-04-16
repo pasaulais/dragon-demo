@@ -12,10 +12,7 @@ RenderState::RenderState()
 
 RenderState::~RenderState()
 {
-    map<string, Mesh *>::iterator it;
-    for(it = m_meshes.begin(); it != m_meshes.end(); it++)
-        delete it->second;
-    m_meshes.clear();
+    freeMeshes();
 }
 
 map<string, Mesh *> & RenderState::meshes()
@@ -40,6 +37,14 @@ Mesh * RenderState::loadMeshFromData(string name, const char *data, size_t size)
     return loadMeshFromGroup(name, Mesh::loadObj(s));
 }
 
+void RenderState::freeMeshes()
+{
+    map<string, Mesh *>::iterator it;
+    for(it = m_meshes.begin(); it != m_meshes.end(); it++)
+        delete it->second;
+    m_meshes.clear();
+}
+
 Mesh * RenderState::loadMeshFromGroup(string name, VertexGroup *vg)
 {
     Mesh *m = 0;
@@ -54,6 +59,26 @@ Mesh * RenderState::loadMeshFromGroup(string name, VertexGroup *vg)
         delete vg;
     }
     return m;
+}
+
+uint32_t RenderState::loadTextureFromFile(string name, string path, bool mipmaps)
+{
+    uint32_t texID = Material::textureFromTIFFImage(path, mipmaps);
+    m_textures.insert(pair<string, uint32_t>(name, texID));
+    return texID;
+}
+
+uint32_t RenderState::loadTextureFromData(string name, const char *data, size_t size, bool mipmaps)
+{
+    uint32_t texID = Material::textureFromTIFFImage(data, size, mipmaps);
+    m_textures.insert(pair<string, uint32_t>(name, texID));
+    return texID;
+}
+
+uint32_t RenderState::texture(string name) const
+{
+    map<string, uint32_t>::const_iterator it = m_textures.find(name);
+    return (it != m_textures.end()) ? it->second : 0;
 }
 
 bool RenderState::drawNormals() const

@@ -1,9 +1,5 @@
-#ifdef JNI_WRAPPER
-#include <GLES/gl.h>
-#else
-#include <GL/gl.h>
-#endif
 #include <cmath>
+#include "Platform.h"
 #include "MeshGL1.h"
 #include "Material.h"
 #include "RenderState.h"

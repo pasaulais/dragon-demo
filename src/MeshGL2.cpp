@@ -1,7 +1,6 @@
-#define GL_GLEXT_PROTOTYPES 1
-#include <GL/gl.h>
 #include <cmath>
 #include <cstring>
+#include "Platform.h"
 #include "MeshGL2.h"
 #include "Material.h"
 #include "RenderState.h"

@@ -27,12 +27,11 @@ public:
     void freeTexture();
 
     void loadTextureTIFF(string path, bool mipmaps = false);
+    void loadTextureTIFF(const char *data, size_t size, bool mipmaps = false);
+    static uint32_t textureFromTIFFImage(string path, bool mipmaps = false);
+    static uint32_t textureFromTIFFImage(const char *data, size_t size, bool mipmaps = false);
 
 private:
-    // Create a texture from a TIFF file using libtiff
-    static uint32_t textureFromTIFFImage(string path, bool mipmaps);
-    static void setTextureParams(uint32_t target, bool mipmaps);
-
     vec4 m_ambient;
     vec4 m_diffuse;
     vec4 m_specular;

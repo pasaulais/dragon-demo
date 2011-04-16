@@ -1,9 +1,4 @@
-#ifdef JNI_WRAPPER
-#include <GLES/gl.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif
+#include "Platform.h"
 #include "RenderStateGL1.h"
 #include "MeshGL1.h"
 
@@ -27,6 +22,14 @@ void RenderStateGL1::drawMesh(Mesh *m)
     m->draw(m_output, this, m_meshOutput);
     if(m_drawNormals)
         m->drawNormals(this);
+}
+
+void RenderStateGL1::freeTextures()
+{
+    map<string, uint32_t>::iterator it;
+    for(it = m_textures.begin(); it != m_textures.end(); it++)
+        glDeleteTextures(1, &it->second);
+    m_textures.clear();
 }
 
 void RenderStateGL1::setMatrixMode(RenderStateGL1::MatrixMode newMode)

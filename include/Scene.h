@@ -13,8 +13,7 @@ public:
     Scene(RenderState *state);
     virtual ~Scene();
 
-    void loadTextures();
-    void freeTextures();
+    void init();
 
     vec3 & theta();
     float & sigma();

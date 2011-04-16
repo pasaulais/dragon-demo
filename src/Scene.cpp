@@ -38,28 +38,17 @@ Scene::~Scene()
     m_dragons.clear();
 }
 
-void Scene::loadTextures()
+void Scene::init()
 {
     if(m_dragons.size() < 3)
         return;
-    m_dragons[0]->scalesMaterial().loadTextureTIFF("scale_gold.tiff");
-    m_dragons[0]->wingMaterial().loadTextureTIFF("scale_gold.tiff");
-    m_dragons[1]->scalesMaterial().loadTextureTIFF("scale_black.tiff");
-    m_dragons[1]->wingMaterial().loadTextureTIFF("scale_black.tiff");
-    m_dragons[2]->scalesMaterial().loadTextureTIFF("scale_bronze.tiff");
-    m_dragons[2]->wingMaterial().loadTextureTIFF("scale_bronze.tiff");
-    floorMaterial.loadTextureTIFF("lava_green.tiff", true);
-}
-
-void Scene::freeTextures()
-{
-    for(uint32_t i = 0; i < m_dragons.size(); i++)
-    {
-        Dragon *d = m_dragons[i];
-        d->scalesMaterial().freeTexture();
-        d->wingMaterial().freeTexture();
-    }
-    floorMaterial.freeTexture();
+    m_dragons[0]->scalesMaterial().setTexture(m_state->texture("scale_gold"));
+    m_dragons[0]->wingMaterial().setTexture(m_state->texture("scale_gold"));
+    m_dragons[1]->scalesMaterial().setTexture(m_state->texture("scale_black"));
+    m_dragons[1]->wingMaterial().setTexture(m_state->texture("scale_black"));
+    m_dragons[2]->scalesMaterial().setTexture(m_state->texture("scale_bronze"));
+    m_dragons[2]->wingMaterial().setTexture(m_state->texture("scale_bronze"));
+    floorMaterial.setTexture(m_state->texture("lava_green"));
 }
 
 void Scene::reset()

@@ -7,7 +7,7 @@
 #include "RenderStateGL1.h"
 #include "RenderStateGL2.h"
 
-bool loadMeshes(RenderState *state)
+bool loadResources(RenderState *state)
 {
     state->loadMeshFromFile("floor", "meshes/floor.obj");
     state->loadMeshFromFile("letter_p", "meshes/LETTER_P.obj");
@@ -18,6 +18,10 @@ bool loadMeshes(RenderState *state)
     state->loadMeshFromFile("dragon_chest", "meshes/dragon_chest.obj");
     state->loadMeshFromFile("dragon_head", "meshes/dragon_head.obj");
     state->loadMeshFromFile("dragon_tail_end", "meshes/dragon_tail_end.obj");
+    state->loadTextureFromFile("lava_green", "lava_green.tiff", true);
+    state->loadTextureFromFile("scale_gold", "scale_gold.tiff");
+    state->loadTextureFromFile("scale_black", "scale_black.tiff");
+    state->loadTextureFromFile("scale_bronze", "scale_bronze.tiff");
     return state->meshes().size() > 0;
 }
 
@@ -31,19 +35,20 @@ int main(int argc, char **argv)
     f.setSampleBuffers(true);
     f.setSwapInterval(0);
 
-    // create and load the scene
+    // create the scene
     RenderStateGL2 state;
     Scene scene(&state);
-    if(!loadMeshes(&state))
-    {
-        QMessageBox::critical(0, "Error", "Could not load the mesh files (they should be in the 'meshes' sub-directory).");
-        return 1;
-    }
 
     // create viewport for rendering the scene
     SceneViewport w(&scene, &state, f);
     w.setWindowState(Qt::WindowMaximized);
     w.setWindowTitle("Dragons Demo");
+    w.makeCurrent();
+    if(!loadResources(&state))
+    {
+        QMessageBox::critical(0, "Error", "Could not load the mesh files (they should be in the 'meshes' sub-directory).");
+        return 1;
+    }
     w.show();
     
     // main window loop

@@ -1,12 +1,8 @@
 #include <tiffio.h>
+#include <cstring>
+#include <cstdio>
+#include "Platform.h"
 #include "Material.h"
-
-#ifdef JNI_WRAPPER
-#include <GLES/gl.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif
 
 Material::Material()
 {
@@ -85,7 +81,7 @@ void Material::freeTexture()
     }
 }
 
-void Material::setTextureParams(uint32_t target, bool mipmaps)
+void setTextureParams(uint32_t target, bool mipmaps)
 {
     if(mipmaps)
         glTexParameterf(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -98,18 +94,16 @@ void Material::setTextureParams(uint32_t target, bool mipmaps)
 
 void Material::loadTextureTIFF(string path, bool mipmaps)
 {
-    TIFFOpen(path.c_str(), "r");
     m_texture = textureFromTIFFImage(path, mipmaps);
 }
 
-// Create a texture from a TIFF file using libtiff
-uint32_t Material::textureFromTIFFImage(string path, bool mipmaps)
+void Material::loadTextureTIFF(const char *data, size_t size, bool mipmaps)
 {
-    // load the image
-    TIFF *tiff = TIFFOpen(path.c_str(), "r");
-    if(!tiff)
-        return 0;
+    m_texture = textureFromTIFFImage(data, size, mipmaps);
+}
 
+uint32_t textureFromTIFF(TIFF *tiff, bool mipmaps)
+{
     uint32_t width, height;
     TIFFGetField(tiff, TIFFTAG_IMAGEWIDTH, &width);
     TIFFGetField(tiff, TIFFTAG_IMAGELENGTH, &height);
@@ -147,6 +141,102 @@ uint32_t Material::textureFromTIFFImage(string path, bool mipmaps)
 #endif
     glBindTexture(GL_TEXTURE_2D, 0);
     _TIFFfree(data);
+    return texID;
+}
+
+uint32_t Material::textureFromTIFFImage(string path, bool mipmaps)
+{
+    TIFF *tiff = TIFFOpen(path.c_str(), "r");
+    if(!tiff)
+        return 0;
+    uint32_t texID = textureFromTIFF(tiff, mipmaps);
+    TIFFClose(tiff);
+    return texID;
+}
+
+typedef struct
+{
+    const char *buffer;
+    size_t size;
+    int32_t pos;
+    bool closed;
+} tiff_stream;
+
+tsize_t tiff_Read(thandle_t st, tdata_t buffer, tsize_t size)
+{
+    tiff_stream *s = (tiff_stream *)st;
+    if(s->closed)
+        return 0;
+    int32_t left = (s->size - s->pos);
+    left = max(min(left, size), 0);
+    memcpy(buffer, s->buffer + s->pos, left);
+    s->pos += left;
+    return left;
+}
+
+tsize_t tiff_Write(thandle_t st, tdata_t buffer, tsize_t size)
+{
+    (void)st;
+    (void)buffer;
+    (void)size;
+    return 0;
+}
+
+int tiff_Close(thandle_t st)
+{
+    tiff_stream *s = (tiff_stream *)st;
+    s->closed = true;
+    return 0;
+}
+
+toff_t tiff_Seek(thandle_t st, toff_t pos, int whence)
+{
+    tiff_stream *s = (tiff_stream *)st;
+    if(s->closed)
+        return 0;
+    switch(whence)
+    {
+    case SEEK_SET:
+        s->pos = pos;
+        break;
+    case SEEK_CUR:
+        s->pos = s->pos + pos;
+        break;
+    case SEEK_END:
+        s->pos = s->size + pos - 1;
+        break;
+    }
+    s->pos = min(max(s->pos, 0), (int32_t)(s->size - 1));
+    return s->pos;
+}
+
+toff_t tiff_Size(thandle_t st)
+{
+    tiff_stream *s = (tiff_stream *)st;
+    return s->size;
+}
+
+int tiff_Map(thandle_t, tdata_t*, toff_t*)
+{
+    return 0;
+}
+
+void tiff_Unmap(thandle_t, tdata_t, toff_t)
+{
+}
+
+uint32_t Material::textureFromTIFFImage(const char *data, size_t size, bool mipmaps)
+{
+    tiff_stream s;
+    s.buffer = data;
+    s.size = size;
+    s.pos = 0;
+    s.closed = false;
+    TIFF *tiff = TIFFClientOpen("<memory>", "r", (thandle_t)&s,
+        tiff_Read, tiff_Write, tiff_Seek, tiff_Close, tiff_Size, tiff_Map, tiff_Unmap);
+    if(!tiff)
+        return 0;
+    uint32_t texID = textureFromTIFF(tiff, mipmaps);
     TIFFClose(tiff);
     return texID;
 }

@@ -28,13 +28,14 @@ SceneViewport::SceneViewport(Scene *scene, RenderState *state, const QGLFormat &
 
 SceneViewport::~SceneViewport()
 {
-    m_scene->freeTextures();
+    makeCurrent();
+    m_state->freeTextures();
 }
 
 void SceneViewport::initializeGL()
 {
     m_state->init();
-    m_scene->loadTextures();
+    m_scene->init();
     resetCamera();
 }
 

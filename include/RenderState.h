@@ -38,6 +38,12 @@ public:
     virtual Mesh * loadMeshFromFile(string name, string path);
     virtual Mesh * loadMeshFromData(string name, const char *data, size_t size);
     virtual Mesh * loadMeshFromGroup(string name, VertexGroup *vg);
+    virtual void freeMeshes();
+
+    virtual uint32_t loadTextureFromFile(string name, string path, bool mipmaps = false);
+    virtual uint32_t loadTextureFromData(string name, const char *data, size_t size, bool mipmaps = false);
+    virtual uint32_t texture(string name) const;
+    virtual void freeTextures() = 0;
 
     // matrix operations
 
@@ -78,6 +84,7 @@ protected:
     bool m_wireframe;
     vec4 m_bgColor;
     Mesh *m_meshOutput;
+    map<string, uint32_t> m_textures;
     map<string, Mesh *> m_meshes;
 
     // exporting

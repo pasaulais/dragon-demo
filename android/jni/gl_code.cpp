@@ -29,6 +29,7 @@ extern "C"
 {
     JNIEXPORT void JNICALL Java_fr_free_pasaulais_glinitials_GLInitialsLib_init(JNIEnv * env, jclass obj, jint width, jint height);
     JNIEXPORT void JNICALL Java_fr_free_pasaulais_glinitials_GLInitialsLib_loadMeshFromData(JNIEnv * env, jclass obj, jstring name, jbyteArray data);
+    JNIEXPORT void JNICALL Java_fr_free_pasaulais_glinitials_GLInitialsLib_loadTextureFromData(JNIEnv * env, jclass obj, jstring name, jbyteArray data, jboolean mipmaps);
     JNIEXPORT void JNICALL Java_fr_free_pasaulais_glinitials_GLInitialsLib_render(JNIEnv * env, jclass obj);
     JNIEXPORT void JNICALL Java_fr_free_pasaulais_glinitials_GLInitialsLib_dispose(JNIEnv * env, jclass obj);
 };
@@ -59,6 +60,24 @@ JNIEXPORT void JNICALL Java_fr_free_pasaulais_glinitials_GLInitialsLib_loadMeshF
     jbyte* dataBuffer = env->GetByteArrayElements(data, NULL);
     // load mesh data
     state->loadMeshFromData(nameString, (const char *)dataBuffer, dataSize);
+    // free references to Java objects
+    env->ReleaseByteArrayElements(data, dataBuffer, JNI_ABORT);
+    env->ReleaseStringUTFChars(name, nameData);
+}
+
+JNIEXPORT void JNICALL Java_fr_free_pasaulais_glinitials_GLInitialsLib_loadTextureFromData(JNIEnv * env, jclass obj, jstring name, jbyteArray data, jboolean mipmaps)
+{
+    if(!state)
+        return;
+    // retrieve name
+    jsize nameSize = env->GetStringLength(name);
+    const char *nameData = env->GetStringUTFChars(name, NULL);
+    string nameString(nameData, nameSize);
+    // retrive data
+    jsize dataSize = env->GetArrayLength(data);
+    jbyte* dataBuffer = env->GetByteArrayElements(data, NULL);
+    // load mesh data
+    GLuint texID = state->loadTextureFromData(nameString, (const char *)dataBuffer, dataSize, mipmaps);
     // free references to Java objects
     env->ReleaseByteArrayElements(data, dataBuffer, JNI_ABORT);
     env->ReleaseStringUTFChars(name, nameData);

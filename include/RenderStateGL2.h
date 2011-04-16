@@ -16,6 +16,7 @@ public:
 
     virtual Mesh * createMesh() const;
     virtual void drawMesh(Mesh *m);
+    virtual void freeTextures();
 
     // matrix operations
     virtual void setMatrixMode(MatrixMode newMode);

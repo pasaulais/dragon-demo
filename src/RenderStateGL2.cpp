@@ -1,7 +1,5 @@
 #include <cstdio>
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include "Platform.h"
 #include "RenderStateGL2.h"
 #include "MeshGL2.h"
 
@@ -51,6 +49,14 @@ void RenderStateGL2::drawMesh(Mesh *m)
     m->draw(m_output, this, m_meshOutput);
     if(m_drawNormals)
         m->drawNormals(this);
+}
+
+void RenderStateGL2::freeTextures()
+{
+    map<string, uint32_t>::iterator it;
+    for(it = m_textures.begin(); it != m_textures.end(); it++)
+        glDeleteTextures(1, &it->second);
+    m_textures.clear();
 }
 
 void RenderStateGL2::setMatrixMode(RenderStateGL2::MatrixMode newMode)

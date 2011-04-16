@@ -4,7 +4,8 @@ HEADERS = include/SceneViewport.h \
     include/Mesh.h include/Material.h include/Vertex.h \
     include/Dragon.h include/Scene.h \
     include/MeshGL1.h \
-    include/MeshGL2.h
+    include/MeshGL2.h \
+    include/Platform.h
 
 SOURCES = src/main.cpp src/SceneViewport.cpp \
     src/RenderState.cpp src/RenderStateGL1.cpp src/RenderStateGL2.cpp \
