@@ -1,10 +1,20 @@
-#include <GL/gl.h>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
 #include "Mesh.h"
 #include "Material.h"
 #include "RenderState.h"
+
+#ifdef JNI_WRAPPER
+#define GL_TRIANGLES				0x0004
+#define GL_TRIANGLE_STRIP			0x0005
+#define GL_TRIANGLE_FAN				0x0006
+#define GL_QUADS                    0x0007
+#define GL_QUAD_STRIP				0x0008
+#define GL_POLYGON                  0x0009
+#else
+#include <GL/gl.h>
+#endif
 
 Mesh::Mesh()
 {

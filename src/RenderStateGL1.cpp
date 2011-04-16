@@ -1,5 +1,9 @@
+#ifdef JNI_WRAPPER
+#include <GLES/gl.h>
+#else
 #include <GL/gl.h>
 #include <GL/glu.h>
+#endif
 #include "RenderStateGL1.h"
 #include "MeshGL1.h"
 
@@ -100,25 +104,28 @@ void RenderStateGL1::popMaterial()
 
 void RenderStateGL1::beginApplyMaterial(const Material &m)
 {
-    glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT | GL_LIGHTING_BIT);
     glMaterialfv(GL_FRONT, GL_AMBIENT, (GLfloat *)&m.ambient());
     glMaterialfv(GL_FRONT, GL_DIFFUSE, (GLfloat *)&m.diffuse());
     glMaterialfv(GL_FRONT, GL_SPECULAR, (GLfloat *)&m.specular());
     glMaterialf(GL_FRONT, GL_SHININESS, m.shine());
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, m.texture());
+    if(m.texture() != 0)
+    {
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, m.texture());
+    }
 }
 
 void RenderStateGL1::endApplyMaterial(const Material &m)
 {
     if(m.texture() != 0)
+    {
         glBindTexture(GL_TEXTURE_2D, 0);
-    glPopAttrib();
+        glDisable(GL_TEXTURE_2D);
+    }
 }
 
 void RenderStateGL1::beginFrame(int w, int h)
 {
-    glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT);
     glEnable(GL_DEPTH_TEST);
     // we do non-uniform scaling and not all normals are one-unit-length
     glEnable(GL_NORMALIZE);
@@ -129,7 +136,9 @@ void RenderStateGL1::beginFrame(int w, int h)
     glLightfv(GL_LIGHT0, GL_AMBIENT, (GLfloat *)&m_ambient0);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, (GLfloat *)&m_diffuse0);
     glLightfv(GL_LIGHT0, GL_SPECULAR, (GLfloat *)&m_specular0);
+#ifndef JNI_WRAPPER
     glPolygonMode(GL_FRONT_AND_BACK, m_wireframe ? GL_LINE : GL_FILL);
+#endif
     setupViewport(w, h);
     setMatrixMode(RenderStateGL1::ModelView);
     pushMatrix();
@@ -141,29 +150,28 @@ void RenderStateGL1::beginFrame(int w, int h)
 void RenderStateGL1::endFrame()
 {
     glFlush();
+#ifndef JNI_WRAPPER
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+#endif
     setMatrixMode(RenderStateGL1::ModelView);
     popMatrix();
-    glPopAttrib();
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_NORMALIZE);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_LIGHT0);
 }
 
 void RenderStateGL1::setupViewport(int w, int h)
 {
     glViewport(0, 0, w, h);
-    setMatrixMode(RenderStateGL1::Projection);
+    setMatrixMode(Projection);
     loadIdentity();
+    float r = (float)w / (float)h;
     if(m_projection)
-    {
-        gluPerspective(45.0f, (GLfloat)w / (GLfloat)h, 0.1f, 100.0f);
-    }
+        multiplyMatrix(matrix4::perspective(45.0f, r, 0.1f, 100.0f));
+    else if (w <= h)
+        multiplyMatrix(matrix4::ortho(-1.0, 1.0, -1.0 / r, 1.0 / r, -10.0, 10.0));
     else
-    {
-        if (w <= h)
-            glOrtho(-1.0, 1.0, -1.0 * (GLfloat) h / (GLfloat) w,
-                1.0 * (GLfloat) h / (GLfloat) w, -10.0, 10.0);
-        else
-            glOrtho(-1.0 * (GLfloat) w / (GLfloat) h,
-                1.0 * (GLfloat) w / (GLfloat) h, -1.0, 1.0, -10.0, 10.0);
-    }
-    setMatrixMode(RenderStateGL1::ModelView);
+        multiplyMatrix(matrix4::ortho(-1.0 * r, 1.0 * r, -1.0, 1.0, -10.0, 10.0));
+    setMatrixMode(ModelView);
 }

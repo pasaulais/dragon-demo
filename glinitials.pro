@@ -11,7 +11,8 @@ SOURCES = src/main.cpp src/SceneViewport.cpp \
     src/Mesh.cpp src/Material.cpp src/Vertex.cpp \
     src/Scene.cpp src/Dragon.cpp \
     src/MeshGL1.cpp \
-    src/MeshGL2.cpp
+    src/MeshGL2.cpp \
+    android/jni/gl_code.cpp
 LIBS += -lm -ltiff
 
 QMAKE_CFLAGS_DEBUG += -std=c99

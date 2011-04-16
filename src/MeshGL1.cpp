@@ -1,4 +1,8 @@
+#ifdef JNI_WRAPPER
+#include <GLES/gl.h>
+#else
 #include <GL/gl.h>
+#endif
 #include <cmath>
 #include "MeshGL1.h"
 #include "Material.h"
@@ -159,6 +163,7 @@ VertexGroup * MeshGL1::drawFaceToMeshCopy(RenderState *s, Face f)
 /* Show the normal for every vertex in the mesh, for debugging purposes. */
 void MeshGL1::drawNormals(RenderState *s)
 {
+#ifndef JNI_WRAPPER
     static Material mat(vec4(1.0, 1.0, 1.0, 1.0),
         vec4(0.0, 0.0, 0.0, 1.0), vec4(0.0, 0.0, 0.0, 1.0), 0.0);
     if(m_normals.size() == 0)
@@ -183,4 +188,5 @@ void MeshGL1::drawNormals(RenderState *s)
     glEnd();
     glLineWidth(1.0);
     s->popMaterial();
+#endif
 }

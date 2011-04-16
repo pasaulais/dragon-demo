@@ -1,7 +1,12 @@
-#include <GL/gl.h>
-#include <GL/glu.h>
 #include <tiffio.h>
 #include "Material.h"
+
+#ifdef JNI_WRAPPER
+#include <GLES/gl.h>
+#else
+#include <GL/gl.h>
+#include <GL/glu.h>
+#endif
 
 Material::Material()
 {
@@ -93,6 +98,7 @@ void Material::setTextureParams(uint32_t target, bool mipmaps)
 
 void Material::loadTextureTIFF(string path, bool mipmaps)
 {
+    TIFFOpen(path.c_str(), "r");
     m_texture = textureFromTIFFImage(path, mipmaps);
 }
 
@@ -126,6 +132,11 @@ uint32_t Material::textureFromTIFFImage(string path, bool mipmaps)
     uint32_t texID = 0;
     glGenTextures(1, &texID);
     glBindTexture(GL_TEXTURE_2D, texID);
+#ifdef JNI_WRAPPER
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
+        GL_RGBA, GL_UNSIGNED_BYTE, data);
+    setTextureParams(GL_TEXTURE_2D, false);
+#else
     if(mipmaps)
         gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height,
             GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -133,6 +144,7 @@ uint32_t Material::textureFromTIFFImage(string path, bool mipmaps)
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
             GL_RGBA, GL_UNSIGNED_BYTE, data);
     setTextureParams(GL_TEXTURE_2D, mipmaps);
+#endif
     glBindTexture(GL_TEXTURE_2D, 0);
     _TIFFfree(data);
     TIFFClose(tiff);
