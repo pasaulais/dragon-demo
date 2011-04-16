@@ -13,7 +13,6 @@ public:
     Scene(RenderState *state);
     virtual ~Scene();
 
-    bool load();
     void loadTextures();
     void freeTextures();
 

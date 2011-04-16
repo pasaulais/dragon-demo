@@ -29,15 +29,6 @@ Dragon::Dragon(Kind kind, RenderState *state) : StateObject(state)
     setDetailLevel(4);
 }
 
-void Dragon::loadMeshes(RenderState *state)
-{
-    state->loadMeshObj("wing_membrane", "meshes/dragon_wing_membrane.obj");
-    state->loadMeshObj("joint", "meshes/dragon_joint_spin.obj");
-    state->loadMeshObj("dragon_chest", "meshes/dragon_chest.obj");
-    state->loadMeshObj("dragon_head", "meshes/dragon_head.obj");
-    state->loadMeshObj("dragon_tail_end", "meshes/dragon_tail_end.obj");
-}
-
 float Dragon::frontLegsAngle() const
 {
     return theta_front_legs;

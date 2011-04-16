@@ -1,6 +1,10 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
 #include "Mesh.h"
 #include "Material.h"
 #include "RenderState.h"
@@ -15,6 +19,8 @@
 #else
 #include <GL/gl.h>
 #endif
+
+using namespace std;
 
 Mesh::Mesh()
 {
@@ -132,9 +138,9 @@ static bool parseObjPoint(char *data, ObjPoint *p)
 }
 
 template<class T>
-static T safe_value(T *data, size_t count, int index)
+static T safe_value(vector<T> &data, int index)
 {
-    if((index < 0) || ((size_t)index >= count))
+    if((index < 0) || ((size_t)index >= data.size()))
         return T();
     else
         return data[index];
@@ -142,87 +148,68 @@ static T safe_value(T *data, size_t count, int index)
 
 VertexGroup * Mesh::loadObj(string path)
 {
-    FILE *f = fopen(path.c_str(), "r");
+    ifstream s;
     char line[512];
     char point1[32];
     char point2[32];
     char point3[32];
-    if(f == 0)
+    s.open(path.c_str(), ifstream::in);
+    if(!s.is_open())
     {
-        fprintf(stderr, "Could not open file '%s'.\n", path.c_str());
+        cerr << "Could not open file '" << path << "'." << endl;
         return 0;
     }
 
-    // read the file once to count the number of vertices, normals, texture coords
-    uint32_t fileVertexCount = 0;
-    uint32_t fileNormalCount = 0;
-    uint32_t fileTexCoordsCount = 0;
-    uint32_t meshVertexCount = 0;
-    while(fgets(line, sizeof(line), f) != 0)
-    {
-        float v1, v2, v3;
-        if(sscanf(line, "v %f %f %f", &v1, &v2, &v3) == 3)
-            fileVertexCount++;
-        else if(sscanf(line, "vn %f %f %f", &v1, &v2, &v3) == 3)
-            fileNormalCount++;
-        else if(sscanf(line, "vt %f %f", &v1, &v2) == 2)
-            fileTexCoordsCount++;
-        else if(sscanf(line, "f %s %s %s", point1, point2, point3) == 3)
-            meshVertexCount += 3;
-    }
-    fseek(f, 0, SEEK_SET);
-
-    // actually read the vertex, ..., data
+    vector<vec3> vertices;
+    vector<vec3> normals;
+    vector<vec2> texCoords;
+    vector<VertexData> meshVertices;
     ObjPoint points[4];
     vec3 normal;
-    bool computeNormals = false;
-    vec3 *vertices = new vec3[fileVertexCount];
-    vec3 *normals = new vec3[fileNormalCount];
-    vec2 *texCoords = new vec2[fileTexCoordsCount];
-    vec3 *pv = vertices;
-    vec3 *pn = normals;
-    vec2 *pt = texCoords;
-    VertexGroup *vg = new VertexGroup(GL_TRIANGLES, meshVertexCount);
-    VertexData *pd = vg->data;
-    while(fgets(line, sizeof(line), f) != 0)
+    s.getline(line, sizeof(line));
+    while(!s.eof())
     {
         float v1, v2, v3;
         if(sscanf(line, "v %f %f %f", &v1, &v2, &v3) == 3)
-            *pv++ = vec3(v1, v2, v3);
+            vertices.push_back(vec3(v1, v2, v3));
         else if(sscanf(line, "vn %f %f %f", &v1, &v2, &v3) == 3)
-            *pn++ = vec3(v1, v2, v3);
+            normals.push_back(vec3(v1, v2, v3));
         else if(sscanf(line, "vt %f %f", &v1, &v2) == 2)
-            *pt++ = vec2(v1, v2);
+            texCoords.push_back(vec2(v1, v2));
         else if(sscanf(line, "f %s %s %s", point1, point2, point3) == 3)
         {
             if(parseObjPoint(point1, &points[0]) &&
                 parseObjPoint(point2, &points[1]) &&
                 parseObjPoint(point3, &points[2]))
             {
-                computeNormals = (fileNormalCount == 0);
+                bool computeNormals = (normals.size() == 0);
                 if(computeNormals)
                 {
-                    vec3 v1 = safe_value(vertices, fileVertexCount, points[0].vertexIndex - 1);
-                    vec3 v2 = safe_value(vertices, fileVertexCount, points[1].vertexIndex - 1);
-                    vec3 v3 = safe_value(vertices, fileVertexCount, points[2].vertexIndex - 1);
+                    vec3 v1 = safe_value(vertices, points[0].vertexIndex - 1);
+                    vec3 v2 = safe_value(vertices, points[1].vertexIndex - 1);
+                    vec3 v3 = safe_value(vertices, points[2].vertexIndex - 1);
                     normal = vec3::normal(v1, v2, v3);
                 }
-                for(int i = 0; i < 3; i++, pd++)
+                for(int i = 0; i < 3; i++)
                 {
-                    pd->position = safe_value(vertices, fileVertexCount, points[i].vertexIndex - 1);
+                    VertexData vd;
+                    vd.position = safe_value(vertices, points[i].vertexIndex - 1);
                     if(computeNormals)
-                        pd->normal = normal;
+                        vd.normal = normal;
                     else
-                        pd->normal = safe_value(normals, fileNormalCount, points[i].normalIndex - 1);
-                    pd->texCoords = safe_value(texCoords, fileTexCoordsCount, points[i].texCoordsIndex - 1);
+                        vd.normal = safe_value(normals, points[i].normalIndex - 1);
+                    vd.texCoords = safe_value(texCoords, points[i].texCoordsIndex - 1);
+                    meshVertices.push_back(vd);
                 }
             }
         }
+        s.getline(line, sizeof(line));
     }
-    delete [] vertices;
-    delete [] normals;
-    delete [] texCoords;
-    fclose(f);
+
+    VertexGroup *vg = new VertexGroup(GL_TRIANGLES, meshVertices.size());
+    VertexData *pd = vg->data;
+    for(uint32_t i = 0; i < meshVertices.size(); i++, pd++)
+        *pd = meshVertices[i];
     return vg;
 }
 

@@ -89,16 +89,6 @@ vec3 & Scene::delta()
     return m_delta;
 }
 
-bool Scene::load()
-{
-    m_state->loadMeshObj("floor", "meshes/floor.obj");
-    m_state->loadMeshObj("letter_p", "meshes/LETTER_P.obj");
-    m_state->loadMeshObj("letter_a", "meshes/LETTER_A.obj");
-    m_state->loadMeshObj("letter_s", "meshes/LETTER_S.obj");
-    Dragon::loadMeshes(m_state);
-    return m_state->meshes().size() > 0;
-}
-
 void Scene::draw()
 {
     Item i = (Item)m_selected;

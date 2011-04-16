@@ -19,8 +19,6 @@ public:
 
     Dragon(Kind kind, RenderState *state);
 
-    static void loadMeshes(RenderState *scene);
-
     void setDetailLevel(int level);
 
     Material & tongueMaterial();
