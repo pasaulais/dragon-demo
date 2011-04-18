@@ -17,6 +17,7 @@ class GLInitialsView extends GLSurfaceView
     {
         super(context);
         this.activity = activity;
+        //setEGLConfigChooser(new ConfigChooser(8, 8, 8, 0, 8, 0));
         setEGLConfigChooser(new ConfigChooser(5, 6, 5, 0, 24, 8));
         setRenderer(activity);
     }

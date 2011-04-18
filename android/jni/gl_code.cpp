@@ -27,7 +27,8 @@ static void checkGlError(const char* op)
 
 extern "C"
 {
-    JNIEXPORT void JNICALL Java_fr_free_pasaulais_glinitials_GLInitialsLib_init(JNIEnv * env, jclass obj, jint width, jint height);
+    JNIEXPORT void JNICALL Java_fr_free_pasaulais_glinitials_GLInitialsLib_initRender(JNIEnv * env, jclass obj, jint width, jint height);
+    JNIEXPORT void JNICALL Java_fr_free_pasaulais_glinitials_GLInitialsLib_initScene(JNIEnv * env, jclass obj);
     JNIEXPORT void JNICALL Java_fr_free_pasaulais_glinitials_GLInitialsLib_loadMeshFromData(JNIEnv * env, jclass obj, jstring name, jbyteArray data);
     JNIEXPORT void JNICALL Java_fr_free_pasaulais_glinitials_GLInitialsLib_loadTextureFromData(JNIEnv * env, jclass obj, jstring name, jbyteArray data, jboolean mipmaps);
     JNIEXPORT void JNICALL Java_fr_free_pasaulais_glinitials_GLInitialsLib_render(JNIEnv * env, jclass obj);
@@ -38,13 +39,18 @@ static RenderStateGL1 *state = 0;
 static Scene *scene = 0;
 static int width = 0, height = 0;
 
-JNIEXPORT void JNICALL Java_fr_free_pasaulais_glinitials_GLInitialsLib_init(JNIEnv * env, jclass obj,  jint w, jint h)
+JNIEXPORT void JNICALL Java_fr_free_pasaulais_glinitials_GLInitialsLib_initRender(JNIEnv * env, jclass obj,  jint w, jint h)
 {
     state = new RenderStateGL1();
-    scene = new Scene(state);
     state->setupViewport(w, h);
     width = w;
     height = h;
+}
+
+JNIEXPORT void JNICALL Java_fr_free_pasaulais_glinitials_GLInitialsLib_initScene(JNIEnv * env, jclass obj)
+{
+    scene = new Scene(state);
+    scene->init();
 }
 
 JNIEXPORT void JNICALL Java_fr_free_pasaulais_glinitials_GLInitialsLib_loadMeshFromData(JNIEnv * env, jclass obj, jstring name, jbyteArray data)
@@ -85,7 +91,7 @@ JNIEXPORT void JNICALL Java_fr_free_pasaulais_glinitials_GLInitialsLib_loadTextu
 
 JNIEXPORT void JNICALL Java_fr_free_pasaulais_glinitials_GLInitialsLib_render(JNIEnv * env, jclass obj)
 {
-    if(!state)
+    if(!state || !scene)
         return;
     state->beginFrame(width, height);
     scene->animate();
@@ -97,5 +103,7 @@ JNIEXPORT void JNICALL Java_fr_free_pasaulais_glinitials_GLInitialsLib_dispose(J
 {
     delete scene;
     delete state;
+    scene = 0;
+    state = 0;
 }
 #endif

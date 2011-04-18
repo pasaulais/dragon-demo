@@ -102,14 +102,6 @@ void Material::loadTextureTIFF(const char *data, size_t size, bool mipmaps)
     m_texture = textureFromTIFFImage(data, size, mipmaps);
 }
 
-static uint8_t check_texture[] =
-{
-    0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff,
-    0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff
-};
-
 uint32_t textureFromTIFF(TIFF *tiff, bool mipmaps)
 {
     uint32_t width, height;
@@ -134,20 +126,17 @@ uint32_t textureFromTIFF(TIFF *tiff, bool mipmaps)
     uint32_t texID = 0;
     glGenTextures(1, &texID);
     glBindTexture(GL_TEXTURE_2D, texID);
-    uint32_t *data2 = (uint32_t *)check_texture;
-    width = 4;
-    height = 4;
 #ifdef JNI_WRAPPER
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
-        GL_RGB, GL_UNSIGNED_BYTE, data2);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+        GL_RGBA, GL_UNSIGNED_BYTE, data);
     setTextureParams(GL_TEXTURE_2D, false);
 #else
     if(mipmaps)
-        gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, width, height,
-            GL_RGB, GL_UNSIGNED_BYTE, data2);
+        gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, width, height,
+            GL_RGBA, GL_UNSIGNED_BYTE, data);
     else
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
-            GL_RGB, GL_UNSIGNED_BYTE, data2);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, data);
     setTextureParams(GL_TEXTURE_2D, mipmaps);
 #endif
     glBindTexture(GL_TEXTURE_2D, 0);

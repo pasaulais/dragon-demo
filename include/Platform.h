@@ -16,4 +16,10 @@
 #define  LOGE(...) fprintf(stderr, __VA_ARGS__);
 #endif
 
+static void checkGlError(const char* op)
+{
+    for(GLint error = glGetError(); error; error = glGetError())
+        LOGI("after %s() glError (0x%x)\n", op, error);
+}
+
 #endif

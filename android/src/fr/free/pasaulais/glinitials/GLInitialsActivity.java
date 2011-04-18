@@ -40,7 +40,7 @@ public class GLInitialsActivity extends Activity implements GLSurfaceView.Render
 
     public void onSurfaceChanged(GL10 gl, int width, int height)
     {
-        GLInitialsLib.init(width, height);
+        GLInitialsLib.initRender(width, height);
         loadMeshFromAsset("floor", "floor.obj");
         loadMeshFromAsset("letter_p", "LETTER_P.obj");
         loadMeshFromAsset("letter_a", "LETTER_A.obj");
@@ -54,6 +54,7 @@ public class GLInitialsActivity extends Activity implements GLSurfaceView.Render
         loadTextureFromAsset("scale_gold", "scale_gold.tiff", false);
         loadTextureFromAsset("scale_black", "scale_black.tiff", false);
         loadTextureFromAsset("scale_bronze", "scale_bronze.tiff", false);
+        GLInitialsLib.initScene();
     }
 
     public void onSurfaceCreated(GL10 gl, EGLConfig config)
@@ -71,7 +72,7 @@ public class GLInitialsActivity extends Activity implements GLSurfaceView.Render
     {
     	byte[] data = loadAsset(fileName + ".mp3");
     	if(data != null)
-    		GLInitialsLib.loadTextureFromData(fileName, data, mipmaps);
+    		GLInitialsLib.loadTextureFromData(name, data, mipmaps);
     }
     
     private byte[] loadAsset(String fileName)

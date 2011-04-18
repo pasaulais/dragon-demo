@@ -9,7 +9,8 @@ public class GLInitialsLib
          System.loadLibrary("glinitials_jni");
      }
 
-     public static native void init(int width, int height);
+     public static native void initRender(int width, int height);
+     public static native void initScene();
      public static native void loadMeshFromData(String name, byte[] data);
      public static native void loadTextureFromData(String name, byte[] data, boolean mipmaps);
      public static native void render();

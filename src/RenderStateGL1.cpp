@@ -130,7 +130,6 @@ void RenderStateGL1::endApplyMaterial(const Material &m)
 void RenderStateGL1::beginFrame(int w, int h)
 {
     glEnable(GL_DEPTH_TEST);
-    // we do non-uniform scaling and not all normals are one-unit-length
     glEnable(GL_NORMALIZE);
     glShadeModel(GL_SMOOTH);
     glEnable(GL_LIGHTING);
