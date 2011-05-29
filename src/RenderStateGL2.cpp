@@ -211,40 +211,14 @@ int RenderStateGL2::texCoordsAttr() const
     return m_texCoordsAttr;
 }
 
-char * RenderStateGL2::loadShaderSource(string path) const
-{
-    FILE *f = fopen(path.c_str(), "r");
-    if(!f)
-        return 0;
-    fseek(f, 0, SEEK_END);
-    long size = ftell(f);
-    char *code = 0;
-    if(size >= 0)
-    {
-        fseek(f, 0, SEEK_SET);
-        code = new char[(size_t)size + 1];
-        if((size_t)size > fread(code, 1, (size_t)size, f))
-        {
-            delete [] code;
-            code = 0;
-        }
-        else
-        {
-            code[size] = '\0';
-        }
-    }
-    fclose(f);
-    return code;
-}
-
 uint32_t RenderStateGL2::loadShader(string path, uint32_t type) const
 {
-    char *code = loadShaderSource(path.c_str());
+    char *code = loadFileData(path);
     if(!code)
         return 0;
     uint32_t shader = glCreateShader(type);
     glShaderSource(shader, 1, (const GLchar **)&code, 0);
-    delete [] code;
+    freeFileData(code);
     glCompileShader(shader);
     GLint status;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);

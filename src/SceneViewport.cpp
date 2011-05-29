@@ -1,4 +1,5 @@
 #include <cmath>
+#include "Platform.h"
 #include <QTimer>
 #include <QKeyEvent>
 #include <QMouseEvent>
@@ -34,6 +35,12 @@ SceneViewport::~SceneViewport()
 
 void SceneViewport::initializeGL()
 {
+    GLenum err = glewInit();
+    if(GLEW_OK != err)
+    {
+        fprintf(stderr, "GLEW Error: %s", glewGetErrorString(err));
+        return;
+    }
     m_state->init();
     m_scene->init();
     resetCamera();

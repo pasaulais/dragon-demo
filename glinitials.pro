@@ -13,15 +13,19 @@ SOURCES = src/main.cpp src/SceneViewport.cpp \
     src/Scene.cpp src/Dragon.cpp \
     src/MeshGL1.cpp \
     src/MeshGL2.cpp \
-    android/jni/gl_code.cpp
-LIBS += -lm -ltiff
+    android/jni/gl_code.cpp \
+    src/Platform.cpp
+LIBS += -lm -ltiff -lGLEW
 
 QMAKE_CFLAGS_DEBUG += -std=c99
 
 TARGET = glinitials
-CONFIG += qt warn_on debug thread
+CONFIG += qt warn_on debug thread console
 QT += opengl
 
 OTHER_FILES += \
     fragment.glsl \
     vertex.glsl
+
+RESOURCES += \
+    resources.qrc

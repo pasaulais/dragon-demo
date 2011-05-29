@@ -48,7 +48,6 @@ public:
 private:
     void beginApplyMaterial(const Material &m);
     void endApplyMaterial(const Material &m);
-    char * loadShaderSource(string path) const;
     uint32_t loadShader(string path, uint32_t type) const;
     bool loadShaders();
     void initShaders();
