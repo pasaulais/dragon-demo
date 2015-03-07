@@ -158,7 +158,7 @@ uint32_t textureFromTIFF(TIFF *tiff, bool mipmaps)
         GL_RGBA, GL_UNSIGNED_BYTE, data);
     if(mipmaps)
     {
-        if(GLEW_VERSION_3_0 || GLEW_ARB_framebuffer_object)
+        if(GLEW_ARB_framebuffer_object)
         {
             glGenerateMipmap(GL_TEXTURE_2D);
             hasMipmaps = true;

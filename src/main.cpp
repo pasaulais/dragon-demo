@@ -30,25 +30,6 @@
 #include "RenderStateGL1.h"
 #include "RenderStateGL2.h"
 
-bool loadResources(RenderState *state)
-{
-    state->loadMeshFromFile("floor", "meshes/floor.obj");
-    state->loadMeshFromFile("letter_p", "meshes/LETTER_P.obj");
-    state->loadMeshFromFile("letter_a", "meshes/LETTER_A.obj");
-    state->loadMeshFromFile("letter_s", "meshes/LETTER_S.obj");
-    state->loadMeshFromFile("wing_membrane", "meshes/dragon_wing_membrane.obj");
-    state->loadMeshFromFile("joint", "meshes/dragon_joint_spin.obj");
-    state->loadMeshFromFile("dragon_chest", "meshes/dragon_chest.obj");
-    state->loadMeshFromFile("dragon_head", "meshes/dragon_head.obj");
-    state->loadMeshFromFile("dragon_tail_end", "meshes/dragon_tail_end.obj");
-    state->loadTextureFromFile("lava_green", "textures/lava_green.tiff", true);
-    state->loadTextureFromFile("scale_gold", "textures/scale_gold.tiff");
-    state->loadTextureFromFile("scale_green", "textures/scale_green.tiff");
-    state->loadTextureFromFile("scale_black", "textures/scale_black.tiff");
-    state->loadTextureFromFile("scale_bronze", "textures/scale_bronze.tiff");
-    return state->meshes().size() > 0;
-}
-
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
@@ -67,13 +48,12 @@ int main(int argc, char **argv)
     SceneViewport w(&scene, &state, f);
     w.setWindowState(Qt::WindowMaximized);
     w.setWindowTitle("Dragons Demo");
-    w.makeCurrent();
-    if(!loadResources(&state))
+    w.show();
+    if(!scene.isLoaded())
     {
         QMessageBox::critical(0, "Error", "Could not load the mesh files (they should be in the 'meshes' sub-directory).");
         return 1;
     }
-    w.show();
     
     // main window loop
     app.exec();

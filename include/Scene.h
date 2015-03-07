@@ -36,6 +36,8 @@ public:
     Scene(RenderState *state);
     virtual ~Scene();
 
+    bool isLoaded() const { return m_loaded; }
+
     void init();
 
     vec3 & theta();
@@ -116,6 +118,7 @@ private:
     Dragon *m_debugDragon;
     std::vector<Dragon *> m_dragons;
     bool m_exportQueued;
+    bool m_loaded;
 };
 
 #endif

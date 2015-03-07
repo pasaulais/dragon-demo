@@ -41,6 +41,7 @@ Scene::Scene(RenderState *state) : StateObject(state)
     m_camera = Camera_Static;
     m_exportQueued = false;
     m_sigma = 1.0;
+    m_loaded = false;
 
     m_debugDragon = new Dragon(Dragon::Floating, m_state);
     m_debugDragon->scalesMaterial() = debugMaterial;
@@ -65,6 +66,24 @@ void Scene::init()
 {
     if(m_dragons.size() < 3)
         return;
+    m_state->loadMeshFromFile("floor", "meshes/floor.obj");
+    m_state->loadMeshFromFile("letter_p", "meshes/LETTER_P.obj");
+    m_state->loadMeshFromFile("letter_a", "meshes/LETTER_A.obj");
+    m_state->loadMeshFromFile("letter_s", "meshes/LETTER_S.obj");
+    m_state->loadMeshFromFile("wing_membrane", "meshes/dragon_wing_membrane.obj");
+    m_state->loadMeshFromFile("joint", "meshes/dragon_joint_spin.obj");
+    m_state->loadMeshFromFile("dragon_chest", "meshes/dragon_chest.obj");
+    m_state->loadMeshFromFile("dragon_head", "meshes/dragon_head.obj");
+    m_state->loadMeshFromFile("dragon_tail_end", "meshes/dragon_tail_end.obj");
+    m_state->loadTextureFromFile("lava_green", "textures/lava_green.tiff", true);
+    m_state->loadTextureFromFile("scale_gold", "textures/scale_gold.tiff");
+    m_state->loadTextureFromFile("scale_green", "textures/scale_green.tiff");
+    m_state->loadTextureFromFile("scale_black", "textures/scale_black.tiff");
+    m_state->loadTextureFromFile("scale_bronze", "textures/scale_bronze.tiff");
+    if(m_state->meshes().size() == 0)
+        return;
+    m_loaded = true;
+
     m_dragons[0]->scalesMaterial().setTexture(m_state->texture("scale_green"));
     m_dragons[0]->wingMaterial().setTexture(m_state->texture("scale_green"));
     m_dragons[1]->scalesMaterial().setTexture(m_state->texture("scale_black"));
