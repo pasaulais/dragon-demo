@@ -1,2 +1,13 @@
-<RCC/>
-
+<RCC>
+    <qresource prefix="/">
+        <file>scale_black.tiff</file>
+        <file>scale_blue.tiff</file>
+        <file>scale_bronze.tiff</file>
+        <file>scale_gold.tiff</file>
+        <file>scale_green.tiff</file>
+        <file>scale_pink.tiff</file>
+        <file>scale_red.tiff</file>
+        <file>scale_white.tiff</file>
+        <file>lava_green.tiff</file>
+    </qresource>
+</RCC>

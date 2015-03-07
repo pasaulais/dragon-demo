@@ -31,6 +31,8 @@ set(DEMO_HEADERS
 
 set(DEMO_RESOURCES
     ../meshes/meshes.qrc
+    ../textures.qrc
+    shaders/shaders.qrc
 )
 
 QT4_ADD_RESOURCES(DEMO_RESOURCES_CPP ${DEMO_RESOURCES})

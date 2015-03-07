@@ -169,12 +169,10 @@ uint32_t textureFromTIFF(TIFF *tiff, bool mipmaps)
 
 uint32_t Material::textureFromTIFFImage(string path, bool mipmaps)
 {
-    TIFF *tiff = TIFFOpen(path.c_str(), "r");
-    if(!tiff)
+    string blob;
+    if (!loadFileBlob(path, blob))
         return 0;
-    uint32_t texID = textureFromTIFF(tiff, mipmaps);
-    TIFFClose(tiff);
-    return texID;
+    return textureFromTIFFImage(blob.data(), blob.size(), mipmaps);
 }
 
 typedef struct
