@@ -31,7 +31,7 @@ set(DEMO_HEADERS
 
 set(DEMO_RESOURCES
     ../meshes/meshes.qrc
-    ../textures.qrc
+    ../textures/textures.qrc
     shaders/shaders.qrc
 )
 
