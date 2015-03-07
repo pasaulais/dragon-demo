@@ -15,7 +15,7 @@ SOURCES = src/main.cpp src/SceneViewport.cpp \
     src/MeshGL2.cpp \
     android/jni/gl_code.cpp \
     src/Platform.cpp
-LIBS += -lm -ltiff -lGLEW
+LIBS += -lm -ltiff -lGLEW -lGLU
 
 QMAKE_CFLAGS_DEBUG += -std=c99
 
