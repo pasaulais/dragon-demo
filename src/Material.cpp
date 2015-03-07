@@ -167,8 +167,8 @@ tsize_t tiff_Read(thandle_t st, tdata_t buffer, tsize_t size)
     tiff_stream *s = (tiff_stream *)st;
     if(s->closed)
         return 0;
-    int32_t left = (s->size - s->pos);
-    left = max(min(left, size), 0);
+    tsize_t left = (s->size - s->pos);
+    left = max(min(left, size), (tsize_t)0);
     memcpy(buffer, s->buffer + s->pos, left);
     s->pos += left;
     return left;
