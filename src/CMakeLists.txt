@@ -41,6 +41,8 @@ QT4_WRAP_CPP(DEMO_MOC_SOURCES ${DEMO_HEADERS})
 
 source_group(moc FILES ${DEMO_MOC_SOURCES})
 
+include_directories(${GLEW_INCLUDE_DIRS})
+
 add_executable(DragonDemo
     ${DEMO_SOURCES}
     ${DEMO_MOC_SOURCES}
