@@ -447,7 +447,7 @@ float Scene::spaced_cos(float x, float w, float a)
 #include <windows.h>
 double currentTime()
 {
-    return (double)GetTickCount() * 10e-3;
+    return (double)GetTickCount() * 0.001;
 }
 #else
 #include <sys/time.h>
