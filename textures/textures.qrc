@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/">
+    <qresource prefix="/textures">
         <file>scale_black.tiff</file>
         <file>scale_blue.tiff</file>
         <file>scale_bronze.tiff</file>

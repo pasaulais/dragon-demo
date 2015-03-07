@@ -65,8 +65,8 @@ void Scene::init()
 {
     if(m_dragons.size() < 3)
         return;
-    m_dragons[0]->scalesMaterial().setTexture(m_state->texture("scale_gold"));
-    m_dragons[0]->wingMaterial().setTexture(m_state->texture("scale_gold"));
+    m_dragons[0]->scalesMaterial().setTexture(m_state->texture("scale_green"));
+    m_dragons[0]->wingMaterial().setTexture(m_state->texture("scale_green"));
     m_dragons[1]->scalesMaterial().setTexture(m_state->texture("scale_black"));
     m_dragons[1]->wingMaterial().setTexture(m_state->texture("scale_black"));
     m_dragons[2]->scalesMaterial().setTexture(m_state->texture("scale_bronze"));

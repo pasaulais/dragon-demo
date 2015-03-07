@@ -41,10 +41,11 @@ bool loadResources(RenderState *state)
     state->loadMeshFromFile("dragon_chest", "meshes/dragon_chest.obj");
     state->loadMeshFromFile("dragon_head", "meshes/dragon_head.obj");
     state->loadMeshFromFile("dragon_tail_end", "meshes/dragon_tail_end.obj");
-    state->loadTextureFromFile("lava_green", "lava_green.tiff", true);
-    state->loadTextureFromFile("scale_gold", "scale_green.tiff");
-    state->loadTextureFromFile("scale_black", "scale_black.tiff");
-    state->loadTextureFromFile("scale_bronze", "scale_bronze.tiff");
+    state->loadTextureFromFile("lava_green", "textures/lava_green.tiff", true);
+    state->loadTextureFromFile("scale_gold", "textures/scale_gold.tiff");
+    state->loadTextureFromFile("scale_green", "textures/scale_green.tiff");
+    state->loadTextureFromFile("scale_black", "textures/scale_black.tiff");
+    state->loadTextureFromFile("scale_bronze", "textures/scale_bronze.tiff");
     return state->meshes().size() > 0;
 }
 
