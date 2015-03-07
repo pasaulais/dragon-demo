@@ -19,10 +19,10 @@ find_package(TIFF 3.8.2 REQUIRED)
 include(${QT_USE_FILE})
 
 if( WIN32 )
-    set(GL_LIBRARIES OpenGL32.lib GLU.lib GLEW.lib)
-    set(SYSTEM_LIBRARIES tiff.lib)
+    set(GL_LIBRARIES OpenGL32.lib ${GLEW_LIBRARIES})
+    set(SYSTEM_LIBRARIES ${TIFF_LIBRARIES})
 else( WIN32 )
-    set(GL_LIBRARIES GL GLU GLEW)
+    set(GL_LIBRARIES GL GLEW)
     set(SYSTEM_LIBRARIES dl pthread tiff)
 endif( WIN32 )
 

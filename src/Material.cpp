@@ -147,21 +147,25 @@ uint32_t textureFromTIFF(TIFF *tiff, bool mipmaps)
 
     // create a texture
     uint32_t texID = 0;
+    bool hasMipmaps = false;
     glGenTextures(1, &texID);
     glBindTexture(GL_TEXTURE_2D, texID);
 #ifdef JNI_WRAPPER
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
         GL_RGBA, GL_UNSIGNED_BYTE, data);
-    setTextureParams(GL_TEXTURE_2D, false);
 #else
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+        GL_RGBA, GL_UNSIGNED_BYTE, data);
     if(mipmaps)
-        gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, width, height,
-            GL_RGBA, GL_UNSIGNED_BYTE, data);
-    else
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
-            GL_RGBA, GL_UNSIGNED_BYTE, data);
-    setTextureParams(GL_TEXTURE_2D, mipmaps);
+    {
+        if(GLEW_VERSION_3_0 || GLEW_ARB_framebuffer_object)
+        {
+            glGenerateMipmap(GL_TEXTURE_2D);
+            hasMipmaps = true;
+        }
+    }
 #endif
+    setTextureParams(GL_TEXTURE_2D, hasMipmaps);
     glBindTexture(GL_TEXTURE_2D, 0);
     _TIFFfree(data);
     return texID;
