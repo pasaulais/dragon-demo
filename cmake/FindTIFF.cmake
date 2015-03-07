@@ -13,7 +13,7 @@ else ()
                     "C:\\Program Files (x86)\\GnuWin32\\include"
                     "C:\\Program Files\\GnuWin32\\include"
     )
-    find_library(TIFF_LIBRARIES libtiff
+    find_library(TIFF_LIBRARIES tiff libtiff
                  PATHS /usr/lib
                        /usr/lib64
                        "C:\\Program Files (x86)\\GnuWin32\\lib"
