@@ -23,7 +23,7 @@ Other dependencies to install:
 
 * Qt at http://qt-project.org/downloads (choose the online installer, make sure the Qt libraries match your version of Visual Studio).
 * GLEW at http://downloads.sourceforge.net/project/glew/glew/1.9.0/glew-1.9.0-win32.zip (save in the dragon-demo/depends' folder).
-* TIFF at http://sourceforge.net/projects/gnuwin32/files/tiff/3.8.2-1/tiff-3.8.2-1.exe/download (save in the dragon-demo/depends' folder).
+* TIFF at http://sourceforge.net/projects/gnuwin32/files/tiff/3.8.2-1/tiff-3.8.2-1.exe/download (save in the dragon-demo/depends' folder and run the installer).
 
 Generating the Visual Studio solution for the demo takes a little while but only needs to be done once.  First, start cmake-gui which can be found in the Start menu. Click on the Browse Source button and select the 'dragon-demo' folder. Then, click on Browse build, make a 'build' folder in the 'dragon-demo' folder and select it. Finally, click on the Configure button.
 
