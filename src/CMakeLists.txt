@@ -29,6 +29,12 @@ set(DEMO_HEADERS
     ../include/Platform.h
 )
 
+set(DEMO_RESOURCES
+    ../meshes/meshes.qrc
+)
+
+QT4_ADD_RESOURCES(DEMO_RESOURCES_CPP ${DEMO_RESOURCES})
+
 QT4_WRAP_CPP(DEMO_MOC_SOURCES ${DEMO_HEADERS})
 
 source_group(moc FILES ${DEMO_MOC_SOURCES})
@@ -36,8 +42,8 @@ source_group(moc FILES ${DEMO_MOC_SOURCES})
 add_executable(DragonDemo
     ${DEMO_SOURCES}
     ${DEMO_MOC_SOURCES}
-    #${LIB_RESOURCES}
-    #${LIB_RESOURCE_FILES}
+    ${DEMO_RESOURCES}
+    ${DEMO_RESOURCES_CPP}
     ${DEMO_HEADERS}
 )
 

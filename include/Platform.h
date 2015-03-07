@@ -40,6 +40,7 @@
 #endif
 
 void checkGlError(const char* op);
+bool loadFileBlob(std::string path, std::string &blob);
 char *loadFileData(std::string path);
 void freeFileData(char *data);
 

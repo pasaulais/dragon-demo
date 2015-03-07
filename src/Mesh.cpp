@@ -31,6 +31,7 @@
 #include "Mesh.h"
 #include "Material.h"
 #include "RenderState.h"
+#include "Platform.h"
 
 #ifdef JNI_WRAPPER
 #define GL_TRIANGLES				0x0004
@@ -171,13 +172,13 @@ static T safe_value(vector<T> &data, int index)
 
 VertexGroup * Mesh::loadObj(string path)
 {
-    ifstream s;
-    s.open(path.c_str(), ifstream::in);
-    if(!s.is_open())
+    string blob;
+    if(!loadFileBlob(path, blob))
     {
         cerr << "Could not open file '" << path << "'." << endl;
         return 0;
     }
+    istringstream s(blob);
     return loadObj(s);
 }
 

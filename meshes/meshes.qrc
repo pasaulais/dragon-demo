@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="meshes">
+        <file>dragon_chest.obj</file>
+        <file>dragon_head.obj</file>
+        <file>dragon_joint_spin.obj</file>
+        <file>dragon_joint_x2.obj</file>
+        <file>dragon_tail_end.obj</file>
+        <file>dragon_wing_membrane.obj</file>
+        <file>floor.obj</file>
+        <file>LETTER_A.obj</file>
+        <file>LETTER_P.obj</file>
+        <file>LETTER_S.obj</file>
+    </qresource>
+</RCC>

@@ -70,6 +70,21 @@ QString resolvePath(QString path)
         return QString(":/%1").arg(path);
 }
 
+bool loadFileBlob(std::string path, std::string &blob)
+{
+    QString realPath = resolvePath(QString::fromStdString(path));
+    QFile f(realPath);
+    if(!f.open(QFile::ReadOnly))
+    {
+        fprintf(stderr, "Could not open file '%s' for reading.\n", realPath.toLatin1().constData());
+        return false;
+    }
+    QByteArray data = f.readAll();
+    blob.clear();
+    blob.append(data.data(), data.data() + data.length());
+    return true;
+}
+
 char *loadFileData(std::string path)
 {
     QString realPath = resolvePath(QString::fromStdString(path));
